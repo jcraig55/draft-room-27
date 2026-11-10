@@ -205,7 +205,7 @@ table.grid td.r{font-family:var(--f-display);font-weight:800;font-size:15px;colo
 .empty{padding:22px;text-align:center;color:var(--ink-2);font-size:14px}
 @media (max-width:520px){.slip{grid-template-columns:44px minmax(0,1fr)}.slip .btns{grid-column:2;flex-direction:row;justify-content:flex-start}}
 @media (prefers-reduced-motion:no-preference){.slip.new{animation:drop .35s ease-out}@keyframes drop{from{transform:translateY(-4px);opacity:.3}to{transform:none;opacity:1}}}
-</style>
+.tablink{padding:8px 14px;border-radius:999px;font-family:var(--f-display);font-weight:700;font-size:17px;letter-spacing:.04em;text-transform:uppercase;color:var(--accent);white-space:nowrap;text-decoration:none;align-self:center}</style>
 </head>
 <body>
 
@@ -225,6 +225,7 @@ table.grid td.r{font-family:var(--f-display);font-weight:800;font-size:15px;colo
     <button role="tab" data-tab="teams" aria-selected="false">Drafters</button>
     <button role="tab" data-tab="players" aria-selected="false">Players</button>
     <button role="tab" data-tab="saved" aria-selected="false">Saved Mocks</button>
+    <a class="tablink" href="top125.html">Top 125 ›</a>
   </nav>
 
   <section class="panel" id="p-mock">
