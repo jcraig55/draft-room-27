@@ -56,5 +56,5 @@ document.querySelectorAll('th').forEach(th=>th.onclick=()=>{
  const val=r=>{const c=r.children[k];return num?parseFloat(c.dataset.v??c.textContent):c.textContent.toLowerCase()};
  [...tb.rows].sort((a,b)=>{const x=val(a),y=val(b);return (x<y?-1:x>y?1:0)*(dir==='ascending'?1:-1)}).forEach(r=>tb.appendChild(r));
 });
-</script><script>if("serviceWorker" in navigator)window.addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}));</script>
+</script><script>if("serviceWorker" in navigator){const had=!!navigator.serviceWorker.controller;let done=false;navigator.serviceWorker.addEventListener("controllerchange",()=>{if(had&&!done){done=true;location.reload()}});window.addEventListener("load",()=>navigator.serviceWorker.register("sw.js",{updateViaCache:"none"}).then(r=>r.update()).catch(()=>{}))}</script>
 </body></html>

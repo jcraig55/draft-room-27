@@ -38,5 +38,5 @@ li[hidden]{display:none}.rk{text-align:right;font-weight:700;font-variant-numeri
 <p class="note">Rookie teams are projected landing spots. Rankings include manual adjustments.</p>
 </main><script>
 document.querySelectorAll('.f button').forEach(b=>b.onclick=()=>{document.querySelectorAll('.f button').forEach(x=>x.setAttribute('aria-pressed',x===b));const f=b.dataset.f;document.querySelectorAll('li').forEach(li=>li.hidden=!(f==='ALL'||li.dataset.p===f))});
-</script><script>if("serviceWorker" in navigator)window.addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}));</script>
+</script><script>if("serviceWorker" in navigator){const had=!!navigator.serviceWorker.controller;let done=false;navigator.serviceWorker.addEventListener("controllerchange",()=>{if(had&&!done){done=true;location.reload()}});window.addEventListener("load",()=>navigator.serviceWorker.register("sw.js",{updateViaCache:"none"}).then(r=>r.update()).catch(()=>{}))}</script>
 </body></html>

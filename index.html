@@ -205,7 +205,7 @@ table.grid td.r{font-family:var(--f-display);font-weight:800;font-size:15px;colo
 .empty{padding:22px;text-align:center;color:var(--ink-2);font-size:14px}
 @media (max-width:520px){.slip{grid-template-columns:44px minmax(0,1fr)}.slip .btns{grid-column:2;flex-direction:row;justify-content:flex-start}}
 @media (prefers-reduced-motion:no-preference){.slip.new{animation:drop .35s ease-out}@keyframes drop{from{transform:translateY(-4px);opacity:.3}to{transform:none;opacity:1}}}
-.tablink{padding:8px 14px;border-radius:999px;font-family:var(--f-display);font-weight:700;font-size:17px;letter-spacing:.04em;text-transform:uppercase;color:var(--accent);white-space:nowrap;text-decoration:none;align-self:center}</style>
+.boardlink{display:inline-block;margin-top:12px;padding:9px 16px;border-radius:999px;background:var(--accent);color:var(--accent-ink);font-weight:700;font-size:14px;text-decoration:none}.tablink{padding:8px 14px;border-radius:999px;font-family:var(--f-display);font-weight:700;font-size:17px;letter-spacing:.04em;text-transform:uppercase;color:var(--accent);white-space:nowrap;text-decoration:none;align-self:center}</style>
 </head>
 <body>
 
@@ -216,6 +216,7 @@ table.grid td.r{font-family:var(--f-display);font-weight:800;font-size:15px;colo
       <div class="eyebrow">2027 Fantasy Redraft · Full PPR · QB · RB · 2 WR · TE · 2 FLEX</div>
       <h1>Draft Room <span>’27</span></h1>
       <p>Mock your 2027 fantasy draft: snake order, pick trades, drafter strategies you can change, and bios with target share for every pass catcher. Rankings come from this season’s production, last season’s, age and role.</p>
+      <a class="boardlink" href="top125.html">Top 125 board &amp; player stats ›</a>
     </div>
     <div class="asof">Stats through Week 9, 2026<br>Updated Nov 10, 2026</div>
   </header>
@@ -743,6 +744,6 @@ try{const t=localStorage.getItem("dr27-tab");if(t&&t!=="mock")document.querySele
 initStore();
 </script>
 
-<script>if("serviceWorker" in navigator)window.addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}));</script>
+<script>if("serviceWorker" in navigator){const had=!!navigator.serviceWorker.controller;let done=false;navigator.serviceWorker.addEventListener("controllerchange",()=>{if(had&&!done){done=true;location.reload()}});window.addEventListener("load",()=>navigator.serviceWorker.register("sw.js",{updateViaCache:"none"}).then(r=>r.update()).catch(()=>{}))}</script>
 </body>
 </html>
