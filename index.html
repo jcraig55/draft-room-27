@@ -171,6 +171,23 @@ details.more>summary::before{content:"▸ "} details.more[open]>summary::before{
 .mockrow .t button{all:unset;cursor:pointer;font-weight:600}
 .mockrow .t button:hover{text-decoration:underline}
 .mockrow .s{font-size:12.5px;color:var(--ink-2)}
+.rowbtns{display:flex;gap:6px;align-items:center;flex-shrink:0}
+.mvbtn{min-width:34px;padding-inline:8px;font-size:15px;line-height:1}
+.mvmark{display:block;font-size:10px;font-weight:700;line-height:1.1;margin-top:2px}.mvmark.up{color:#16a34a}.mvmark.dn{color:#dc2626}
+.boardnote{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;font-size:12.5px;padding:7px 10px;margin:6px 0;border:1px dashed var(--line);border-radius:8px;color:var(--ink-2)}
+.linkbtn{border:0;background:none;color:var(--accent);font:inherit;font-weight:700;padding:2px 0;cursor:pointer;text-decoration:underline}
+.mvscrim{position:fixed;inset:0;z-index:40;background:rgba(10,12,20,0);display:flex;align-items:flex-end;justify-content:center;transition:background .2s}
+.mvscrim.open{background:rgba(10,12,20,.5)}
+.mover{background:var(--surface);color:var(--ink);width:min(520px,100%);border-radius:16px 16px 0 0;padding:10px max(18px,env(safe-area-inset-right,0px)) calc(18px + env(safe-area-inset-bottom,0px)) max(18px,env(safe-area-inset-left,0px));transform:translateY(100%);transition:transform .22s ease-out;box-shadow:0 -8px 30px rgba(0,0,0,.25)}
+.mvscrim.open .mover{transform:none}
+@media (prefers-reduced-motion:reduce){.mover,.mvscrim{transition:none}}
+.mvgrab{width:40px;height:4px;border-radius:2px;background:var(--line);margin:0 auto 10px}
+.mvhead{font-size:18px;margin:4px 0 2px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.mvbig{font-family:var(--f-display);font-weight:800;font-size:44px;line-height:1;margin:12px 0 6px;color:var(--accent)}
+.mvnb{font-size:13px;display:grid;gap:3px;margin-bottom:12px;color:var(--ink-2)}.mvnb .mvme{color:var(--ink);font-weight:700}
+#mvRange{width:100%;accent-color:var(--accent);height:28px}
+.mvsteps{display:flex;gap:6px;justify-content:center;align-items:center;margin-top:8px}
+#mvNum{width:72px;text-align:center;font:inherit;font-weight:700;padding:6px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink)}
 .scrim{position:fixed;inset:0;background:rgba(10,12,20,.45);z-index:20;display:flex;align-items:flex-end;justify-content:center}
 @media (min-width:720px){.scrim{align-items:center}}
 .sheet{background:var(--surface);color:var(--ink);width:min(720px,100%);max-height:88vh;overflow:auto;border-radius:14px 14px 0 0;padding:16px max(16px,env(safe-area-inset-right,0px)) calc(16px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
@@ -335,6 +352,20 @@ const BRK={"b": [["Kenneth Walker III", "RB", "KC", 11.3, 24.6, 14.6], ["Matthew
 const POS=["QB","RB","WR","TE"];
 const P=RAW.map(a=>({id:a[0],name:a[1],pos:a[2],team:a[3],age:a[4],ht:a[5],wt:a[6],college:a[7],draft:a[8],g:a[9],ppr:a[10],ppg:a[11],line:a[12],ts:a[13],snap:a[14],prev:a[15],proj:a[16],pts:a[17],rank:a[18],prank:a[19],note:a[20],str:a[21],t:a[22],exp:a[23]}));
 const BYID=Object.fromEntries(P.map(p=>[p.id,p]));
+/* ---------- my board: rank moves made while drafting ---------- */
+const BASE=P.map(p=>p.id);P.forEach(p=>p.base=p.rank);
+let MOVES=[];try{MOVES=JSON.parse(localStorage.getItem("dr27-myboard")||"[]").filter(m=>BYID[m[0]])}catch(e){}
+function applyBoard(){
+  const ord=BASE.slice();
+  for(const [id,r] of MOVES){const i=ord.indexOf(id);if(i<0)continue;ord.splice(i,1);ord.splice(Math.max(0,Math.min(ord.length,r-1)),0,id)}
+  const ix=Object.fromEntries(ord.map((id,i)=>[id,i]));P.sort((a,b)=>ix[a.id]-ix[b.id]);
+  const c={};P.forEach((p,i)=>{p.rank=i+1;c[p.pos]=(c[p.pos]||0)+1;p.prank=c[p.pos]});
+}
+function saveMoves(){try{localStorage.setItem("dr27-myboard",JSON.stringify(MOVES))}catch(e){}}
+function setRank(id,r){MOVES=MOVES.filter(m=>m[0]!==id);if(r!==BYID[id].base||MOVES.length)MOVES.push([id,r]);saveMoves();applyBoard()}
+function resetPlayer(id){MOVES=MOVES.filter(m=>m[0]!==id);saveMoves();applyBoard()}
+function resetBoard(){MOVES=[];saveMoves();applyBoard()}
+applyBoard();
 const LINEUP=["QB","RB","WR","WR","TE","FLEX","FLEX"];
 const STRATS={bal:"Balanced",zero:"Zero RB",hero:"Hero RB",robust:"Robust RB",wr:"WR heavy",te:"Elite TE",eqb:"Early QB",lqb:"Late QB"};
 const STRAT_DESC={bal:"Follows the rankings and fills open lineup spots.",zero:"Avoids RBs in Rounds 1–5, loads up on WRs.",hero:"One RB early, then no RBs until Round 6.",robust:"Takes RBs heavily in Rounds 1–4.",wr:"Leans WR in the first six rounds.",te:"Grabs a top TE in Rounds 1–3.",eqb:"Takes a QB in Rounds 2–4.",lqb:"Waits on QB until Round 9 or later."};
@@ -507,10 +538,10 @@ function renderAvail(){
   const tk=takenSet(),q=$("#availSearch").value.trim().toLowerCase(),clock=nextOpen();
   const list=P.filter(p=>!tk.has(p.id)&&(availPos==="ALL"||(availPos==="FLEX"?p.pos!=="QB":p.pos===availPos))&&matchQ(p,q)).slice(0,150);
   $("#availCount").textContent=`${P.length-tk.size} left`;
-  $("#availHint").innerHTML=clock?`<div class="hint"><b>${esc(tname(clock.owner))}</b> at ${clock.label}. Tap a name for his bio, or “Draft”.</div>`:`<div class="hint">Every pick is in. Tap “Change” on any slot to swap a player.</div>`;
-  $("#availList").innerHTML=list.length?list.map(p=>`<div class="prow"><div class="rk">${p.rank}</div>
+  $("#availHint").innerHTML=boardNote()+(clock?`<div class="hint"><b>${esc(tname(clock.owner))}</b> at ${clock.label}. Tap a name for his bio, or “Draft”.</div>`:`<div class="hint">Every pick is in. Tap “Change” on any slot to swap a player.</div>`);
+  $("#availList").innerHTML=list.length?list.map(p=>`<div class="prow"><div class="rk">${p.rank}${mvMark(p)}</div>
     <div style="min-width:0"><div>${nameBtn(p,availBio===p.id)}</div><div class="meta">${esc(p.team)} · ${p.proj} proj PPR/G${p.ts!=null&&p.pos!=="QB"&&availBio!==p.id?` · ${p.ts}% tgt share`:""}</div></div>
-    <button class="btn sm" data-draft="${p.id}" ${clock?"":"disabled"}>Draft</button></div>${availBio===p.id?bioHtml(p,clock&&clock.owner):""}`).join(""):`<div class="empty">No players match.</div>`;
+    <span class="rowbtns"><button class="btn sm ghost mvbtn" data-move="${p.id}" aria-label="Move ${esc(p.name)} in the rankings" title="Move in rankings">⇅</button><button class="btn sm" data-draft="${p.id}" ${clock?"":"disabled"}>Draft</button></span></div>${availBio===p.id?bioHtml(p,clock&&clock.owner):""}`).join(""):`<div class="empty">No players match.</div>`;
 }
 function renderUserTeams(){$("#userTeams").innerHTML=Array.from({length:S.teams},(_,i)=>`<button aria-pressed="${S.user.includes(i)}" data-ut="${i}">${i+1}${S.names[i]?" · "+esc(S.names[i].slice(0,8)):""}</button>`).join("")}
 function renderControls(){
@@ -562,21 +593,56 @@ function renderPlayers(){
   $("#proList").innerHTML=POS.map(pos=>{const g=list.filter(p=>p.pos===pos).slice(0,60);if(!g.length)return"";return`<section class="posgroup"><h2>${{QB:"Quarterbacks",RB:"Running backs",WR:"Wide receivers",TE:"Tight ends"}[pos]} <span class="faint num" style="font-size:14px;font-weight:500">top ${g.length}</span></h2><div class="plist">${g.map(p=>pcard(p,p.prank)).join("")}</div></section>`}).join("");
 }
 
+/* ---------- move-a-player panel ---------- */
+let pkRedraw=null;
+const mvMark=p=>(p.rank===p.base||!MOVES.some(m=>m[0]===p.id))?"":`<span class="mvmark ${p.rank<p.base?"up":"dn"}" title="Moved from #${p.base}">${p.rank<p.base?"▲":"▼"}${Math.abs(p.base-p.rank)}</span>`;
+const boardNote=()=>MOVES.length?`<div class="boardnote"><span>Your board: ${MOVES.length} player${MOVES.length>1?"s":""} moved</span><button class="linkbtn" data-resetboard>Reset to default</button></div>`:"";
+function afterMove(){render();if(pkRedraw)pkRedraw()}
+function openMover(id){
+  const pl=BYID[id];if(!pl)return;let r=pl.rank;const N=P.length;
+  const host=document.createElement("div");host.className="mvscrim";host.innerHTML=`<div class="mover" role="dialog" aria-modal="true" aria-label="Move ${esc(pl.name)}">
+    <div class="mvgrab" aria-hidden="true"></div>
+    <div class="eyebrow">Move in your rankings</div>
+    <div class="mvhead">${posTag(pl.pos)} <b>${esc(pl.name)}</b> <span class="muted">${esc(pl.team)}</span></div>
+    <div class="muted" style="font-size:12.5px">Now #${pl.rank}${pl.rank!==pl.base?` · default #${pl.base}`:""} · ${pl.pos}${pl.prank}</div>
+    <div class="mvbig num">#<span id="mvR"></span></div>
+    <div class="mvnb" id="mvNb"></div>
+    <input type="range" id="mvRange" min="1" max="${N}" step="1" aria-label="New rank">
+    <div class="mvsteps"><button class="btn sm" data-st="-10">−10</button><button class="btn sm" data-st="-1">−1</button><input type="number" id="mvNum" min="1" max="${N}" inputmode="numeric" aria-label="Type a rank"><button class="btn sm" data-st="1">+1</button><button class="btn sm" data-st="10">+10</button></div>
+    <div class="actions" style="margin-top:14px"><button class="btn primary" id="mvOk">Move</button><button class="btn" id="mvCancel">Cancel</button>${pl.rank!==pl.base?`<button class="btn ghost" id="mvReset">Back to #${pl.base}</button>`:""}</div>
+    <div class="faint" style="font-size:12px;margin-top:10px">Applies to this draft and future mocks on this device. The computer teams draft off your order too.</div></div>`;
+  document.body.appendChild(host);requestAnimationFrame(()=>host.classList.add("open"));
+  const others=P.filter(x=>x.id!==id);
+  const upd=()=>{r=Math.max(1,Math.min(N,r));$("#mvR").textContent=r;$("#mvRange").value=r;if(document.activeElement!==$("#mvNum"))$("#mvNum").value=r;
+    const a=others[r-2],b=others[r-1];
+    $("#mvNb").innerHTML=`${a?`<div>▲ #${r-1} ${esc(a.name)} <span class="faint">${a.pos}</span></div>`:"<div class='faint'>Top of the board</div>"}<div class="mvme">● ${esc(pl.name)}</div>${b?`<div>▼ #${r+1} ${esc(b.name)} <span class="faint">${b.pos}</span></div>`:""}`;
+    $("#mvOk").textContent=r===pl.rank?"Keep at #"+r:"Move to #"+r};
+  const close=()=>{host.classList.remove("open");setTimeout(()=>host.remove(),200)};
+  host.addEventListener("click",e=>{if(e.target===host)close();const st=e.target.closest("[data-st]");if(st){r+=+st.dataset.st;upd()}});
+  $("#mvRange").oninput=e=>{r=+e.target.value;upd()};
+  $("#mvNum").oninput=e=>{const v=parseInt(e.target.value);if(v){r=v;upd()}};
+  $("#mvCancel").onclick=close;
+  $("#mvOk").onclick=()=>{if(r!==pl.rank){setRank(id,r);toast(`${pl.name} moved to #${pl.rank}.`)}close();afterMove()};
+  if($("#mvReset"))$("#mvReset").onclick=()=>{resetPlayer(id);toast(`${pl.name} is back at #${pl.rank}.`);close();afterMove()};
+  upd();
+}
+
 /* ---------- sheets ---------- */
-function closeSheet(){$("#sheetHost").innerHTML=""}
+function closeSheet(){$("#sheetHost").innerHTML="";pkRedraw=null}
 function openPicker(num){
   const p=picks().find(x=>x.num===num);if(!p)return;
   let pos="ALL",openBio=null;
   const draw=()=>{
     const tk=takenSet(num),q=($("#pkq")?.value||"").toLowerCase(),nd=openNeeds(p.owner);
     const list=P.filter(x=>!tk.has(x.id)&&(pos==="ALL"||(pos==="NEED"?(nd.includes(x.pos)||(x.pos!=="QB"&&nd.includes("FLEX"))):pos==="FLEX"?x.pos!=="QB":x.pos===pos))&&matchQ(x,q)).slice(0,60);
-    $("#pkl").innerHTML=list.map(x=>`<div class="prow"><div class="rk">${x.rank}</div><div style="min-width:0"><div>${nameBtn(x,openBio===x.id)}${nd.includes(x.pos)?` <span class="chip" style="font-size:11px">fills ${x.pos}</span>`:""}</div><div class="meta">${esc(x.team)} · ${x.proj} proj PPR/G${x.ts!=null&&x.pos!=="QB"&&openBio!==x.id?` · ${x.ts}% tgt share`:""}</div></div><button class="btn sm primary" data-take="${x.id}">Draft</button></div>${openBio===x.id?bioHtml(x,p.owner):""}`).join("")||`<div class="empty">No players match.</div>`;
+    $("#pkBoardNote").innerHTML=boardNote();
+    $("#pkl").innerHTML=list.map(x=>`<div class="prow"><div class="rk">${x.rank}${mvMark(x)}</div><div style="min-width:0"><div>${nameBtn(x,openBio===x.id)}${nd.includes(x.pos)?` <span class="chip" style="font-size:11px">fills ${x.pos}</span>`:""}</div><div class="meta">${esc(x.team)} · ${x.proj} proj PPR/G${x.ts!=null&&x.pos!=="QB"&&openBio!==x.id?` · ${x.ts}% tgt share`:""}</div></div><span class="rowbtns"><button class="btn sm ghost mvbtn" data-move="${x.id}" aria-label="Move ${esc(x.name)} in the rankings" title="Move in rankings">⇅</button><button class="btn sm primary" data-take="${x.id}">Draft</button></span></div>${openBio===x.id?bioHtml(x,p.owner):""}`).join("")||`<div class="empty">No players match.</div>`;
   };
   $("#sheetHost").innerHTML=`<div class="scrim" id="scrim"><div class="sheet" role="dialog" aria-modal="true" aria-label="Make a pick">
     <div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start"><div><div class="eyebrow">Pick ${p.label} · No. ${p.num} overall</div><h2>${esc(tname(p.owner))}</h2><div class="muted" style="font-size:13px">Open spots: ${openNeeds(p.owner).join(" · ")||"bench"}</div></div><button class="btn sm" id="pkx">Close</button></div>
     <div class="subtabs" role="tablist" id="pktabs" style="margin-top:12px"><button role="tab" data-pt="players" aria-selected="true">Players</button><button role="tab" data-pt="team" aria-selected="false">My team</button><button role="tab" data-pt="prev" aria-selected="false">Previous picks</button></div>
     <div id="pkPlayers"><div style="display:grid;gap:8px;margin-top:10px"><input type="search" id="pkq" placeholder="Search players or NFL teams"><div class="poschips" id="pkpos"></div></div>
-    <div id="pkl" style="margin-top:8px;border:1px solid var(--line);border-radius:8px"></div></div>
+    <div id="pkBoardNote"></div><div id="pkl" style="margin-top:8px;border:1px solid var(--line);border-radius:8px"></div></div>
     <div id="pkTeam" hidden style="margin-top:8px;border:1px solid var(--line);border-radius:8px"></div>
     <div id="pkPrev" hidden style="margin-top:8px;border:1px solid var(--line);border-radius:8px;max-height:56vh;overflow:auto"></div>
     <div class="actions" style="margin-top:12px"><button class="btn" id="pkauto">Let the AI pick</button><button class="btn ghost" data-trade="${p.num}">Trade this pick</button></div></div></div>`;
@@ -586,6 +652,7 @@ function openPicker(num){
   $("#pkPrev").dataset.upto=num;$("#pkPrev").innerHTML=prevPicksHtml(num);
   $("#pktabs").onclick=e=>{const b=e.target.closest("[data-pt]");if(!b)return;const t=b.dataset.pt;
     document.querySelectorAll("#pktabs button").forEach(x=>x.setAttribute("aria-selected",x===b));$("#pkPlayers").hidden=t!=="players";$("#pkTeam").hidden=t!=="team";$("#pkPrev").hidden=t!=="prev"};
+  pkRedraw=draw;
   $("#pkq").oninput=draw;$("#pkx").onclick=closeSheet;$("#scrim").onclick=e=>{if(e.target.id==="scrim")closeSheet()};
   $("#pkauto").onclick=()=>{delete S.sel[num];const pl=aiChoose(p.owner,p.num,p.round);S.sel[num]=pl.id;justPicked.add(num);persist();closeSheet();render()};
   $("#pkl").onclick=e=>{const bi=e.target.closest("[data-bio]");if(bi){openBio=openBio===bi.dataset.bio?null:bi.dataset.bio;draw();return}
@@ -726,6 +793,8 @@ $("#proSearch").oninput=renderPlayers;$("#proView").onchange=renderPlayers;$("#s
 document.addEventListener("keydown",e=>{if(e.key==="Escape"&&$("#sheetHost").innerHTML)closeSheet()});
 document.addEventListener("click",e=>{
   const ab=e.target.closest("#availList [data-bio]");if(ab){availBio=availBio===ab.dataset.bio?null:ab.dataset.bio;renderAvail();return}
+  const mv=e.target.closest("[data-move]");if(mv){openMover(mv.dataset.move);return}
+  const rb=e.target.closest("[data-resetboard]");if(rb){resetBoard();toast("Rankings reset to the default board.");afterMove();return}
   const pk=e.target.closest("[data-pick]");if(pk){openPicker(+pk.dataset.pick);return}
   const cl=e.target.closest("[data-clear]");if(cl){delete S.sel[+cl.dataset.clear];persist();render();return}
   const tr=e.target.closest("[data-trade]");if(tr){openTrade(+tr.dataset.trade);return}
