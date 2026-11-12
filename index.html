@@ -22,8 +22,8 @@
   --bg:#FFFFFF; --surface:#FFFFFF; --surface-2:#F2F8FC; --ink:#13202B; --ink-2:#46596A; --ink-3:#7D8E9C; --line:#9FCBEA;
   --accent:#4B9CD3; --accent-ink:#FFFFFF; --accent-soft:#E3F1FA;
   --clock:#2F7FB8; --clock-soft:#E3F1FA; --up:#1F7A45; --up-soft:#DDF1E3; --down:#B3362E; --down-soft:#F8DEDA; --warn:#2F7FB8;
-  /* positions: QB gold · RB Penn State blue · WR scarlet · TE yellow */
-  --qb:#C9A227; --qb-soft:#F7EDCB; --qb-ink:#1A1400;
+  /* positions: QB kelly green · RB Penn State blue · WR scarlet · TE yellow */
+  --qb:#138A4E; --qb-soft:#DCF1E4; --qb-ink:#FFFFFF;
   --rb:#1E407C; --rb-soft:#DCE4F2; --rb-ink:#FFFFFF;
   --wr:#BB0000; --wr-soft:#F8D9D9; --wr-ink:#FFFFFF;
   --te:#FFD100; --te-soft:#FFF6CC; --te-ink:#1A1400;
@@ -712,7 +712,7 @@ async function drawImage(D,meta,made){
   try{await document.fonts.ready}catch(e){}
   const cs=getComputedStyle(document.documentElement),v=n=>cs.getPropertyValue(n).trim();
   const C={bg:v("--bg"),sf:v("--surface"),ln:v("--line"),ink:v("--ink"),ink2:v("--ink-2"),ink3:v("--ink-3"),acc:v("--accent"),QB:v("--qb"),RB:v("--rb"),WR:v("--wr"),TE:v("--te")};
-  const CT={QB:"#8F7215",RB:C.RB,WR:C.WR,TE:"#8A6F00"};
+  const CT={QB:C.QB,RB:C.RB,WR:C.WR,TE:"#8A6F00"};
   const W=1080,P0=32,G=10,COLS=4,cw=(W-2*P0-(COLS-1)*G)/COLS,LH=21,CH=40+D.R*LH+10,rows=Math.ceil(D.T/COLS),H=P0+104+rows*(CH+G)+28+P0;
   const sc=2,cv=document.createElement("canvas");cv.width=W*sc;cv.height=H*sc;const x=cv.getContext("2d");x.scale(sc,sc);
   const Df='"Barlow Condensed","Arial Narrow",Arial,sans-serif',Bf='"IBM Plex Sans",system-ui,sans-serif',Mf='"IBM Plex Mono",ui-monospace,monospace';
