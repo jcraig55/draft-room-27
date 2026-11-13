@@ -21,4 +21,4 @@ python3 build.py
 cd /home/claude/fantasy
 python3 final.py
 python3 build_download.py
-echo "Rebuilt. Next: push_app.sh, then publish the Claude pages."
+echo "Rebuilt. Next: push_app.sh (the app is the only published version)."
