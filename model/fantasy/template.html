@@ -216,6 +216,12 @@ details.more>summary::before{content:"▸ "} details.more[open]>summary::before{
 table.grid td.r .dir{display:block;font-size:10px;font-weight:600;color:var(--ink-3)}
 .gc[data-gbio]{cursor:pointer}.gc.mine{box-shadow:inset 0 0 0 1.5px var(--accent)}.gc.clock{background:var(--accent-soft);color:var(--accent);border-left-color:var(--accent);box-shadow:inset 0 0 0 1.5px var(--accent)}.gc.clock .n{font-weight:800}
 .gridhead{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:8px}.gridhead .actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.pickcard{display:grid;grid-template-columns:auto auto 1fr;gap:6px;margin:10px 0 0}
+.pickcard .pct{border:1px solid var(--line);border-radius:12px;padding:6px 10px;display:grid;line-height:1.15;min-width:0;background:var(--bg)}
+.pickcard .pcl{font:700 10px var(--f-display);letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3)}
+.pickcard b{font:800 20px var(--f-display);font-variant-numeric:tabular-nums}.pickcard .pcteam{font-size:16px;text-transform:uppercase;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pickcard small{font-size:11px;color:var(--ink-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pickcard.me .pct{border-color:var(--accent);background:var(--accent-soft)}.pickcard.me b{color:var(--ink)}
 .ticker{border:1.5px solid var(--accent);background:var(--accent-soft);border-radius:16px;padding:10px 12px;margin:10px 0 2px;display:grid;gap:4px;box-shadow:0 4px 14px rgba(0,0,0,.08)}
 #liveTicker{position:sticky;top:calc(env(safe-area-inset-top,0px) + 6px);z-index:6}
 body.haspill .toast{bottom:calc(140px + env(safe-area-inset-bottom,0px))!important}
@@ -867,6 +873,8 @@ function assistPicks(p){
     const bad=bdOf(x).includes("bust")?.85:1;
     return{x,fill,drop,fall,sc:((vor+.6*drop)*fill+.05*Math.max(-10,Math.min(20,fall)))*bad}}).sort((a,b)=>b.sc-a.sc).slice(0,3).map(o=>({...o,nxt,tk,nd}));
 }
+function pickCardHtml(p){const me=S.user.includes(p.owner),nx=picks().find(x=>x.owner===p.owner&&x.num>p.num&&!S.sel[x.num]);
+  return`<div class="pickcard${me?" me":""}"><div class="pct"><span class="pcl">Pick</span><b>${p.label}</b><small>Round ${p.round}</small></div><div class="pct"><span class="pcl">Overall</span><b>#${p.num}</b><small>of ${S.teams*S.rounds}</small></div><div class="pct wide"><span class="pcl">Team</span><b class="pcteam">${me?"⭐ ":""}${esc(tname(p.owner))}</b><small>${nx?`Next pick: ${nx.label} (#${nx.num})`:"Last pick"}</small></div></div>`}
 let asOpen=false;
 document.addEventListener("toggle",e=>{if(e.target.classList&&e.target.classList.contains("assist"))asOpen=e.target.open},true);
 function assistHtml(p){
@@ -1090,7 +1098,7 @@ function openPicker(num){
   const draw=()=>{
     const tk=takenSet(num),q=($("#pkq")?.value||"").toLowerCase(),nd=openNeeds(p.owner);
     const list=P.filter(x=>!tk.has(x.id)&&(pos==="ALL"||(pos==="NEED"?fitsSlot(x.pos,nd):pos==="FLEX"?x.pos!=="QB":x.pos===pos))&&matchQ(x,q)&&bdPass(x)).slice(0,60);
-    $("#pkBoardNote").innerHTML=runAlert(num)+(q||bdFilter||bdHide||pos!=="ALL"?"":assistHtml(p))+boardNote();
+    $("#pkBoardNote").innerHTML=pickCardHtml(p)+runAlert(num)+(q||bdFilter||bdHide||pos!=="ALL"?"":assistHtml(p))+boardNote();
     const single=["QB","RB","WR","TE"].includes(pos);let lastT=null;
     $("#pkl").innerHTML=list.map(x=>{const div=single&&x.tier!==lastT?`<div class="tierdiv">${x.pos} Tier ${x.tier}</div>`:"";lastT=x.tier;return div+`<div class="prow" data-row="${x.id}"><div class="rk">${x.rank}${mvMark(x)}</div><div style="min-width:0"><div>${nameBtn(x,openBio===x.id)}${nd.includes(x.pos)?` <span class="chip" style="font-size:11px">fills ${x.pos}</span>`:""}</div><div class="meta">${esc(x.team)} · ${x.proj} proj ${projLbl()}${x.ts!=null&&x.pos!=="QB"?` · ${x.ts}% tgt share`:""} ${tierChip(x)}</div>${badgeRow(x,2)}${(()=>{const lc=linkChips(x,p.owner),lt=lastInTier(x,tk)&&x.tier<=8?`<span class="lnk lastt">⚠️ Last ${x.pos} in Tier ${x.tier}</span>`:"";return lc||lt?`<div class="bds">${lt}${lc}</div>`:""})()}</div><span class="rowbtns">${favBtn(x.id)}<button class="btn sm ghost mvbtn" data-move="${x.id}" aria-label="Move ${esc(x.name)} in the rankings" title="Move in rankings">⇅</button><button class="btn sm primary" data-take="${x.id}">Draft</button></span></div>`}).join("")||`<div class="empty">No players match.</div>`;
   };
