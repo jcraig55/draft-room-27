@@ -224,6 +224,12 @@ details.more>summary::before{content:"▸ "} details.more[open]>summary::before{
 #pktabs{overflow-x:auto;flex-wrap:nowrap;scrollbar-width:none;max-width:100%}#pktabs::-webkit-scrollbar{display:none}#pktabs button{white-space:nowrap;flex-shrink:0}
 .bpnamerow{display:flex;justify-content:space-between;align-items:center;gap:10px}.bpnamerow .favbtn{width:40px;height:38px;font-size:20px}
 .availhead>div:first-child{flex-wrap:wrap;min-width:0}.side .subtabs{min-width:0;max-width:100%;overflow-x:auto;scrollbar-width:none}.sim3 .btn{white-space:nowrap;font-size:14px;padding-inline:10px}
+.teamchips{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;margin-top:10px;padding-bottom:2px}.teamchips::-webkit-scrollbar{display:none}
+.teamchips button{flex:none;border:1px solid var(--line);background:var(--bg);color:var(--ink-2);border-radius:999px;padding:6px 12px;font:inherit;font-weight:700;font-size:12.5px;white-space:nowrap;cursor:pointer}
+.teamchips button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:#fff}
+.teamcard{padding:14px;display:grid;gap:10px}.teamhead{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}.teamhead h3{font-family:var(--f-display);font-weight:800;font-size:24px;text-transform:uppercase;margin:2px 0 0;line-height:1.05}
+.teamcard .myteam .tot .eyebrow{display:none}
+.teamhead .grade{font-size:18px;padding:6px 12px}.teamnav{display:flex;justify-content:space-between}
 .appbar{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:6px 0 12px;border-bottom:1px solid var(--line);margin-bottom:12px}
 .appbar .ttl{white-space:nowrap;font-size:clamp(24px,7.2vw,30px)!important}
 .appbar .ttl,.tabhead .ttl{font-family:var(--f-display);font-weight:800;font-size:28px;line-height:1;text-transform:uppercase;margin:0}.appbar .ttl span{color:var(--accent)}
@@ -380,9 +386,10 @@ table.grid td.r{font-family:var(--f-display);font-weight:800;font-size:15px;colo
   </section>
   <section class="panel" id="p-board" hidden>
     <div class="tabhead"><div><h2 class="ttl">Board</h2><div class="sub">Your full rankings · stats through Week 9 · updated Nov 13, 2026</div></div></div>
-    <div class="seg" role="tablist" id="bSeg"><button role="tab" data-v="list" aria-selected="true">List</button><button role="tab" data-v="stats" aria-selected="false">Stats</button></div>
-    <div class="pkbar" style="margin-top:10px"><input type="search" id="bQ" placeholder="Search players or NFL teams"></div>
-    <div class="poschips" id="bPos" style="margin-top:8px"></div>
+    <div class="seg" role="tablist" id="bSeg"><button role="tab" data-v="list" aria-selected="true">List</button><button role="tab" data-v="stats" aria-selected="false">Stats</button><button role="tab" data-v="teams" aria-selected="false">Teams</button></div>
+    <div id="bFilters"><div class="pkbar" style="margin-top:10px"><input type="search" id="bQ" placeholder="Search players or NFL teams"></div>
+    <div class="poschips" id="bPos" style="margin-top:8px"></div></div>
+    <div class="teamchips" id="bTeams" hidden></div>
     <div id="boardList" style="margin-top:10px"></div>
   </section>
   <section class="panel" id="p-top" hidden>
@@ -1146,9 +1153,28 @@ document.addEventListener("click",e=>{const t=e.target.closest("th[data-sort]");
 let bView="list",bPos="ALL";
 const posFilter=(p,f)=>f==="ALL"||(f==="FAV"?FAVS.has(p.id):p.pos===f);
 const chipsHtml=(cur,attr)=>["ALL","QB","RB","WR","TE","FAV"].map(x=>`<button aria-pressed="${x===cur}" ${attr}="${x}">${x==="ALL"?"All":x==="FAV"?"♥ Favorites":x}</button>`).join("");
+let bTeam=null;
+function teamsViewHtml(t){
+  const T=S.teams,str=Array.from({length:T},(_,i)=>teamStrength(i)),made=Object.keys(S.sel).length;
+  const order=str.map((x,i)=>({i,sc:x.score})).sort((a,b)=>b.sc-a.sc),place=order.findIndex(o=>o.i===t)+1;
+  const m=str.reduce((a,x)=>a+x.score,0)/T,sd=Math.sqrt(str.reduce((a,x)=>a+(x.score-m)**2,0)/T)||1,g=gradeOf((str[t].score-m)/sd);
+  const mine=S.user.includes(t),st=STRATS[strat(t)]||"";
+  const head=`<div class="teamhead"><div style="min-width:0"><div class="eyebrow">${mine?"Your team":"Computer team"}${!mine&&st?` · ${esc(st)}`:""}</div><h3>${esc(tname(t))}</h3>
+    <div class="faint" style="font-size:12.5px">Picks ${ordn(t+1)}${made?` · ${ordn(place)} of ${T} in projected points`:""}</div></div>${made?`<span class="grade g${g[0]}" title="Draft grade so far">${g}</span>`:""}</div>`;
+  const nav=`<div class="teamnav"><button class="btn sm" data-tstep="-1" aria-label="Previous team">‹ Prev</button><button class="btn sm" data-tstep="1" aria-label="Next team">Next ›</button></div>`;
+  return`<div class="card teamcard">${head}${made?"":`<div class="empty" style="margin:8px 0">No picks yet. Start a mock on the Draft tab and every team’s roster fills in here.</div>`}${myTeamHtml(t)}${nav}</div>`;
+}
 function renderBoardTab(){
   $("#bPos").innerHTML=chipsHtml(bPos,"data-bp");
   document.querySelectorAll("#bSeg button").forEach(b=>b.setAttribute("aria-selected",b.dataset.v===bView));
+  $("#bFilters").hidden=bView==="teams";$("#bTeams").hidden=bView!=="teams";
+  if(bView==="teams"){
+    if(bTeam==null||bTeam>=S.teams)bTeam=S.user.length?S.user[0]:0;
+    const ids=[...S.user.slice().sort((a,b)=>a-b),...Array.from({length:S.teams},(_,i)=>i).filter(i=>!S.user.includes(i))];
+    $("#bTeams").innerHTML=ids.map(i=>`<button aria-pressed="${i===bTeam}" data-bt="${i}">${S.user.includes(i)?"⭐ ":""}${esc(tshort(i))}</button>`).join("");
+    $("#boardList").innerHTML=teamsViewHtml(bTeam);
+    const on=$("#bTeams").querySelector('[aria-pressed="true"]');if(on)on.scrollIntoView({block:"nearest",inline:"center"});
+    return}
   const q=($("#bQ").value||"").toLowerCase(),L=P.filter(p=>posFilter(p,bPos)&&matchQ(p,q));
   if(!L.length){$("#boardList").innerHTML=`<div class="empty">${bPos==="FAV"?"No favorites yet. Tap ♡ next to any player to save him.":"No players match."}</div>`;return}
   if(bView==="stats"){$("#boardList").innerHTML=statsTable("board",L);return}
@@ -1156,6 +1182,8 @@ function renderBoardTab(){
 }
 $("#bSeg").onclick=e=>{const b=e.target.closest("[data-v]");if(b){bView=b.dataset.v;renderBoardTab()}};
 $("#bPos").onclick=e=>{const b=e.target.closest("[data-bp]");if(b){bPos=b.dataset.bp;renderBoardTab()}};
+$("#bTeams").onclick=e=>{const b=e.target.closest("[data-bt]");if(b){bTeam=+b.dataset.bt;renderBoardTab()}};
+$("#boardList").addEventListener("click",e=>{const b=e.target.closest("[data-tstep]");if(!b)return;const ids=[...S.user.slice().sort((a,b)=>a-b),...Array.from({length:S.teams},(_,i)=>i).filter(i=>!S.user.includes(i))];const k=ids.indexOf(bTeam);bTeam=ids[(k+ +b.dataset.tstep+ids.length)%ids.length];renderBoardTab()});
 $("#bQ").oninput=renderBoardTab;
 
 /* ---------- Top 125 tab ---------- */
