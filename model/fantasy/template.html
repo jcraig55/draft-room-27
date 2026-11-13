@@ -216,6 +216,17 @@ details.more>summary::before{content:"▸ "} details.more[open]>summary::before{
 table.grid td.r .dir{display:block;font-size:10px;font-weight:600;color:var(--ink-3)}
 .gc[data-gbio]{cursor:pointer}.gc.mine{box-shadow:inset 0 0 0 1.5px var(--accent)}.gc.clock{background:var(--accent-soft);color:var(--accent);border-left-color:var(--accent);box-shadow:inset 0 0 0 1.5px var(--accent)}.gc.clock .n{font-weight:800}
 .gridhead{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:8px}.gridhead .actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.ticker{border:1.5px solid var(--accent);background:var(--accent-soft);border-radius:16px;padding:10px 12px;margin:10px 0 2px;display:grid;gap:4px;box-shadow:0 4px 14px rgba(0,0,0,.08)}
+#liveTicker{position:sticky;top:calc(env(safe-area-inset-top,0px) + 6px);z-index:6}
+body.haspill .toast{bottom:calc(140px + env(safe-area-inset-bottom,0px))!important}
+.ticker.you{border-color:#16A34A;background:#E9F8EE}
+.trow{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:14px}.trow .btn{margin-left:auto}
+.ltag{display:inline-flex;align-items:center;gap:5px;font:800 11px var(--f-display);letter-spacing:.1em;text-transform:uppercase;color:#fff;background:#E5484D;border-radius:999px;padding:3px 9px}
+.ltag.you{background:#16A34A}.ltag.paused{background:var(--ink-2)}
+.ldot{width:7px;height:7px;border-radius:50%;background:#fff;animation:lblink 1s infinite}@keyframes lblink{50%{opacity:.25}}
+.ldots{display:inline-flex;gap:3px;margin-left:2px}.ldots i{width:5px;height:5px;border-radius:50%;background:var(--accent);animation:lblink 1s infinite}.ldots i:nth-child(2){animation-delay:.2s}.ldots i:nth-child(3){animation-delay:.4s}
+.tlast{font-size:12.5px;color:var(--ink-2)}.tlast .pos{margin:0 3px}
+#simUser.live{background:var(--ink);border-color:var(--ink);color:#fff}
 .tmhead{display:flex;justify-content:space-between;align-items:center}
 .tswitch{width:50px;height:30px;border-radius:999px;border:0;background:#C9CED6;position:relative;cursor:pointer;flex:none;transition:background .15s}.tswitch i{position:absolute;top:3px;left:3px;width:24px;height:24px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.25);transition:left .15s}
 .tswitch[aria-checked="true"]{background:var(--accent)}.tswitch[aria-checked="true"] i{left:23px}
@@ -338,12 +349,13 @@ table.grid td.r{font-family:var(--f-display);font-weight:800;font-size:15px;colo
       <div style="min-width:0">
         <div class="card controls">
           <div class="actions sim3">
-            <button class="btn primary" id="simUser">Sim to my pick</button>
+            <button class="btn primary" id="simUser">▶ Start draft</button>
             <button class="btn" id="simOne">Next pick</button>
             <button class="btn" id="simAll">Sim all</button>
             <button class="btn danger" id="clearPicks">Clear picks</button>
           </div>
         </div>
+        <div id="liveTicker"></div>
         <div id="boardWrap"></div>
       </div>
       <aside class="side">
@@ -452,6 +464,8 @@ table.grid td.r{font-family:var(--f-display);font-weight:800;font-size:15px;colo
     </div>
     <div class="dgrid" id="teamsGrid"></div>
 </div></details></section>
+  <section class="sgrp"><div class="eyebrow">▶ Live draft</div><div class="field">Computer pick speed<div class="seg" id="paceSeg" role="radiogroup"><button data-pace="instant" role="radio">Instant</button><button data-pace="fast" role="radio">Fast</button><button data-pace="normal" role="radio">Normal</button><button data-pace="slow" role="radio">Slow</button></div></div>
+    <div class="faint" style="font-size:12.5px">Tap ▶ Start draft and the computer teams pick one at a time. The draft stops on your pick and the clock starts. Instant jumps straight to your next pick.</div></section>
   <section class="sgrp"><div class="tmhead"><div class="eyebrow" style="margin:0">⏱ Pick timer</div><button class="tswitch" id="tmOn" role="switch" aria-checked="true" aria-label="Pick timer"><i></i></button></div>
     <div id="tmBody"><div class="field">Time per pick<div class="seg" id="tmSec" role="radiogroup"><button data-s="30" role="radio">30 sec</button><button data-s="60" role="radio">1 min</button><button data-s="90" role="radio">1.5 min</button></div></div>
     <div class="sgrid" style="margin-top:8px"><label class="field" for="tmEnd">When time runs out<select id="tmEnd"><option value="best">Auto-draft ✨ best</option><option value="rank">Auto-draft top rank</option><option value="warn">Just alert me</option></select></label>
@@ -686,7 +700,7 @@ function renderControls(){
   $("#rndLbl").textContent=S.chaos<25?"Low":S.chaos>65?"High":"Medium";
   $("#tradeLog").innerHTML=S.log.length?S.log.map(l=>"• "+esc(l)).join("<br>"):"No trades yet.";
 }
-function render(){if(typeof syncClock==="function"){syncClock();paintClock()}renderControls();renderUserTeams();renderBoard();renderAvail();if(!$("#setScrim").hidden)renderTeams();if(!$("#p-board").hidden)renderBoardTab();if(!$("#p-top").hidden)renderTop();if(!$("#p-mocks").hidden)renderMocks()}
+function render(){if(typeof syncClock==="function"){syncClock();paintClock()}renderControls();if(typeof liveBtnPaint==="function")liveBtnPaint();renderUserTeams();renderBoard();renderAvail();if(!$("#setScrim").hidden)renderTeams();if(!$("#p-board").hidden)renderBoardTab();if(!$("#p-top").hidden)renderTop();if(!$("#p-mocks").hidden)renderMocks()}
 
 /* ---------- drafters ---------- */
 function renderTeams(){
@@ -982,7 +996,7 @@ function openMover(id){
 
 /* ---------- sheets ---------- */
 /* ---------- pick timer ---------- */
-const TM=Object.assign({on:true,sec:90,end:"best",beep:true},(()=>{try{return JSON.parse(localStorage.getItem("dr27-timer"))||{}}catch(e){return{}}})());
+const TM=Object.assign({on:true,sec:90,end:"best",beep:true,pace:"normal"},(()=>{try{return JSON.parse(localStorage.getItem("dr27-timer"))||{}}catch(e){return{}}})());
 if(![30,60,90].includes(TM.sec)){if(!TM.sec)TM.on=false;TM.sec=90}
 const saveTM=()=>{try{localStorage.setItem("dr27-timer",JSON.stringify(TM))}catch(e){}};
 const clk={num:null,dl:0,left:0,paused:false,warned:false,over:false,iv:null};
@@ -1004,7 +1018,7 @@ function expireClock(){const num=clk.num,p=picks().find(x=>x.num===num);if(!p||S
   if(TM.end==="best"){const L=assistPicks(p);pl=L.length?L[0].x:null}
   if(!pl)pl=P.find(x=>!tk.has(x.id));
   if(!pl){stopClock();return}
-  S.sel[num]=pl.id;justPicked.add(num);stopClock();persist();closeSheet();render();if(TM.beep)beep();
+  S.sel[num]=pl.id;justPicked.add(num);stopClock();persist();closeSheet();render();if(TM.beep)beep();afterUserPick();
   toast(`⏱ Time’s up. Auto-drafted ${pl.name} at ${p.label}.`)}
 function paintClock(){
   const on=clk.num!=null,l=on?clockLeft():0,p=on?picks().find(x=>x.num===clk.num):null,hot=on&&(clk.over||l<=10);
@@ -1013,7 +1027,7 @@ function paintClock(){
   document.querySelectorAll("[data-clockbar]").forEach(e=>e.style.width=(clk.over?0:Math.max(0,Math.min(100,l/Math.max(TM.sec,l)*100)))+"%");
   document.querySelectorAll("[data-clockpause]").forEach(e=>{e.textContent=clk.paused?"▶ Resume":"Pause";e.hidden=clk.over});
   const pk=$("#pkClock");if(pk){const mine=on&&$("#sheetHost .sheet[data-pnum='"+clk.num+"']");pk.hidden=!mine;pk.classList.toggle("hot",!!hot)}
-  const pill=$("#clockPill"),sheetOpen=!!$("#sheetHost").children.length;pill.hidden=!on||sheetOpen;pill.classList.toggle("hot",!!hot);pill.classList.toggle("paused",clk.paused);
+  const pill=$("#clockPill"),sheetOpen=!!$("#sheetHost").children.length;pill.hidden=!on||sheetOpen;document.body.classList.toggle("haspill",!pill.hidden);pill.classList.toggle("hot",!!hot);pill.classList.toggle("paused",clk.paused);
   if(p)$("#clockPillLbl").textContent=clk.over?`Time’s up · ${p.label}`:clk.paused?`Paused · ${p.label}`:`Your pick · ${p.label}`;
 }
 document.addEventListener("click",e=>{
@@ -1021,7 +1035,37 @@ document.addEventListener("click",e=>{
   if(e.target.closest("[data-clockadd]")){if(clk.num==null)return;if(clk.over){clk.over=false;clk.warned=false;clk.dl=Date.now()+30000;clk.left=30;clk.paused=false}else if(clk.paused)clk.left+=30;else clk.dl+=30000;if(clockLeft()>10)clk.warned=false;paintClock();return}
 });
 $("#clockPill").onclick=()=>{if(clk.num!=null)openPicker(clk.num)};
-function renderTimerSettings(){$("#tmOn").setAttribute("aria-checked",TM.on);$("#tmBody").classList.toggle("off",!TM.on);
+/* ---------- live draft ---------- */
+const PACE={instant:0,fast:700,normal:1600,slow:3500};
+const live={on:false,started:false,t:null,last:null};
+function liveBtnPaint(){const b=$("#simUser");if(!b)return;const done=!nextOpen();
+  b.textContent=live.on?"⏸ Pause":done?"✓ Done":Object.keys(S.sel).length?"▶ Resume draft":"▶ Start draft";b.classList.toggle("live",live.on);b.disabled=done&&!live.on;renderTicker()}
+function startLive(){if(!S.user.length){toast("Pick your draft slot in ⚙️ Settings first.");return}
+  if(!nextOpen()){toast("Draft complete. Clear picks to run another.");return}
+  live.on=true;live.started=true;if(clk.num!=null&&clk.paused){clk.dl=Date.now()+clk.left*1000;clk.paused=false;paintClock()}
+  liveBtnPaint();liveStep()}
+function pauseLive(quiet){live.on=false;clearTimeout(live.t);live.t=null;if(clk.num!=null&&!clk.paused){clk.left=clockLeft();clk.paused=true;paintClock()}liveBtnPaint();if(!quiet)toast("⏸ Draft paused. Tap ▶ Resume draft to keep going.")}
+function stopLive(){live.on=false;clearTimeout(live.t);live.t=null;liveBtnPaint()}
+function afterUserPick(){if(!live.on)return;clearTimeout(live.t);live.t=setTimeout(liveStep,450)}
+function scrollToClock(){if($("#p-mock").hidden||$("#sheetHost").children.length)return;const c=$("#boardWrap .slip.clock");if(!c)return;const r=c.getBoundingClientRect();if(r.top<130||r.bottom>innerHeight-110)c.scrollIntoView({block:"center",behavior:"smooth"})}
+function aiPickNow(q){const pl=aiChoose(q.owner,q.num,q.round);if(!pl)return false;S.sel[q.num]=pl.id;justPicked.add(q.num);live.last=q.num;return true}
+function liveStep(){clearTimeout(live.t);live.t=null;if(!live.on)return;const p=nextOpen();
+  if(!p){live.on=false;live.started=false;stopClock();render();liveBtnPaint();toast("🏁 Draft complete! Check your grade on My mocks.");return}
+  if(S.user.includes(p.owner)){liveBtnPaint();if(!$(`#sheetHost .sheet[data-pnum="${p.num}"]`)){openPicker(p.num);toast(`🔔 You’re on the clock at ${p.label}`);if(TM.beep&&!TM.on)beep()}return}
+  const d=PACE[TM.pace]??1600;
+  if(d===0){let guard=0;while(guard++<500){const q=nextOpen();if(!q||S.user.includes(q.owner))break;if(!aiPickNow(q)){stopLive();break}}persist();render();scrollToClock();if(live.on)live.t=setTimeout(liveStep,60);return}
+  liveBtnPaint();scrollToClock();
+  live.t=setTimeout(()=>{if(!live.on)return;const q=nextOpen();if(!q||q.num!==p.num||S.user.includes(q.owner)){liveStep();return}
+    if(!aiPickNow(q)){stopLive();return}persist();render();liveStep()},d)}
+function renderTicker(){const el=$("#liveTicker");if(!el)return;const p=nextOpen();
+  if(!live.started||!p){el.innerHTML="";return}
+  const lp=live.last!=null?picks().find(x=>x.num===live.last):null,lpl=lp?BYID[S.sel[lp.num]]:null,mine=S.user.includes(p.owner);
+  const top=live.on?(mine?`<span class="ltag you">🔔 Your pick</span><b>${p.label}</b> · You’re on the clock<button class="btn sm primary" data-pick="${p.num}">Make pick</button>`
+    :`<span class="ltag"><i class="ldot"></i>Live</span><b>${p.label}</b> · ${esc(tname(p.owner))} is picking<span class="ldots"><i></i><i></i><i></i></span>`)
+    :`<span class="ltag paused">⏸ Paused</span><b>${p.label}</b> · ${esc(tname(p.owner))} is up next`;
+  el.innerHTML=`<div class="ticker${live.on&&mine?" you":""}"><div class="trow">${top}</div>${lpl?`<div class="tlast">Last pick: ${lp.label} ${esc(tname(lp.owner))} took ${posTag(lpl.pos)}<b>${esc(lpl.name)}</b> <span class="faint">${esc(lpl.team)}</span></div>`:""}</div>`}
+$("#paceSeg").onclick=e=>{const b=e.target.closest("[data-pace]");if(!b)return;TM.pace=b.dataset.pace;saveTM();renderTimerSettings();toast(`Computer pick speed: ${b.textContent}.`)};
+function renderTimerSettings(){document.querySelectorAll("#paceSeg button").forEach(b=>{b.setAttribute("aria-selected",b.dataset.pace===TM.pace);b.setAttribute("aria-checked",b.dataset.pace===TM.pace)});$("#tmOn").setAttribute("aria-checked",TM.on);$("#tmBody").classList.toggle("off",!TM.on);
   document.querySelectorAll("#tmSec button").forEach(b=>{b.setAttribute("aria-selected",+b.dataset.s===TM.sec);b.setAttribute("aria-checked",+b.dataset.s===TM.sec)});$("#tmEnd").value=TM.end;$("#tmBeep").value=TM.beep?"1":"0"}
 $("#tmOn").onclick=()=>{TM.on=!TM.on;saveTM();renderTimerSettings();if(!TM.on)stopClock();toast(TM.on?`Pick timer on: ${fmtT(TM.sec)} per pick.`:"Pick timer off.")};
 $("#tmSec").onclick=e=>{const b=e.target.closest("[data-s]");if(!b)return;TM.sec=+b.dataset.s;if(!TM.on)TM.on=true;saveTM();renderTimerSettings();
@@ -1066,11 +1110,11 @@ function openPicker(num){
     document.querySelectorAll("#pktabs button").forEach(x=>x.setAttribute("aria-selected",x===b));$("#pkPlayers").hidden=t!=="players";$("#pkTeam").hidden=t!=="team";$("#pkPrev").hidden=t!=="prev";$("#pkFav").hidden=t!=="fav";if(t==="fav")$("#pkFav").innerHTML=favListHtml(num)};
   pkRedraw=draw;
   $("#pkq").oninput=draw;$("#pkx").onclick=closeSheet;$("#scrim").onclick=e=>{if(e.target.id==="scrim")closeSheet()};
-  $("#pkauto").onclick=()=>{delete S.sel[num];const pl=aiChoose(p.owner,p.num,p.round);S.sel[num]=pl.id;justPicked.add(num);persist();closeSheet();render()};
+  $("#pkauto").onclick=()=>{delete S.sel[num];const pl=aiChoose(p.owner,p.num,p.round);S.sel[num]=pl.id;justPicked.add(num);persist();closeSheet();render();afterUserPick()};
   $("#pkl").onclick=e=>{const bi=e.target.closest("[data-bio]");if(bi){openBioPage(bi.dataset.bio,{num});return}
     const rw=e.target.closest("[data-row]");if(rw&&!e.target.closest("button")){if(rw.classList.contains("open")){rw.classList.remove("open");return}openBioPage(rw.dataset.row,{num});return}
     const b=e.target.closest("[data-take]");if(!b)return;S.sel[num]=b.dataset.take;justPicked.add(num);persist();closeSheet();render();
-    const nx=nextOpen();if(nx&&!S.user.includes(nx.owner))toast("Pick is in. Tap “Sim to my pick” to continue.")};
+    if(live.on){afterUserPick();return}const nx=nextOpen();if(nx&&!S.user.includes(nx.owner))toast("Pick is in. Tap ▶ Resume draft to keep going.")};
   $("#pkBoardNote").onclick=e=>$("#pkl").onclick(e);
   let sx=null,sy=null,srow=null;
   $("#pkl").addEventListener("touchstart",e=>{const r=e.target.closest(".prow");if(!r)return;srow=r;sx=e.touches[0].clientX;sy=e.touches[0].clientY},{passive:true});
@@ -1291,12 +1335,12 @@ let toastT;function toast(m){$("#toastHost").innerHTML=`<div class="toast" role=
 $("#tabs").onclick=e=>{const b=e.target.closest("[data-tab]");if(!b)return;document.querySelectorAll("#tabs button").forEach(x=>x.setAttribute("aria-selected",x===b));
   ["mock","board","top","mocks"].forEach(t=>$("#p-"+t).hidden=t!==b.dataset.tab);window.scrollTo(0,0);
   if(b.dataset.tab==="board")renderBoardTab();if(b.dataset.tab==="top")renderTop();if(b.dataset.tab==="mocks"){renderMocks();renderSaved()}try{localStorage.setItem("dr27-tab",b.dataset.tab)}catch(e){}};
-$("#simUser").onclick=()=>{if(!S.user.length){toast("Pick your draft slot first, or use Sim full draft.");return}simulate("user")};
-$("#simAll").onclick=()=>simulate("all");
-$("#simOne").onclick=()=>{const p=nextOpen();if(p&&S.user.includes(p.owner)){openPicker(p.num);return}simulate("one")};
+$("#simUser").onclick=()=>{if(live.on)pauseLive();else startLive()};
+$("#simAll").onclick=()=>{stopLive();simulate("all")};
+$("#simOne").onclick=()=>{if(live.on)pauseLive(true);const p=nextOpen();if(p&&S.user.includes(p.owner)){openPicker(p.num);return}simulate("one")};
 let clrT=null;$("#clearPicks").onclick=()=>{const b=$("#clearPicks");if(!Object.keys(S.sel).length){toast("No picks to clear.");return}
   if(!b.classList.contains("confirm")){b.classList.add("confirm");b.textContent="Tap to clear";clearTimeout(clrT);clrT=setTimeout(()=>{b.classList.remove("confirm");b.textContent="Clear picks"},3000);return}
-  clearTimeout(clrT);b.classList.remove("confirm");b.textContent="Clear picks";S.sel={};persist();render();toast("Picks cleared. Trades kept.")};
+  clearTimeout(clrT);b.classList.remove("confirm");b.textContent="Clear picks";stopLive();live.started=false;stopClock();S.sel={};persist();render();toast("Picks cleared. Trades kept.")};
 
 $("#needW").oninput=e=>{S.needW=+e.target.value;persist();renderControls()};
 $("#rnd").oninput=e=>{S.chaos=+e.target.value;persist();renderControls()};
