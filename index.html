@@ -268,6 +268,7 @@ body{padding-bottom:calc(76px + env(safe-area-inset-bottom,0px))}
 .sgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px}
 .seg{display:flex;border:1px solid var(--line);border-radius:999px;padding:3px;gap:2px}.seg button{flex:1;border:0;background:none;border-radius:999px;padding:7px 6px;font:inherit;font-weight:700;font-size:13px;color:var(--ink-2);cursor:pointer}.seg button[aria-selected="true"]{background:var(--accent);color:#fff}
 .pkbar{display:flex;gap:8px;align-items:center}.pkbar input{flex:1;min-width:0}
+.pkfhead{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}.pkfilter .pkfx{font-size:12.5px;font-weight:700;color:var(--ink-2);text-decoration:none}
 .pkfilter{border:1px solid var(--line);border-radius:14px;padding:10px 12px;margin-top:8px}
 .assist{border:1.5px solid var(--accent);border-radius:14px;padding:0;margin:10px 0 4px;background:var(--accent-soft)}
 .assist summary{list-style:none;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:8px;padding:9px 12px;font-size:13px}.assist summary::-webkit-details-marker{display:none}
@@ -1060,8 +1061,8 @@ function openPicker(num){
     <div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start"><div><div class="eyebrow">Pick ${p.label} · No. ${p.num} overall</div><h2>${esc(tname(p.owner))}</h2><div class="muted" style="font-size:13px">Open spots: ${openNeeds(p.owner).join(" · ")||"bench"}</div></div><button class="btn sm" id="pkx">Close</button></div>
     <div class="pkclock" id="pkClock" hidden><div class="pkcrow"><span class="pkct">⏱ <b data-clocktxt>0:00</b><span class="faint" data-clocksub></span></span><span class="pkcb"><button class="btn sm" data-clockpause>Pause</button><button class="btn sm" data-clockadd>+30s</button></span></div><div class="pkbarbg"><i data-clockbar></i></div></div>
     <div class="subtabs" role="tablist" id="pktabs" style="margin-top:12px"><button role="tab" data-pt="players" aria-selected="true">Players</button><button role="tab" data-pt="team" aria-selected="false">My team</button><button role="tab" data-pt="prev" aria-selected="false">Picks</button><button role="tab" data-pt="fav" aria-selected="false" aria-label="Favorites">♥</button></div>
-    <div id="pkPlayers"><div class="pkbar" style="margin-top:10px"><input type="search" id="pkq" placeholder="Search players or NFL teams"><button class="btn sm" id="pkFilterBtn" aria-expanded="false">Filter ▾</button></div>
-    <div id="pkFilter" class="pkfilter" hidden><div class="eyebrow">Position</div><div class="poschips" id="pkpos"></div><div class="eyebrow" style="margin-top:8px">Badges</div><div class="poschips bdchips" id="pkbd"></div></div>
+    <div id="pkPlayers"><div class="pkbar" style="margin-top:10px"><input type="search" id="pkq" placeholder="Search players or NFL teams"><button class="btn sm" id="pkFilterBtn" aria-expanded="true" aria-controls="pkFilter">Filter ▴</button></div>
+    <div id="pkFilter" class="pkfilter"><div class="pkfhead"><div class="eyebrow" style="margin:0">Position</div><button class="linkbtn pkfx" id="pkFilterX" aria-label="Close filters">Close ✕</button></div><div class="poschips" id="pkpos"></div><div class="eyebrow" style="margin-top:8px">Badges</div><div class="poschips bdchips" id="pkbd"></div></div>
     <div id="pkBoardNote"></div><div id="pkl" style="margin-top:8px;border:1px solid var(--line);border-radius:14px;overflow:hidden"></div><div class="swipehint">Tap a player for his bio · swipe left for ♡ Favorite and ⇅ Move</div></div>
     <div id="pkTeam" hidden style="margin-top:8px;border:1px solid var(--line);border-radius:14px;overflow:hidden"></div>
     <div id="pkPrev" hidden style="margin-top:8px;border:1px solid var(--line);border-radius:14px;overflow:hidden;max-height:56vh;overflow:auto"></div>
@@ -1069,9 +1070,10 @@ function openPicker(num){
     <div class="actions" style="margin-top:12px"><button class="btn" id="pkauto">Let the AI pick</button><button class="btn ghost" data-trade="${p.num}">Trade this pick</button></div></div></div>`;
   const chips=$("#pkpos");const dc=()=>{chips.innerHTML=["ALL","NEED","FLEX",...POS].map(x=>`<button aria-pressed="${x===pos}" data-p="${x}">${x==="ALL"?"All":x==="NEED"?"Fills a need":x}</button>`).join("")};
   chips.onclick=e=>{const b=e.target.closest("button[data-p]");if(b){pos=b.dataset.p;dc();bdc();draw()}};dc();
-  $("#pkFilterBtn").onclick=()=>{const f=$("#pkFilter");f.hidden=!f.hidden;$("#pkFilterBtn").setAttribute("aria-expanded",!f.hidden)};
+  const setF=o=>{$("#pkFilter").hidden=!o;$("#pkFilterBtn").setAttribute("aria-expanded",o);bdc()};
+  $("#pkFilterBtn").onclick=()=>setF($("#pkFilter").hidden);$("#pkFilterX").onclick=()=>setF(false);
   const bdc=()=>{$("#pkbd").innerHTML=[["safety","🛡️ Safety picks"],["breakout","💥 Breakouts"],["sleeper","💤 Sleepers"],["volume","⚙️ Volume"],["ceiling","🚀 High ceiling"]].map(([k,l])=>`<button aria-pressed="${bdFilter===k}" data-bf="${k}">${l}</button>`).join("")+`<button aria-pressed="${bdHide}" data-bh="1">Hide 🚨 🎢</button><button class="bdinfo" data-bguide aria-label="What do badges mean?">ⓘ Guide</button>`;
-    const n=(pos!=="ALL"?1:0)+(bdFilter?1:0)+(bdHide?1:0);$("#pkFilterBtn").textContent=n?`Filter · ${n}`:"Filter ▾";$("#pkFilterBtn").classList.toggle("primary",!!n)};
+    const n=(pos!=="ALL"?1:0)+(bdFilter?1:0)+(bdHide?1:0),op=!$("#pkFilter").hidden;$("#pkFilterBtn").textContent=(n?`Filter · ${n}`:"Filter")+(op?" ▴":" ▾");$("#pkFilterBtn").classList.toggle("primary",!!n)};
   $("#pkbd").onclick=e=>{const b=e.target.closest("[data-bf]");if(b){bdFilter=bdFilter===b.dataset.bf?null:b.dataset.bf;bdc();draw();return}if(e.target.closest("[data-bh]")){bdHide=!bdHide;bdc();draw()}};bdc();draw();
   $("#pkTeam").innerHTML=myTeamHtml(p.owner);
   $("#pkPrev").dataset.upto=num;$("#pkPrev").innerHTML=prevPicksHtml(num);
