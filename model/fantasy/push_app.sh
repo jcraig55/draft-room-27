@@ -3,6 +3,7 @@
 set -e
 cd /home/claude/draft-room-27
 git fetch -q origin main && git reset -q --soft origin/main
+rm -f top125.html stats.html
 cp /home/claude/app/* .
 bash /home/claude/fantasy/sync_model.sh
 git add -A

@@ -1,6 +1,6 @@
 import json
 exec(open('proj.py').read())
-P=[x for x in P][:330]
+P=[x for x in P][:300]
 def ht(h):
     if not h: return '—'
     h=int(h); return f"{h//12}-{h%12}"

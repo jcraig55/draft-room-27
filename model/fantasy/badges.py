@@ -78,11 +78,47 @@ for x in P:
             yr=2026-int(x.get('rookie') or 2026)+1
             extra=f" · {x['ts']}% target share" if pos in ('WR','TE') and x.get('ts') else (f" · {((x.get('car') or 0)+(x.get('tgt') or 0))/x['g']:.1f} touches per game" if pos=='RB' else "")
             W['breakout']=f"{ordn(yr)} NFL season: {x['ppg']} PPG in {x['g']} games{extra}. Upside not fully tapped yet"
+    # ---- 7 badges: fold Consistent into Safety pick, Low floor into Volatile, Underperformer into Bust?
+    FOLD={'consistent':'safety','floor':'volatile','under':'bust'}
+    if 'floor' in B and len(B)>1: B=[k for k in B if k!='floor'];W.pop('floor',None)
+    nb=[]
+    for k in B:
+        t=FOLD.get(k,k)
+        if t not in nb: nb.append(t)
+        if t!=k and t not in W and k in W: W[t]=W[k]
+    for k in FOLD: W.pop(k,None)
+    B=nb
+    # ---- every player gets at least one badge (looser rules, best fit first)
+    if not B:
+        n=len(v);b0,st0,bm0,_=TH[pos];G=x['g'] or 0
+        if n==0:
+            if p25 and p25>=12: B=['ceiling'];W['ceiling']=f"{p25:.1f} PPG in 2025 · upside when healthy"
+            elif x['rank']<=60: B=['breakout'];W['breakout']="Rookie or newcomer with early-round buzz"
+            else: B=['sleeper'];W['sleeper']="Unproven so far · cheap upside late in drafts"
+        elif n<4:
+            m=v.mean()
+            if p25 and m<.8*p25: B=['bust'];W['bust']=f"{m:.1f} PPG in {n} games vs {p25:.1f} in 2025"
+            elif v.max()>=.8*bm0: B=['ceiling'];W['ceiling']=f"Season high {v.max():.1f} in {n} games"
+            elif x['rank']>=55: B=['sleeper'];W['sleeper']=f"Small sample ({n} games) · upside late"
+            else: B=['volatile'];W['volatile']=f"Only {n} games so far · range {v.min():.1f} to {v.max():.1f}"
+        else:
+            m=v.mean();cv=v.std()/m if m>0 else 9;start=(v>=st0).mean()
+            car=(x.get('car') or 0)/G;tg=(x.get('tgt') or 0)/G;att=(x.get('att') or 0)/G;ts=x.get('ts') or 0
+            rvol=(pos=='RB' and car+tg>=15) or (pos=='WR' and (tg>=7 or ts>=22)) or (pos=='TE' and (tg>=5.5 or ts>=18)) or (pos=='QB' and att+car>=34)
+            if start>=.5 and cv<=.45: B=['safety'];W['safety']=f"Steady: {int((v>=st0).sum())} of {n} games with {st0}+ pts"
+            elif rvol:
+                B=['volume']
+                W['volume']=(f"{car+tg:.1f} touches per game" if pos=='RB' else f"{att+car:.1f} pass attempts + carries per game" if pos=='QB' else f"{tg:.1f} targets per game · {ts}% target share")
+            elif v.max()>=.8*bm0: B=['ceiling'];W['ceiling']=f"Season high {v.max():.1f} pts"
+            elif p25 and m<=.85*p25 and p25-m>=2: B=['bust'];W['bust']=f"{m:.1f} PPG, down from {p25:.1f} in 2025"
+            elif cv>=.45: B=['volatile'];W['volatile']=f"Weekly range {v.min():.1f} to {v.max():.1f} pts"
+            elif x['rank']>=55: B=['sleeper'];W['sleeper']=f"Deep pick with a steady role: {m:.1f} PPG"
+            else: B=['safety'];W['safety']=f"Steady contributor: {m:.1f} PPG in {n} games"
     if 'bust' in B and 'sleeper' in B: B.remove('sleeper');W.pop('sleeper',None)
-    order=['safety','consistent','volume','breakout','ceiling','sleeper','bust','volatile','floor','under']
+    order=['safety','volume','breakout','ceiling','sleeper','bust','volatile']
     B=sorted(B,key=order.index)
     rpg=round((x.get('rec') or 0)/x['g'],2) if x['g']>=3 else {'QB':0,'RB':2.0,'WR':3.5,'TE':3.0}[pos]
-    out[pid]={'b':B,'w':W,'wk':wk,'pr':ppg_rank.get(pid),'tr':ts_rank.get(pid),'rpg':rpg}
+    out[pid]={'b':B,'w':W,'wk':wk,'pr':ppg_rank.get(pid),'tr':ts_rank.get(pid),'rpg':rpg,'p25':round(p25,1) if p25 else None}
 json.dump(out,open('/home/claude/fantasy/badges.json','w'),separators=(',',':'))
 from collections import Counter
 print('badges',dict(Counter(b for o in out.values() for b in o['b'])),'players',len(out))

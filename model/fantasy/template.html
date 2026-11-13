@@ -209,6 +209,44 @@ details.more>summary::before{content:"▸ "} details.more[open]>summary::before{
 .favgone{opacity:.6}
 #pktabs{overflow-x:auto;flex-wrap:nowrap;scrollbar-width:none;max-width:100%}#pktabs::-webkit-scrollbar{display:none}#pktabs button{white-space:nowrap;flex-shrink:0}
 .bpnamerow{display:flex;justify-content:space-between;align-items:center;gap:10px}.bpnamerow .favbtn{width:40px;height:38px;font-size:20px}
+.availhead>div:first-child{flex-wrap:wrap;min-width:0}.side .subtabs{min-width:0;max-width:100%;overflow-x:auto;scrollbar-width:none}.sim3 .btn{white-space:nowrap;font-size:14px;padding-inline:10px}
+.appbar{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:6px 0 12px;border-bottom:1px solid var(--line);margin-bottom:12px}
+.appbar .ttl{white-space:nowrap;font-size:clamp(24px,7.2vw,30px)!important}
+.appbar .ttl,.tabhead .ttl{font-family:var(--f-display);font-weight:800;font-size:28px;line-height:1;text-transform:uppercase;margin:0}.appbar .ttl span{color:var(--accent)}
+.appbar .sub,.tabhead .sub{font-size:12.5px;color:var(--ink-2);margin-top:3px}
+.gear{border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:999px;padding:8px 14px;font:inherit;font-weight:700;font-size:13px;white-space:nowrap;cursor:pointer;text-decoration:none}
+.tabhead{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:12px}
+.sim3{display:grid!important;grid-template-columns:1.3fr 1fr 1fr;gap:8px}.sim3 .btn{justify-content:center;text-align:center}
+.bnav{position:fixed;left:0;right:0;bottom:0;z-index:20;display:flex;justify-content:space-around;background:var(--bg);border-top:1px solid var(--line);padding:6px max(8px,env(safe-area-inset-left,0px)) calc(6px + env(safe-area-inset-bottom,0px))}
+.bnav button{flex:1;max-width:120px;border:0;background:none;font:inherit;font-size:11px;font-weight:700;color:var(--ink-3);display:grid;justify-items:center;gap:1px;padding:4px 0;cursor:pointer}
+.bnav button i{font-style:normal;font-size:21px;line-height:1.15;filter:grayscale(1);opacity:.7}.bnav button[aria-selected="true"]{color:var(--accent)}.bnav button[aria-selected="true"] i{filter:none;opacity:1}
+body{padding-bottom:calc(76px + env(safe-area-inset-bottom,0px))}
+.toast{bottom:calc(84px + env(safe-area-inset-bottom,0px))!important}
+.setscrim{position:fixed;inset:0;z-index:35;background:rgba(10,12,20,0);display:flex;align-items:flex-end;justify-content:center;transition:background .2s}.setscrim.open{background:rgba(10,12,20,.5)}
+.setsheet{background:var(--bg);width:min(640px,100%);max-height:92vh;overflow:auto;border-radius:22px 22px 0 0;padding:10px 16px calc(20px + env(safe-area-inset-bottom,0px));transform:translateY(100%);transition:transform .22s ease-out}
+.setscrim.open .setsheet{transform:none}
+.sethead{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}.sethead h2{font-size:26px;font-weight:800;text-transform:uppercase;margin:0}
+.sgrp{border:1px solid var(--line);border-radius:16px;padding:12px 14px;margin-top:10px;display:grid;gap:8px}
+.sgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px}
+.seg{display:flex;border:1px solid var(--line);border-radius:999px;padding:3px;gap:2px}.seg button{flex:1;border:0;background:none;border-radius:999px;padding:7px 6px;font:inherit;font-weight:700;font-size:13px;color:var(--ink-2);cursor:pointer}.seg button[aria-selected="true"]{background:var(--accent);color:#fff}
+.pkbar{display:flex;gap:8px;align-items:center}.pkbar input{flex:1;min-width:0}
+.pkfilter{border:1px solid var(--line);border-radius:14px;padding:10px 12px;margin-top:8px}
+.assist{border:1.5px solid var(--accent);border-radius:14px;padding:0;margin:10px 0 4px;background:var(--accent-soft)}
+.assist summary{list-style:none;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:8px;padding:9px 12px;font-size:13px}.assist summary::-webkit-details-marker{display:none}
+.assist summary b{color:#1F6FA8}.assist .aschev{font-weight:800;color:#1F6FA8;transition:transform .15s}.assist[open] .aschev{transform:rotate(90deg)}
+.assist .asl{padding:0 10px 10px;margin-top:0}
+.swipehint{font-size:11.5px;color:var(--ink-3);text-align:center;margin-top:8px}
+.prow[data-row]{cursor:pointer}
+@media (hover:none){#pkl .prow .favbtn,#pkl .prow .mvbtn{display:none}#pkl .prow.open .favbtn,#pkl .prow.open .mvbtn{display:inline-grid;place-items:center}#pkl .prow.open{background:var(--accent-soft)}}
+@media (hover:hover){.swipehint{display:none}}
+.t125{list-style:none;margin:0;padding:0;display:grid;gap:2px}
+.t125 li{display:grid;grid-template-columns:30px 34px 1fr auto 32px;gap:8px;align-items:center;padding:5px 8px;border-radius:12px}.t125 li:nth-child(odd){background:var(--surface-2)}
+.t125 .n{text-align:right;font-weight:700;font-size:13px}.t125 .pos{text-align:center}.t125 .nm{border:0;background:none;text-align:left;font:inherit;font-weight:500;color:var(--ink);padding:0;cursor:pointer;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.t125 .tm{font-size:11.5px;color:var(--ink-3)}
+.swrap{overflow-x:auto;border:1px solid var(--line);border-radius:16px}
+.stab{border-collapse:collapse;width:100%;min-width:600px;font-size:13px}.stab th{font:600 11px var(--f-display);letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);text-align:left;padding:9px 8px;border-bottom:1px solid var(--line);cursor:pointer;white-space:nowrap;background:var(--bg);position:sticky;top:0}
+.stab th.n,.stab td.n{text-align:right}.stab th[aria-sort="ascending"]::after{content:" ▲"}.stab th[aria-sort="descending"]::after{content:" ▼"}
+.stab td{padding:7px 8px;border-bottom:1px solid var(--line);white-space:nowrap;font-variant-numeric:tabular-nums}.stab tbody tr:nth-child(odd){background:var(--surface-2)}.stab td small{display:block;font-size:10.5px;color:var(--ink-3)}
+.curmock{padding:14px;border-color:var(--accent);background:var(--accent-soft)}.cmtop{display:flex;justify-content:space-between;align-items:center;gap:10px;margin:4px 0 2px}
 .rowbtns{display:flex;gap:6px;align-items:center;flex-shrink:0}
 .mvbtn{min-width:34px;padding-inline:8px;font-size:15px;line-height:1}
 .mvmark{display:block;font-size:10px;font-weight:700;line-height:1.1;margin-top:2px}.mvmark.up{color:#16a34a}.mvmark.dn{color:#dc2626}
@@ -266,68 +304,19 @@ table.grid td.r{font-family:var(--f-display);font-weight:800;font-size:15px;colo
 </style>
 
 <div class="wrap">
-  <header class="mast">
-    <div>
-      <div class="eyebrow" id="leagueLine">2027 Fantasy Redraft · Full PPR · QB · RB · 2 WR · TE · 2 FLEX</div>
-      <h1>Draft Room <span>’27</span></h1>
-      <p>Mock your 2027 fantasy draft: snake order, pick trades, drafter strategies you can change, and bios with target share for every pass catcher. Rankings come from this season’s production, last season’s, age and role.</p>
-    </div>
-    <div class="asof">Stats through Week __WEEK__, 2026<br>Updated __DATE__</div>
-  </header>
+  <header class="appbar"><div style="min-width:0"><h1 class="ttl">Draft Room <span>’27</span></h1><div class="sub" id="leagueLine"></div></div><button class="gear" id="openSettings" aria-haspopup="dialog">⚙️ Settings</button></header>
 
-  <nav class="tabs" role="tablist" id="tabs">
-    <button role="tab" data-tab="mock" aria-selected="true">Mock Draft</button>
-    <button role="tab" data-tab="teams" aria-selected="false">Drafters</button>
-    <button role="tab" data-tab="players" aria-selected="false">Players</button>
-    <button role="tab" data-tab="favs" aria-selected="false">♥ Favorites</button>
-    <button role="tab" data-tab="saved" aria-selected="false">Saved Mocks</button>
-  </nav>
+
 
   <section class="panel" id="p-mock">
     <div class="mock">
       <div style="min-width:0">
         <div class="card controls">
-          <div class="actions">
+          <div class="actions sim3">
             <button class="btn primary" id="simUser">Sim to my pick</button>
-            <button class="btn" id="simAll">Sim full draft</button>
             <button class="btn" id="simOne">Next pick</button>
-            <button class="btn" id="clearPicks">Clear picks</button>
-            <button class="btn" id="boardView">Full board view</button>
-            <button class="btn" id="gradesBtn">📊 Grades &amp; standings</button>
+            <button class="btn" id="simAll">Sim all</button>
           </div>
-          <div>
-            <div class="eyebrow" style="margin-bottom:6px">Your draft slot <span class="faint" style="letter-spacing:0;text-transform:none;font-family:var(--f-body)">· pick one or more teams to control</span></div>
-            <div class="teampick" id="userTeams"></div>
-          </div>
-          <div class="ctl-row">
-            <label class="field" for="nTeams">League size
-              <select id="nTeams"><option>8</option><option>10</option><option>12</option><option>14</option><option>16</option></select>
-            </label>
-            <label class="field" for="scoring">Scoring
-              <select id="scoring"><option value="ppr">Full PPR</option><option value="half">Half PPR</option><option value="std">Standard</option></select>
-            </label>
-            <label class="field" for="sfSel">Superflex
-              <select id="sfSel"><option value="0">Off</option><option value="1">On (adds a QB/RB/WR/TE spot)</option></select>
-            </label>
-            <label class="field" for="nRounds">Rounds
-              <select id="nRounds"><option>10</option><option>12</option><option>14</option><option>15</option><option>16</option><option>18</option></select>
-            </label>
-            <label class="field" for="needW">AI drafting: <span id="needWLbl"></span>
-              <input type="range" id="needW" min="0" max="100" step="5">
-              <span class="faint" style="font-weight:500">Rankings ← → Roster needs</span>
-            </label>
-            <label class="field" for="rnd">Chaos: <span id="rndLbl"></span>
-              <input type="range" id="rnd" min="0" max="100" step="5">
-              <span class="faint" style="font-weight:500">Chalk ← → Surprises</span>
-            </label>
-          </div>
-          <details class="more">
-            <summary>Trade picks</summary>
-            <div style="display:grid;gap:10px;margin-top:10px">
-              <div class="actions"><button class="btn sm" id="openTrade">New trade</button><button class="btn sm danger" id="resetTrades">Undo all trades</button></div>
-              <div id="tradeLog" class="muted" style="font-size:13px"></div>
-            </div>
-          </details>
         </div>
         <div id="boardWrap"></div>
       </div>
@@ -349,14 +338,7 @@ table.grid td.r{font-family:var(--f-display);font-weight:800;font-size:15px;colo
     </div>
   </section>
 
-  <section class="panel" id="p-teams" hidden>
-    <div class="toolbar">
-      <button class="btn sm" id="randStrat">Randomize AI strategies</button>
-      <button class="btn sm" id="resetStrat">Reset to Balanced</button>
-      <span class="faint" style="font-size:13px">Each drafter’s strategy and open lineup spots drive how the AI picks. Rename teams to match your league.</span>
-    </div>
-    <div class="dgrid" id="teamsGrid"></div>
-  </section>
+  <section class="panel" id="p-teams" hidden></section>
 
   <section class="panel" id="p-players" hidden>
     <div class="roundhead" style="margin-top:0"><h2>2026 breakouts</h2><span class="faint" style="font-size:13px">Biggest jump in PPR points per game from 2025</span></div>
@@ -379,8 +361,23 @@ table.grid td.r{font-family:var(--f-display);font-weight:800;font-size:15px;colo
       <div id="favList"></div>
     </div>
   </section>
-  <section class="panel" id="p-saved" hidden>
-    <div class="savegrid">
+  <section class="panel" id="p-board" hidden>
+    <div class="tabhead"><div><h2 class="ttl">Board</h2><div class="sub">Your full rankings · stats through Week __WEEK__ · updated __DATE__</div></div></div>
+    <div class="seg" role="tablist" id="bSeg"><button role="tab" data-v="list" aria-selected="true">List</button><button role="tab" data-v="stats" aria-selected="false">Stats</button></div>
+    <div class="pkbar" style="margin-top:10px"><input type="search" id="bQ" placeholder="Search players or NFL teams"></div>
+    <div class="poschips" id="bPos" style="margin-top:8px"></div>
+    <div id="boardList" style="margin-top:10px"></div>
+  </section>
+  <section class="panel" id="p-top" hidden>
+    <div class="tabhead"><div><h2 class="ttl">Top 125</h2><div class="sub" id="topSub"></div></div><a class="gear" href="top125.pdf" download>PDF ↓</a></div>
+    <div class="seg" role="tablist" id="tSeg"><button role="tab" data-v="list" aria-selected="true">Top 125</button><button role="tab" data-v="stats" aria-selected="false">Player stats</button></div>
+    <div class="poschips" id="tPos" style="margin-top:10px"></div>
+    <div id="topList" style="margin-top:10px"></div>
+  </section>
+  <section class="panel" id="p-mocks" hidden>
+    <div class="tabhead"><div><h2 class="ttl">My mocks</h2><div class="sub">Saved drafts and results</div></div></div>
+    <div id="curMock"></div>
+    <div class="savegrid" style="margin-top:12px">
       <div class="card" style="padding:14px;display:grid;gap:10px;align-content:start">
         <h2 style="font-size:22px;text-transform:uppercase;font-weight:800">Save this mock</h2>
         <label class="field" for="saveName">Name<input type="text" id="saveName" placeholder="e.g. 16-team, pick 5, Zero RB"></label>
@@ -394,7 +391,48 @@ table.grid td.r{font-family:var(--f-display);font-weight:800;font-size:15px;colo
   </section>
 
   <footer class="foot" id="foot"></footer>
+  <nav class="bnav" role="tablist" id="tabs" aria-label="Sections">
+    <button role="tab" data-tab="mock" aria-selected="true"><i aria-hidden="true">🏈</i>Draft</button>
+    <button role="tab" data-tab="board" aria-selected="false"><i aria-hidden="true">📋</i>Board</button>
+    <button role="tab" data-tab="top" aria-selected="false"><i aria-hidden="true">🏆</i>Top 125</button>
+    <button role="tab" data-tab="mocks" aria-selected="false"><i aria-hidden="true">💾</i>My mocks</button>
+  </nav>
 </div>
+<div class="setscrim" id="setScrim" hidden><div class="setsheet" role="dialog" aria-modal="true" aria-label="Settings"><div class="mvgrab" aria-hidden="true"></div>
+  <div class="sethead"><h2>Settings</h2><button class="btn sm primary" id="closeSettings">Done</button></div>
+  <section class="sgrp"><div class="eyebrow">League</div><div class="sgrid"><label class="field" for="nTeams">League size
+              <select id="nTeams"><option>8</option><option>10</option><option>12</option><option>14</option><option>16</option></select>
+            </label><label class="field" for="nRounds">Rounds
+              <select id="nRounds"><option>10</option><option>12</option><option>14</option><option>15</option><option>16</option><option>18</option></select>
+            </label><label class="field" for="scoring">Scoring
+              <select id="scoring"><option value="ppr">Full PPR</option><option value="half">Half PPR</option><option value="std">Standard</option></select>
+            </label><label class="field" for="sfSel">Superflex
+              <select id="sfSel"><option value="0">Off</option><option value="1">On (adds a QB/RB/WR/TE spot)</option></select>
+            </label></div></section>
+  <section class="sgrp"><div class="eyebrow">Your draft slot <span class="faint" style="letter-spacing:0;text-transform:none;font-family:var(--f-body)">· pick one or more teams to control</span></div><div class="teampick" id="userTeams"></div></section>
+  <section class="sgrp"><div class="eyebrow">Computer drafters</div><div class="sgrid"><label class="field" for="needW">AI drafting: <span id="needWLbl"></span>
+              <input type="range" id="needW" min="0" max="100" step="5">
+              <span class="faint" style="font-weight:500">Rankings ← → Roster needs</span>
+            </label><label class="field" for="rnd">Chaos: <span id="rndLbl"></span>
+              <input type="range" id="rnd" min="0" max="100" step="5">
+              <span class="faint" style="font-weight:500">Chalk ← → Surprises</span>
+            </label></div>
+    <details class="more"><summary>Team names &amp; strategies</summary><div style="margin-top:10px">
+    <div class="toolbar">
+      <button class="btn sm" id="randStrat">Randomize AI strategies</button>
+      <button class="btn sm" id="resetStrat">Reset to Balanced</button>
+      <span class="faint" style="font-size:13px">Each drafter’s strategy and open lineup spots drive how the AI picks. Rename teams to match your league.</span>
+    </div>
+    <div class="dgrid" id="teamsGrid"></div>
+</div></details></section>
+  <section class="sgrp"><div class="eyebrow">Trades</div>
+            <div style="display:grid;gap:10px;margin-top:10px">
+              <div class="actions"><button class="btn sm" id="openTrade">New trade</button><button class="btn sm danger" id="resetTrades">Undo all trades</button></div>
+              <div id="tradeLog" class="muted" style="font-size:13px"></div>
+            </div>
+          </section>
+  <section class="sgrp"><div class="eyebrow">This mock</div><div class="actions"><button class="btn danger" id="clearPicks">Clear all picks</button><span class="faint" style="font-size:12.5px;align-self:center">Trades are kept.</span></div></section>
+</div></div>
 <div id="sheetHost"></div>
 <div id="toastHost"></div>
 
@@ -611,12 +649,12 @@ function renderAvail(){
 function renderUserTeams(){$("#userTeams").innerHTML=Array.from({length:S.teams},(_,i)=>`<button aria-pressed="${S.user.includes(i)}" data-ut="${i}">${i+1}${S.names[i]?" · "+esc(S.names[i].slice(0,8)):""}</button>`).join("")}
 function renderControls(){
   $("#nTeams").value=S.teams;$("#nRounds").value=S.rounds;$("#scoring").value=S.scoring;$("#sfSel").value=S.sf?"1":"0";
-  $("#leagueLine").textContent=`2027 Fantasy Redraft · ${scoringName()} · QB · RB · 2 WR · TE · 2 FLEX${S.sf?" · Superflex":""} · ${S.teams} teams`;$("#needW").value=S.needW;$("#rnd").value=S.chaos;
+  $("#leagueLine").textContent=`${scoringName()} · ${S.teams} teams${S.sf?" · Superflex":""}${S.user.length?` · You pick ${ordn(S.user[0]+1)}`:""}`;$("#needW").value=S.needW;$("#rnd").value=S.chaos;
   $("#needWLbl").textContent=S.needW<35?"Rankings":S.needW>70?"Needs":"Balanced";
   $("#rndLbl").textContent=S.chaos<25?"Low":S.chaos>65?"High":"Medium";
   $("#tradeLog").innerHTML=S.log.length?S.log.map(l=>"• "+esc(l)).join("<br>"):"No trades yet.";
 }
-function render(){renderControls();renderUserTeams();renderBoard();renderAvail();if(!$("#p-teams").hidden)renderTeams();if(!$("#p-favs").hidden)renderFavs()}
+function render(){renderControls();renderUserTeams();renderBoard();renderAvail();if(!$("#setScrim").hidden)renderTeams();if(!$("#p-board").hidden)renderBoardTab();if(!$("#p-top").hidden)renderTop();if(!$("#p-mocks").hidden)renderMocks()}
 
 /* ---------- drafters ---------- */
 function renderTeams(){
@@ -660,16 +698,13 @@ function renderPlayers(){
 }
 
 /* ---------- badges ---------- */
-const BD={safety:["🛡️","Safety pick","Consistent, similar output both seasons, age 29 or under, rarely misses games, top-60 pick."],
- consistent:["🎯","Consistent","Startable score (QB 18, RB/WR 12, TE 9) in 65%+ of games, with small week-to-week swings."],
- volume:["⚙️","Volume machine","Heavy weekly workload: RB 20+ touches, WR 9.5+ targets or 30% target share, TE 7.5+ targets or 24% share, QB 38+ pass attempts and carries per game. Players with this badge don’t also get High ceiling."],
- breakout:["💥","Breakout","Hand-picked: hyped, well-liked players with a high ceiling who haven’t shown their full upside yet."],
- ceiling:["🚀","High ceiling","2+ boom games (QB 30, RB/WR 25, TE 20) or one huge week (QB 35, RB/WR 30, TE 24)."],
- sleeper:["💤","Sleeper","Ranked 55th or later, but scoring like a much better player or trending way up over the last 4 games."],
- bust:["🚨","Bust?","Badly missing expectations: averaged 12+ PPG in 2025 and is now 35%+ and 5+ PPG below that (3+ games), or flagged by hand. Replaces Underperformer."],
- volatile:["🎢","Volatile","Boom-or-bust: big weekly swings, at least one boom week, and below a starter score (QB 18, RB/WR 12, TE 9) in 35%+ of games."],
- floor:["🪫","Low floor","Bust game (QB under 12, RB/WR under 6, TE under 4) in 35%+ of games."],
- under:["📉","Underperformer","Scoring 20%+ (and 3+ PPG) below his 2025 average."]};
+const BD={safety:["🛡️","Safety pick","Reliable weekly scorer: startable in most games with small swings (includes the old Consistent badge). Top ones also held their 2025 level and rarely miss games."],
+ volume:["⚙️","Volume machine","Heavy weekly workload: RB 20+ touches, WR 9.5+ targets or 30% share, TE 7.5+ targets or 24% share, QB 38+ attempts and carries. Looser cutoffs fill in players with no other badge. Never paired with High ceiling."],
+ breakout:["💥","Breakout","Hyped, well-liked players with a high ceiling who haven’t shown their full upside yet. Hand-picked, plus early-round rookies."],
+ ceiling:["🚀","High ceiling","Wins weeks with spike games: 2+ boom weeks or one huge week."],
+ sleeper:["💤","Sleeper","Ranked 55th or later but scoring like a better player, trending up, or a cheap late-round flier."],
+ bust:["🚨","Bust?","Missing expectations: well below his 2025 scoring (includes the old Underperformer badge), or flagged by hand."],
+ volatile:["🎢","Volatile","Boom-or-bust weekly swings, including players who often post duds (the old Low floor badge)."]};
 const TH={QB:[12,18,30],RB:[6,12,25],WR:[6,12,25],TE:[4,9,20]};
 const bdOf=p=>(BADGES[p.id]||{}).b||[];
 const bdPill=k=>`<span class="bd bd-${k}">${BD[k][0]} ${BD[k][1]}</span>`;
@@ -782,15 +817,17 @@ function assistPicks(p){
     const bad=bdOf(x).includes("bust")?.85:1;
     return{x,fill,drop,fall,sc:((vor+.6*drop)*fill+.05*Math.max(-10,Math.min(20,fall)))*bad}}).sort((a,b)=>b.sc-a.sc).slice(0,3).map(o=>({...o,nxt,tk,nd}));
 }
+let asOpen=false;
+document.addEventListener("toggle",e=>{if(e.target.classList&&e.target.classList.contains("assist"))asOpen=e.target.open},true);
 function assistHtml(p){
   const L=assistPicks(p);if(!L.length)return"";const me=S.user.includes(p.owner);
-  return`<div class="assist"><div class="eyebrow">✨ Best picks for ${me?"you":esc(tname(p.owner))}</div><div class="asl">${L.map(({x,fill,drop,fall,nxt,tk,nd})=>{
+  return`<details class="assist"${asOpen?" open":""}><summary><span>✨ <b>Best for ${me?"you":esc(tshort(p.owner))}:</b> ${L.map(o=>esc(lastName(o.x.name))).join(" · ")}</span><span class="aschev" aria-hidden="true">›</span></summary><div class="asl">${L.map(({x,fill,drop,fall,nxt,tk,nd})=>{
     const why=[];if(nd.includes(x.pos))why.push(`Fills ${me?"your":"their"} ${x.pos} spot`);else if(fitsSlot(x.pos,nd))why.push(`Fits ${nd.includes("FLEX")&&x.pos!=="QB"?"FLEX":"Superflex"}`);else why.push("Depth pick");
     if(FAVS.has(x.id))why.unshift("♥ Favorite");
     if(lastInTier(x,tk))why.push(`Last ${x.pos} in Tier ${x.tier}`);
     if(drop>=1&&nxt)why.push(`Next ${x.pos} at ${nxt.label}: ~${drop.toFixed(1)} pts/G worse`);
     if(fall>=Math.max(4,S.teams/2))why.push(`Falling: ranked #${x.rank}`);
-    return`<div class="ascard"><div class="asname">${nameBtn(x,false)}</div><div class="meta">${esc(x.team)} · ${x.proj} proj ${projLbl()} · ${x.pos}${x.prank} ${tierChip(x)}</div>${badgeRow(x,2)}<div class="aswhy">${why.map(w=>`<span>${esc(w)}</span>`).join("")}</div><button class="btn sm primary" data-take="${x.id}">Draft ${esc(lastName(x.name))}</button></div>`}).join("")}</div></div>`;
+    return`<div class="ascard"><div class="asname">${nameBtn(x,false)}</div><div class="meta">${esc(x.team)} · ${x.proj} proj ${projLbl()} · ${x.pos}${x.prank} ${tierChip(x)}</div>${badgeRow(x,2)}<div class="aswhy">${why.map(w=>`<span>${esc(w)}</span>`).join("")}</div><button class="btn sm primary" data-take="${x.id}">Draft ${esc(lastName(x.name))}</button></div>`}).join("")}</div></details>`;
 }
 
 /* ---------- compare ---------- */
@@ -871,14 +908,14 @@ function favListHtml(num){
 function renderFavs(){const h=$("#favList");if(!h)return;h.innerHTML=`<div class="favbox">${favListHtml(null)}</div>`}
 function toggleFav(id){if(FAVS.has(id))FAVS.delete(id);else FAVS.add(id);saveFavs();
   document.querySelectorAll(`[data-fav="${id}"]`).forEach(b=>{const on=FAVS.has(id);b.setAttribute("aria-pressed",on);b.textContent=on?"♥":"♡";b.setAttribute("aria-label",(on?"Remove from":"Add to")+" favorites")});
-  if(!$("#p-favs").hidden)renderFavs();const pf=$("#pkFav");if(pf)pf.innerHTML=favListHtml(+pf.dataset.upto);
+  if(!$("#p-board").hidden&&bPos==="FAV")renderBoardTab();if(!$("#p-top").hidden&&tPos==="FAV")renderTop();const pf=$("#pkFav");if(pf)pf.innerHTML=favListHtml(+pf.dataset.upto);
   toast(FAVS.has(id)?`${BYID[id].name} added to favorites.`:`${BYID[id].name} removed from favorites.`)}
 window.addEventListener("storage",e=>{if(e.key==="dr27-favs"){loadFavs();render()}});
 window.addEventListener("pageshow",()=>{loadFavs();render()});
 
 /* ---------- move-a-player panel ---------- */
 let pkRedraw=null,bdFilter=null,bdHide=false;
-const bdPass=x=>{const b=bdOf(x);return(!bdFilter||b.includes(bdFilter))&&(!bdHide||!(b.includes("under")||b.includes("floor")))};
+const bdPass=x=>{const b=bdOf(x);return(!bdFilter||b.includes(bdFilter))&&(!bdHide||!(b.includes("bust")||b.includes("volatile")))};
 const mvMark=p=>(p.rank===p.base||!MOVES.some(m=>m[0]===p.id))?"":`<span class="mvmark ${p.rank<p.base?"up":"dn"}" title="Moved from #${p.base}">${p.rank<p.base?"▲":"▼"}${Math.abs(p.base-p.rank)}</span>`;
 const boardNote=()=>MOVES.length?`<div class="boardnote"><span>Your board: ${MOVES.length} player${MOVES.length>1?"s":""} moved</span><button class="linkbtn" data-resetboard>Reset to default</button></div>`:"";
 function afterMove(){render();if(pkRedraw)pkRedraw();redrawBio()}
@@ -921,20 +958,23 @@ function openPicker(num){
     const list=P.filter(x=>!tk.has(x.id)&&(pos==="ALL"||(pos==="NEED"?fitsSlot(x.pos,nd):pos==="FLEX"?x.pos!=="QB":x.pos===pos))&&matchQ(x,q)&&bdPass(x)).slice(0,60);
     $("#pkBoardNote").innerHTML=runAlert(num)+(q||bdFilter||bdHide||pos!=="ALL"?"":assistHtml(p))+boardNote();
     const single=["QB","RB","WR","TE"].includes(pos);let lastT=null;
-    $("#pkl").innerHTML=list.map(x=>{const div=single&&x.tier!==lastT?`<div class="tierdiv">${x.pos} Tier ${x.tier}</div>`:"";lastT=x.tier;return div+`<div class="prow"><div class="rk">${x.rank}${mvMark(x)}</div><div style="min-width:0"><div>${nameBtn(x,openBio===x.id)}${nd.includes(x.pos)?` <span class="chip" style="font-size:11px">fills ${x.pos}</span>`:""}</div><div class="meta">${esc(x.team)} · ${x.proj} proj ${projLbl()}${x.ts!=null&&x.pos!=="QB"?` · ${x.ts}% tgt share`:""} ${tierChip(x)}</div>${badgeRow(x)}${(()=>{const lc=linkChips(x,p.owner),lt=lastInTier(x,tk)&&x.tier<=8?`<span class="lnk lastt">⚠️ Last ${x.pos} in Tier ${x.tier}</span>`:"";return lc||lt?`<div class="bds">${lt}${lc}</div>`:""})()}</div><span class="rowbtns">${favBtn(x.id)}<button class="btn sm ghost mvbtn" data-move="${x.id}" aria-label="Move ${esc(x.name)} in the rankings" title="Move in rankings">⇅</button><button class="btn sm primary" data-take="${x.id}">Draft</button></span></div>`}).join("")||`<div class="empty">No players match.</div>`;
+    $("#pkl").innerHTML=list.map(x=>{const div=single&&x.tier!==lastT?`<div class="tierdiv">${x.pos} Tier ${x.tier}</div>`:"";lastT=x.tier;return div+`<div class="prow" data-row="${x.id}"><div class="rk">${x.rank}${mvMark(x)}</div><div style="min-width:0"><div>${nameBtn(x,openBio===x.id)}${nd.includes(x.pos)?` <span class="chip" style="font-size:11px">fills ${x.pos}</span>`:""}</div><div class="meta">${esc(x.team)} · ${x.proj} proj ${projLbl()}${x.ts!=null&&x.pos!=="QB"?` · ${x.ts}% tgt share`:""} ${tierChip(x)}</div>${badgeRow(x,2)}${(()=>{const lc=linkChips(x,p.owner),lt=lastInTier(x,tk)&&x.tier<=8?`<span class="lnk lastt">⚠️ Last ${x.pos} in Tier ${x.tier}</span>`:"";return lc||lt?`<div class="bds">${lt}${lc}</div>`:""})()}</div><span class="rowbtns">${favBtn(x.id)}<button class="btn sm ghost mvbtn" data-move="${x.id}" aria-label="Move ${esc(x.name)} in the rankings" title="Move in rankings">⇅</button><button class="btn sm primary" data-take="${x.id}">Draft</button></span></div>`}).join("")||`<div class="empty">No players match.</div>`;
   };
   $("#sheetHost").innerHTML=`<div class="scrim" id="scrim"><div class="sheet" role="dialog" aria-modal="true" aria-label="Make a pick">
     <div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start"><div><div class="eyebrow">Pick ${p.label} · No. ${p.num} overall</div><h2>${esc(tname(p.owner))}</h2><div class="muted" style="font-size:13px">Open spots: ${openNeeds(p.owner).join(" · ")||"bench"}</div></div><button class="btn sm" id="pkx">Close</button></div>
-    <div class="subtabs" role="tablist" id="pktabs" style="margin-top:12px"><button role="tab" data-pt="players" aria-selected="true">Players</button><button role="tab" data-pt="team" aria-selected="false">My team</button><button role="tab" data-pt="prev" aria-selected="false">Previous picks</button><button role="tab" data-pt="fav" aria-selected="false">♥ Favorites</button></div>
-    <div id="pkPlayers"><div style="display:grid;gap:8px;margin-top:10px"><input type="search" id="pkq" placeholder="Search players or NFL teams"><div class="poschips" id="pkpos"></div><div class="poschips bdchips" id="pkbd"></div></div>
-    <div id="pkBoardNote"></div><div id="pkl" style="margin-top:8px;border:1px solid var(--line);border-radius:14px;overflow:hidden"></div></div>
+    <div class="subtabs" role="tablist" id="pktabs" style="margin-top:12px"><button role="tab" data-pt="players" aria-selected="true">Players</button><button role="tab" data-pt="team" aria-selected="false">My team</button><button role="tab" data-pt="prev" aria-selected="false">Picks</button><button role="tab" data-pt="fav" aria-selected="false" aria-label="Favorites">♥</button></div>
+    <div id="pkPlayers"><div class="pkbar" style="margin-top:10px"><input type="search" id="pkq" placeholder="Search players or NFL teams"><button class="btn sm" id="pkFilterBtn" aria-expanded="false">Filter ▾</button></div>
+    <div id="pkFilter" class="pkfilter" hidden><div class="eyebrow">Position</div><div class="poschips" id="pkpos"></div><div class="eyebrow" style="margin-top:8px">Badges</div><div class="poschips bdchips" id="pkbd"></div></div>
+    <div id="pkBoardNote"></div><div id="pkl" style="margin-top:8px;border:1px solid var(--line);border-radius:14px;overflow:hidden"></div><div class="swipehint">Tap a player for his bio · swipe left for ♡ Favorite and ⇅ Move</div></div>
     <div id="pkTeam" hidden style="margin-top:8px;border:1px solid var(--line);border-radius:14px;overflow:hidden"></div>
     <div id="pkPrev" hidden style="margin-top:8px;border:1px solid var(--line);border-radius:14px;overflow:hidden;max-height:56vh;overflow:auto"></div>
     <div id="pkFav" hidden class="favbox" style="margin-top:8px"></div>
     <div class="actions" style="margin-top:12px"><button class="btn" id="pkauto">Let the AI pick</button><button class="btn ghost" data-trade="${p.num}">Trade this pick</button></div></div></div>`;
   const chips=$("#pkpos");const dc=()=>{chips.innerHTML=["ALL","NEED","FLEX",...POS].map(x=>`<button aria-pressed="${x===pos}" data-p="${x}">${x==="ALL"?"All":x==="NEED"?"Fills a need":x}</button>`).join("")};
-  chips.onclick=e=>{const b=e.target.closest("button[data-p]");if(b){pos=b.dataset.p;dc();draw()}};dc();
-  const bdc=()=>{$("#pkbd").innerHTML=[["safety","🛡️ Safety picks"],["breakout","💥 Breakouts"],["sleeper","💤 Sleepers"],["volume","⚙️ Volume"],["ceiling","🚀 High ceiling"],["consistent","🎯 Consistent"]].map(([k,l])=>`<button aria-pressed="${bdFilter===k}" data-bf="${k}">${l}</button>`).join("")+`<button aria-pressed="${bdHide}" data-bh="1">Hide 📉 🪫</button><button class="bdinfo" data-bguide aria-label="What do badges mean?">ⓘ</button>`};
+  chips.onclick=e=>{const b=e.target.closest("button[data-p]");if(b){pos=b.dataset.p;dc();bdc();draw()}};dc();
+  $("#pkFilterBtn").onclick=()=>{const f=$("#pkFilter");f.hidden=!f.hidden;$("#pkFilterBtn").setAttribute("aria-expanded",!f.hidden)};
+  const bdc=()=>{$("#pkbd").innerHTML=[["safety","🛡️ Safety picks"],["breakout","💥 Breakouts"],["sleeper","💤 Sleepers"],["volume","⚙️ Volume"],["ceiling","🚀 High ceiling"]].map(([k,l])=>`<button aria-pressed="${bdFilter===k}" data-bf="${k}">${l}</button>`).join("")+`<button aria-pressed="${bdHide}" data-bh="1">Hide 🚨 🎢</button><button class="bdinfo" data-bguide aria-label="What do badges mean?">ⓘ Guide</button>`;
+    const n=(pos!=="ALL"?1:0)+(bdFilter?1:0)+(bdHide?1:0);$("#pkFilterBtn").textContent=n?`Filter · ${n}`:"Filter ▾";$("#pkFilterBtn").classList.toggle("primary",!!n)};
   $("#pkbd").onclick=e=>{const b=e.target.closest("[data-bf]");if(b){bdFilter=bdFilter===b.dataset.bf?null:b.dataset.bf;bdc();draw();return}if(e.target.closest("[data-bh]")){bdHide=!bdHide;bdc();draw()}};bdc();draw();
   $("#pkTeam").innerHTML=myTeamHtml(p.owner);
   $("#pkPrev").dataset.upto=num;$("#pkPrev").innerHTML=prevPicksHtml(num);
@@ -946,9 +986,14 @@ function openPicker(num){
   $("#pkq").oninput=draw;$("#pkx").onclick=closeSheet;$("#scrim").onclick=e=>{if(e.target.id==="scrim")closeSheet()};
   $("#pkauto").onclick=()=>{delete S.sel[num];const pl=aiChoose(p.owner,p.num,p.round);S.sel[num]=pl.id;justPicked.add(num);persist();closeSheet();render()};
   $("#pkl").onclick=e=>{const bi=e.target.closest("[data-bio]");if(bi){openBioPage(bi.dataset.bio,{num});return}
+    const rw=e.target.closest("[data-row]");if(rw&&!e.target.closest("button")){if(rw.classList.contains("open")){rw.classList.remove("open");return}openBioPage(rw.dataset.row,{num});return}
     const b=e.target.closest("[data-take]");if(!b)return;S.sel[num]=b.dataset.take;justPicked.add(num);persist();closeSheet();render();
     const nx=nextOpen();if(nx&&!S.user.includes(nx.owner))toast("Pick is in. Tap “Sim to my pick” to continue.")};
   $("#pkBoardNote").onclick=e=>$("#pkl").onclick(e);
+  let sx=null,sy=null,srow=null;
+  $("#pkl").addEventListener("touchstart",e=>{const r=e.target.closest(".prow");if(!r)return;srow=r;sx=e.touches[0].clientX;sy=e.touches[0].clientY},{passive:true});
+  $("#pkl").addEventListener("touchend",e=>{if(!srow)return;const dx=e.changedTouches[0].clientX-sx,dy=e.changedTouches[0].clientY-sy;
+    if(Math.abs(dx)>40&&Math.abs(dx)>Math.abs(dy)*1.5){document.querySelectorAll("#pkl .prow.open").forEach(r=>{if(r!==srow)r.classList.remove("open")});srow.classList.toggle("open",dx<0)}srow=null},{passive:true});
 }
 const pv=n=>Math.round(1000*Math.exp(-0.021*(n-1)));
 function openTrade(fromNum){
@@ -1046,29 +1091,97 @@ async function saveMock(){
   $("#saveName").value="";
 }
 async function deleteMock(id){if(store.kind==="db"){try{await store.db.collection("data/users/"+store.uid+"/fmocks").doc(id).delete();return}catch(e){}}saved=saved.filter(s=>s.id!==id);saveLocal();renderSaved()}
+const gradeCache={};
+function savedGrade(sv){if(sv.id in gradeCache)return gradeCache[sv.id];const keep=S;let g=null;
+  try{S=Object.assign(FRESH(),JSON.parse(sv.state));applyBoard();if(S.user.length&&Object.keys(S.sel).length){const T=S.teams,str=Array.from({length:T},(_,i)=>teamStrength(i)),m=str.reduce((a,x)=>a+x.score,0)/T,sd=Math.sqrt(str.reduce((a,x)=>a+(x.score-m)**2,0)/T)||1;g=gradeOf((str[S.user[0]].score-m)/sd)}}catch(e){}
+  S=keep;applyBoard();return gradeCache[sv.id]=g}
 function renderSaved(){
   $("#storeNote").textContent=store.kind==="db"?"Saved to your account. Your folders follow you to any device where you open this page.":"Saved in this browser only. Open the page signed in to keep mocks across devices.";
   const folders=[...new Set(saved.map(s=>s.folder))].sort();$("#folderList").innerHTML=folders.map(f=>`<option value="${esc(f)}">`).join("");
   if(!saved.length){$("#savedList").innerHTML=`<div class="card empty">No saved mocks yet. Run a draft, name it, pick a folder, and save. Folders appear here.</div>`;return}
   $("#savedList").innerHTML=folders.map(f=>{const it=saved.filter(s=>s.folder===f).sort((a,b)=>b.savedAt.localeCompare(a.savedAt));
-    return`<section class="folder"><h3>${esc(f)} <span class="faint num" style="font-size:13px;font-weight:500">${it.length}</span></h3>${it.map(s=>`<div class="mockrow"><div style="min-width:0"><div class="t"><button data-view="${s.id}">${esc(s.name)}</button></div><div class="s">${esc(s.headline||"")} · ${new Date(s.savedAt).toLocaleDateString()}</div></div>
+    return`<section class="folder"><h3>${esc(f)} <span class="faint num" style="font-size:13px;font-weight:500">${it.length}</span></h3>${it.map(s=>`<div class="mockrow"><div style="min-width:0"><div class="t"><button data-view="${s.id}">${esc(s.name)}</button>${(g=>g?` <span class="grade g${g[0]}">${g}</span>`:"")(savedGrade(s))}</div><div class="s">${esc(s.headline||"")} · ${new Date(s.savedAt).toLocaleDateString()}</div></div>
       <div class="actions">${pendingDelete===s.id?`<button class="btn sm danger" data-delyes="${s.id}">Delete</button><button class="btn sm" data-delno="1">Keep</button>`:`<button class="btn sm primary" data-view="${s.id}">View board</button><button class="btn sm" data-load="${s.id}">Load</button><button class="btn sm ghost" data-del="${s.id}">Delete</button>`}</div></div>`).join("")}</section>`}).join("");
+}
+
+
+/* ---------- settings sheet ---------- */
+function openSettings(){const sc=$("#setScrim");sc.hidden=false;renderTeams();requestAnimationFrame(()=>sc.classList.add("open"))}
+function closeSettings(){const sc=$("#setScrim");sc.classList.remove("open");setTimeout(()=>{sc.hidden=true},200)}
+$("#openSettings").onclick=openSettings;$("#closeSettings").onclick=closeSettings;
+$("#setScrim").addEventListener("click",e=>{if(e.target.id==="setScrim")closeSettings()});
+
+/* ---------- stats table (Board + Top 125) ---------- */
+const sortState={};
+function statsTable(key,list){
+  const st=sortState[key]||(sortState[key]={k:key==="top"?"ppg":"rank",d:key==="top"?-1:1});
+  const v=(p,k)=>{const b=BADGES[p.id]||{};return k==="rank"?p.rank:k==="pr"?(b.pr??999):k==="ppg"?(p.g?p.ppg:-1):k==="p25"?(b.p25??-1):k==="proj"?p.proj:k==="name"?p.name.toLowerCase():0};
+  const L=list.slice().sort((a,b)=>{const x=v(a,st.k),y=v(b,st.k);return(x<y?-1:x>y?1:0)*st.d});
+  const th=(k,l,n)=>`<th class="${n?"n":""}" data-sort="${k}" data-tbl="${key}" aria-sort="${st.k===k?(st.d>0?"ascending":"descending"):"none"}">${l}</th>`;
+  return`<div class="swrap"><table class="stab"><thead><tr>${th("rank","Rank",1)}${th("name","Player")}${th("pr","Pos rank (PPG)",1)}${th("ppg","2026 PPR/G",1)}${th("p25","2025 PPR/G",1)}${th("proj","2027 proj",1)}</tr></thead><tbody>
+  ${L.map(p=>{const b=BADGES[p.id]||{};return`<tr data-row="${p.id}"><td class="n">${p.rank}</td><td class="pl">${posTag(p.pos)} <button class="linkbtn" data-bio="${p.id}" style="text-decoration:none;color:var(--ink);font-weight:600">${esc(p.name)}</button> <span class="faint">${esc(p.team)}</span></td><td class="n">${b.pr?p.pos+b.pr:"—"}</td><td class="n">${p.g?p.ppg.toFixed(1):"—"}<small>${p.g||0} g</small></td><td class="n">${b.p25!=null?b.p25.toFixed(1):"—"}</td><td class="n">${p.proj}</td></tr>`}).join("")}</tbody></table></div>
+  <p class="faint" style="font-size:12px;margin:8px 2px">Tap a column to sort. Pos rank ranks 2026 points per game among players with 4+ games.</p>`;
+}
+document.addEventListener("click",e=>{const t=e.target.closest("th[data-sort]");if(!t)return;const st=sortState[t.dataset.tbl];const k=t.dataset.sort;
+  if(st.k===k)st.d*=-1;else{st.k=k;st.d=(k==="rank"||k==="pr"||k==="name")?1:-1}t.dataset.tbl==="top"?renderTop():renderBoardTab()});
+
+/* ---------- Board tab ---------- */
+let bView="list",bPos="ALL";
+const posFilter=(p,f)=>f==="ALL"||(f==="FAV"?FAVS.has(p.id):p.pos===f);
+const chipsHtml=(cur,attr)=>["ALL","QB","RB","WR","TE","FAV"].map(x=>`<button aria-pressed="${x===cur}" ${attr}="${x}">${x==="ALL"?"All":x==="FAV"?"♥ Favorites":x}</button>`).join("");
+function renderBoardTab(){
+  $("#bPos").innerHTML=chipsHtml(bPos,"data-bp");
+  document.querySelectorAll("#bSeg button").forEach(b=>b.setAttribute("aria-selected",b.dataset.v===bView));
+  const q=($("#bQ").value||"").toLowerCase(),L=P.filter(p=>posFilter(p,bPos)&&matchQ(p,q));
+  if(!L.length){$("#boardList").innerHTML=`<div class="empty">${bPos==="FAV"?"No favorites yet. Tap ♡ next to any player to save him.":"No players match."}</div>`;return}
+  if(bView==="stats"){$("#boardList").innerHTML=statsTable("board",L);return}
+  $("#boardList").innerHTML=`<div class="favbox">${L.map(p=>`<div class="prow" data-row="${p.id}"><div class="rk">${p.rank}</div><div style="min-width:0"><div>${nameBtn(p,false)}</div><div class="meta">${esc(p.team)} · ${p.proj} proj ${projLbl()} · ${p.pos}${p.prank} ${tierChip(p)}</div>${badgeRow(p,2)}</div><span class="rowbtns">${favBtn(p.id)}</span></div>`).join("")}</div>`;
+}
+$("#bSeg").onclick=e=>{const b=e.target.closest("[data-v]");if(b){bView=b.dataset.v;renderBoardTab()}};
+$("#bPos").onclick=e=>{const b=e.target.closest("[data-bp]");if(b){bPos=b.dataset.bp;renderBoardTab()}};
+$("#bQ").oninput=renderBoardTab;
+
+/* ---------- Top 125 tab ---------- */
+let tView="list",tPos="ALL";
+function renderTop(){
+  $("#topSub").textContent=`${scoringName()} · ${S.teams} teams · stats through Week __WEEK__ · updated __DATE__`;
+  $("#tPos").innerHTML=chipsHtml(tPos,"data-tp");
+  document.querySelectorAll("#tSeg button").forEach(b=>b.setAttribute("aria-selected",b.dataset.v===tView));
+  const L=P.slice(0,125).filter(p=>posFilter(p,tPos));
+  if(!L.length){$("#topList").innerHTML=`<div class="empty">${tPos==="FAV"?"No favorites in the Top 125 yet. Tap ♡ to save a player.":"No players match."}</div>`;return}
+  if(tView==="stats"){$("#topList").innerHTML=statsTable("top",L);return}
+  $("#topList").innerHTML=`<ol class="t125">${L.map(p=>`<li data-row="${p.id}"><span class="n num">${p.rank}</span>${posTag(p.pos)}<button class="nm" data-bio="${p.id}">${esc(p.name)}</button><span class="tm">${esc(p.team)}</span>${favBtn(p.id)}</li>`).join("")}</ol>`;
+}
+$("#tSeg").onclick=e=>{const b=e.target.closest("[data-v]");if(b){tView=b.dataset.v;renderTop()}};
+$("#tPos").onclick=e=>{const b=e.target.closest("[data-tp]");if(b){tPos=b.dataset.tp;renderTop()}};
+
+/* ---------- My mocks: current mock card ---------- */
+function myResult(){
+  if(!S.user.length)return null;const T=S.teams,str=Array.from({length:T},(_,i)=>teamStrength(i)),m=str.reduce((a,x)=>a+x.score,0)/T,sd=Math.sqrt(str.reduce((a,x)=>a+(x.score-m)**2,0)/T)||1;
+  const u=S.user[0],sim=simSeason(T,str,400);return{grade:gradeOf((str[u].score-m)/sd),po:sim[u].po,w:sim[u].w};
+}
+function renderMocks(){
+  const made=Object.keys(S.sel).length,tot=S.teams*S.rounds,r=made?myResult():null;
+  $("#curMock").innerHTML=`<div class="card curmock"><div class="eyebrow">Current mock</div>
+    <div class="cmtop"><b>${S.teams} teams · ${S.user.length?"pick "+(S.user[0]+1):"no slot"} · ${S.rounds} rounds · ${scoringName()}${S.sf?" · Superflex":""}</b>${r?`<span class="grade g${r.grade[0]}">${r.grade}</span>`:""}</div>
+    <div class="muted" style="font-size:13px">${made?`${made} of ${tot} picks made${r?` · ${Math.round(r.po*100)}% playoff odds · ${r.w.toFixed(1)} avg wins`:""}`:"No picks yet. Head to the Draft tab to start."}</div>
+    <div class="actions" style="margin-top:10px"><button class="btn" data-grades>📊 Grades &amp; standings</button><button class="btn" data-boardview>Board view</button></div></div>`;
 }
 
 /* ---------- util + events ---------- */
 let toastT;function toast(m){$("#toastHost").innerHTML=`<div class="toast" role="status">${esc(m)}</div>`;clearTimeout(toastT);toastT=setTimeout(()=>$("#toastHost").innerHTML="",2600)}
 $("#tabs").onclick=e=>{const b=e.target.closest("[data-tab]");if(!b)return;document.querySelectorAll("#tabs button").forEach(x=>x.setAttribute("aria-selected",x===b));
-  ["mock","teams","players","favs","saved"].forEach(t=>$("#p-"+t).hidden=t!==b.dataset.tab);if(b.dataset.tab==="favs")renderFavs();
-  if(b.dataset.tab==="teams")renderTeams();if(b.dataset.tab==="players")renderPlayers();if(b.dataset.tab==="saved")renderSaved();try{localStorage.setItem("dr27-tab",b.dataset.tab)}catch(e){}};
+  ["mock","board","top","mocks"].forEach(t=>$("#p-"+t).hidden=t!==b.dataset.tab);window.scrollTo(0,0);
+  if(b.dataset.tab==="board")renderBoardTab();if(b.dataset.tab==="top")renderTop();if(b.dataset.tab==="mocks"){renderMocks();renderSaved()}try{localStorage.setItem("dr27-tab",b.dataset.tab)}catch(e){}};
 $("#simUser").onclick=()=>{if(!S.user.length){toast("Pick your draft slot first, or use Sim full draft.");return}simulate("user")};
 $("#simAll").onclick=()=>simulate("all");
 $("#simOne").onclick=()=>{const p=nextOpen();if(p&&S.user.includes(p.owner)){openPicker(p.num);return}simulate("one")};
 $("#clearPicks").onclick=()=>{S.sel={};persist();render();toast("Picks cleared. Trades kept.")};
-$("#boardView").onclick=()=>openBoardView(JSON.parse(JSON.stringify(S)),{eyebrow:"Current mock",title:"Draft board"});
+
 $("#needW").oninput=e=>{S.needW=+e.target.value;persist();renderControls()};
 $("#rnd").oninput=e=>{S.chaos=+e.target.value;persist();renderControls()};
 $("#nTeams").onchange=e=>{S.teams=+e.target.value;S.sel={};S.trades={};S.log=[];S.user=S.user.filter(i=>i<S.teams);if(!S.user.length)S.user=[0];persist();render();toast("League size changed. Picks and trades cleared.")};
-$("#gradesBtn").onclick=openGrades;
+
 $("#scoring").onchange=e=>{S.scoring=e.target.value;applyBoard();persist();render();toast(`Scoring set to ${scoringName()}. Projections and rankings updated.`)};
 $("#sfSel").onchange=e=>{S.sf=e.target.value==="1";applyBoard();persist();render();toast(S.sf?"Superflex on: QBs move up and every team gets a Superflex spot.":"Superflex off.")};
 $("#nRounds").onchange=e=>{S.rounds=+e.target.value;const max=S.teams*S.rounds;for(const k in S.sel)if(+k>max)delete S.sel[k];for(const k in S.trades)if(+k>max)delete S.trades[k];persist();render()};
@@ -1095,6 +1208,10 @@ document.addEventListener("click",e=>{
   const cmp=e.target.closest("[data-compare]");if(cmp){openCompareChooser(cmp.dataset.compare);return}
   if(e.target.closest("[data-cmpback]")){if(bioCtx){delete bioCtx.cmp;redrawBio()}return}
   const fv=e.target.closest("[data-fav]");if(fv){toggleFav(fv.dataset.fav);return}
+  if(e.target.closest("[data-boardview]")){openBoardView(JSON.parse(JSON.stringify(S)),{eyebrow:"Current mock",title:"Draft board"});return}
+  if(e.target.closest("[data-grades]")){openGrades();return}
+  const brow=e.target.closest("#boardList [data-row], #topList [data-row]");if(brow&&!e.target.closest("button")){openBioPage(brow.dataset.row,{});return}
+  const bbi=e.target.closest("#boardList [data-bio], #topList [data-bio]");if(bbi){openBioPage(bbi.dataset.bio,{});return}
   const fl=e.target.closest("#favList [data-bio]");if(fl){openBioPage(fl.dataset.bio,{});return}
   const mv=e.target.closest("[data-move]");if(mv){openMover(mv.dataset.move);return}
   const rb=e.target.closest("[data-resetboard]");if(rb){resetBoard();toast("Rankings reset to the default board.");afterMove();return}
