@@ -223,6 +223,13 @@ table.grid td.r .dir{display:block;font-size:10px;font-weight:600;color:var(--in
 .pickcard b{font:800 20px var(--f-display);font-variant-numeric:tabular-nums}.pickcard .pcteam{font-size:16px;text-transform:uppercase;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .pickcard small{font-size:11px;color:var(--ink-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .pickcard.me .pct{border-color:var(--accent);background:var(--accent-soft)}.pickcard.me b{color:var(--ink)}
+.slip{position:relative;overflow:hidden}
+.slip .sweep{position:absolute;top:0;bottom:0;left:-40%;width:35%;background:rgba(22,192,96,.22);transform:skewX(-20deg);pointer-events:none;opacity:0;z-index:1}
+@media (prefers-reduced-motion:no-preference){
+.slip.fx{animation:pkbd 1.6s ease-out}.slip.fx .sweep{animation:pksw .9s ease-out}.slip.fx .player .pos{animation:pktg 1.4s ease-out}
+@keyframes pksw{0%{left:-40%;opacity:1}100%{left:110%;opacity:1}}
+@keyframes pkbd{0%,40%{border-color:#16C060;background:#F1FBF4}100%{}}
+@keyframes pktg{0%,50%{box-shadow:0 0 0 3px rgba(22,192,96,.8)}100%{box-shadow:0 0 0 0 rgba(22,192,96,0)}}}
 .ticker{border:1.5px solid var(--accent);background:var(--accent-soft);border-radius:16px;padding:10px 12px;margin:10px 0 2px;display:grid;gap:4px;box-shadow:0 4px 14px rgba(0,0,0,.08)}
 .dock{position:sticky;top:calc(6px + env(safe-area-inset-top,0px));z-index:6}
 .dock::before{content:"";position:absolute;left:-20px;right:-20px;bottom:100%;height:calc(6px + env(safe-area-inset-top,0px));background:var(--bg);opacity:0;pointer-events:none}.dock.stuck::before{opacity:1}
@@ -660,13 +667,14 @@ function renderChips(host,cur,cb,extra=[]){host.innerHTML=["ALL",...extra,...POS
 
 /* ---------- board ---------- */
 function renderBoard(){
-  const all=picks(),clock=nextOpen();let h="";
+  const all=picks(),clock=nextOpen(),fx=justPicked.size<=2;let h="";
   for(let r=1;r<=S.rounds;r++){
     h+=`<div class="roundhead"><h2>Round ${r}</h2><span class="faint num" style="font-size:12px">${r%2?"→":"←"} Picks ${(r-1)*S.teams+1}–${r*S.teams}</span></div><div class="board">`;
     all.filter(p=>p.round===r).forEach(p=>{
       const pl=BYID[S.sel[p.num]],mine=S.user.includes(p.owner),isC=clock&&clock.num===p.num;
       const nd=openNeeds(p.owner);
-      h+=`<div class="slip${isC?" clock":""}${mine?" mine":""}${justPicked.has(p.num)?" new":""}">
+      const nw=justPicked.has(p.num)&&!!pl;
+      h+=`<div class="slip${isC?" clock":""}${mine?" mine":""}${nw?(fx?" new fx":" new"):""}">${nw&&fx?'<div class="sweep" aria-hidden="true"></div>':""}
         <div class="no">${p.label}<small>#${p.num}</small></div>
         <div style="min-width:0"><div class="team">${esc(tname(p.owner))} <span class="via">${p.via}</span></div>
         ${pl?`<div class="player">${posTag(pl.pos)}<b>${esc(pl.name)}</b><span class="sub">${esc(pl.team)} · ${pl.proj} proj ${projLbl()}</span>${valueTag(pl,p.num)}</div>`
