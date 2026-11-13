@@ -184,6 +184,24 @@ details.more>summary::before{content:"▸ "} details.more[open]>summary::before{
 .bpact{position:fixed;left:0;right:0;bottom:0;display:flex;gap:8px;justify-content:center;padding:12px max(16px,env(safe-area-inset-right,0px)) calc(14px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));background:var(--bg);border-top:1px solid var(--line)}
 .bpact .btn{padding:11px 18px;font-size:15px}.bpact .bpdraft{flex:1;max-width:460px}
 .gdl{display:grid;gap:10px}.gdl div{display:grid;grid-template-columns:128px 1fr;gap:8px;align-items:start;font-size:12.5px;color:var(--ink-2)}.gdl .bd{justify-self:start}
+.tierchip{display:inline-block;font:700 10.5px var(--f-mono);color:var(--ink-2);border:1px solid var(--line);border-radius:999px;padding:0 6px;margin-left:2px;vertical-align:1px}
+.tierdiv{font-family:var(--f-display);font-weight:700;font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:#1F6FA8;background:var(--accent-soft);padding:5px 12px;border-bottom:1px solid var(--line)}
+.lnk{font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px;white-space:nowrap;background:#FFF6CC;color:#7A5C00}.lnk.lastt{background:#FDECEC;color:#B42318}
+.runalert{font-size:13px;padding:8px 12px;margin:8px 0;border-radius:12px;background:#FFF6CC;color:#5C4500}
+.assist{border:1.5px solid var(--accent);border-radius:16px;padding:10px 12px;margin:10px 0 4px;background:linear-gradient(180deg,var(--accent-soft),var(--bg) 70%)}
+.asl{display:grid;gap:8px;margin-top:6px}@media (min-width:720px){.asl{grid-template-columns:repeat(3,1fr)}}
+.ascard{background:var(--bg);border:1px solid var(--line);border-radius:14px;padding:9px 11px;display:grid;gap:4px;align-content:start}
+.ascard .btn{justify-self:start;margin-top:2px}.aswhy{display:flex;flex-wrap:wrap;gap:4px}.aswhy span{font-size:11.5px;color:var(--ink-2);background:var(--surface-2);border-radius:8px;padding:1px 7px}
+.cmpt{width:100%;border-collapse:collapse;font-size:13px}.cmpt th,.cmpt td{padding:8px 6px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+.cmpt thead th{border-bottom:2px solid var(--line)}.cmpt tbody th{color:var(--ink-3);font-weight:600;width:34%}.cmpt td.win{color:#1F6FA8;font-weight:800}
+.cmpn{font-family:var(--f-display);font-weight:800;font-size:18px;text-transform:uppercase;line-height:1.05;margin-top:4px}
+.cmpl{display:grid;max-height:50vh;overflow:auto;border:1px solid var(--line);border-radius:14px}
+.cmprow{display:flex;gap:8px;align-items:center;text-align:left;padding:9px 12px;border:0;border-bottom:1px solid var(--line);background:var(--bg);color:var(--ink);font:inherit;cursor:pointer}.cmprow:last-child{border-bottom:0}
+.gwrap{overflow-x:auto;border:1px solid var(--line);border-radius:16px}
+.gtab{width:100%;border-collapse:collapse;font-size:13px;min-width:460px}.gtab th{font:600 11px var(--f-display);letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);text-align:left;padding:9px 10px;border-bottom:1px solid var(--line)}
+.gtab td{padding:8px 10px;border-bottom:1px solid var(--line)}.gtab tr:last-child td{border-bottom:0}.gtab tr.me td{background:var(--accent-soft)}
+.grade{display:inline-block;min-width:34px;text-align:center;font:800 15px var(--f-display);border-radius:8px;padding:2px 6px;color:#fff}.grade.gA{background:#16A34A}.grade.gB{background:#4B9CD3}.grade.gC{background:#C9A227}.grade.gD,.grade.gF{background:#E5484D}
+.bpact .mvbtn2{padding:11px 14px}
 .rowbtns{display:flex;gap:6px;align-items:center;flex-shrink:0}
 .mvbtn{min-width:34px;padding-inline:8px;font-size:15px;line-height:1}
 .mvmark{display:block;font-size:10px;font-weight:700;line-height:1.1;margin-top:2px}.mvmark.up{color:#16a34a}.mvmark.dn{color:#dc2626}
@@ -243,7 +261,7 @@ table.grid td.r{font-family:var(--f-display);font-weight:800;font-size:15px;colo
 <div class="wrap">
   <header class="mast">
     <div>
-      <div class="eyebrow">2027 Fantasy Redraft · Full PPR · QB · RB · 2 WR · TE · 2 FLEX</div>
+      <div class="eyebrow" id="leagueLine">2027 Fantasy Redraft · Full PPR · QB · RB · 2 WR · TE · 2 FLEX</div>
       <h1>Draft Room <span>’27</span></h1>
       <p>Mock your 2027 fantasy draft: snake order, pick trades, drafter strategies you can change, and bios with target share for every pass catcher. Rankings come from this season’s production, last season’s, age and role.</p>
     </div>
@@ -267,6 +285,7 @@ table.grid td.r{font-family:var(--f-display);font-weight:800;font-size:15px;colo
             <button class="btn" id="simOne">Next pick</button>
             <button class="btn" id="clearPicks">Clear picks</button>
             <button class="btn" id="boardView">Full board view</button>
+            <button class="btn" id="gradesBtn">📊 Grades &amp; standings</button>
           </div>
           <div>
             <div class="eyebrow" style="margin-bottom:6px">Your draft slot <span class="faint" style="letter-spacing:0;text-transform:none;font-family:var(--f-body)">· pick one or more teams to control</span></div>
@@ -275,6 +294,12 @@ table.grid td.r{font-family:var(--f-display);font-weight:800;font-size:15px;colo
           <div class="ctl-row">
             <label class="field" for="nTeams">League size
               <select id="nTeams"><option>8</option><option>10</option><option>12</option><option>14</option><option>16</option></select>
+            </label>
+            <label class="field" for="scoring">Scoring
+              <select id="scoring"><option value="ppr">Full PPR</option><option value="half">Half PPR</option><option value="std">Standard</option></select>
+            </label>
+            <label class="field" for="sfSel">Superflex
+              <select id="sfSel"><option value="0">Off</option><option value="1">On (adds a QB/RB/WR/TE spot)</option></select>
             </label>
             <label class="field" for="nRounds">Rounds
               <select id="nRounds"><option>10</option><option>12</option><option>14</option><option>15</option><option>16</option><option>18</option></select>
@@ -365,27 +390,39 @@ const POS=["QB","RB","WR","TE"];
 const P=RAW.map(a=>({id:a[0],name:a[1],pos:a[2],team:a[3],age:a[4],ht:a[5],wt:a[6],college:a[7],draft:a[8],g:a[9],ppr:a[10],ppg:a[11],line:a[12],ts:a[13],snap:a[14],prev:a[15],proj:a[16],pts:a[17],rank:a[18],prank:a[19],note:a[20],str:a[21],t:a[22],exp:a[23]}));
 const BYID=Object.fromEntries(P.map(p=>[p.id,p]));
 /* ---------- my board: rank moves made while drafting ---------- */
-const BASE=P.map(p=>p.id);P.forEach(p=>p.base=p.rank);
+const BASE=P.map(p=>p.id);P.forEach(p=>{p.base=p.rank;p.prank0=p.prank;p.proj0=p.proj;p.pts0=p.pts});
+const REPL_RPG={QB:0,RB:2.5,WR:4,TE:3.5};
+const recPG=p=>{const b=BADGES[p.id];return b&&b.rpg!=null?b.rpg:({QB:0,RB:2,WR:3.5,TE:3})[p.pos]};
+const pprVal=()=>({ppr:1,half:.5,std:0})[(typeof S!=="undefined"&&S.scoring)||"ppr"];
+function settingsDelta(p){const l=1-pprVal();let d=-.6*l*(recPG(p)-REPL_RPG[p.pos]);if(S.sf&&p.pos==="QB")d+=2+3.5*Math.exp(-(p.prank0-1)/12);return d}
+const TGAP={QB:2.5,RB:1.8,WR:1.6,TE:1.4};
 let MOVES=[];try{MOVES=JSON.parse(localStorage.getItem("dr27-myboard")||"[]").filter(m=>BYID[m[0]])}catch(e){}
 function applyBoard(){
+  const l=1-pprVal();
+  P.forEach(p=>{p.proj=+(p.proj0-l*recPG(p)).toFixed(1);p.pts=Math.round(p.pts0*(p.proj0?p.proj/p.proj0:1))});
   const ord=BASE.slice();
+  if(S.scoring!=="ppr"||S.sf){const sc={};P.forEach(p=>{sc[p.id]=14*Math.exp(-(p.base-1)/55)+settingsDelta(p)});ord.sort((a,b)=>sc[b]-sc[a])}
   for(const [id,r] of MOVES){const i=ord.indexOf(id);if(i<0)continue;ord.splice(i,1);ord.splice(Math.max(0,Math.min(ord.length,r-1)),0,id)}
   const ix=Object.fromEntries(ord.map((id,i)=>[id,i]));P.sort((a,b)=>ix[a.id]-ix[b.id]);
   const c={};P.forEach((p,i)=>{p.rank=i+1;c[p.pos]=(c[p.pos]||0)+1;p.prank=c[p.pos]});
+  const tc={},cm={},top={};
+  P.forEach(p=>{const k=p.pos;if(!tc[k]){tc[k]=1;top[k]=cm[k]=p.proj;p.tier=1;return}cm[k]=Math.min(cm[k],p.proj);if(top[k]-cm[k]>=TGAP[k]){tc[k]++;top[k]=cm[k]}p.tier=tc[k]});
 }
 function saveMoves(){try{localStorage.setItem("dr27-myboard",JSON.stringify(MOVES))}catch(e){}}
 function setRank(id,r){MOVES=MOVES.filter(m=>m[0]!==id);if(r!==BYID[id].base||MOVES.length)MOVES.push([id,r]);saveMoves();applyBoard()}
 function resetPlayer(id){MOVES=MOVES.filter(m=>m[0]!==id);saveMoves();applyBoard()}
 function resetBoard(){MOVES=[];saveMoves();applyBoard()}
-applyBoard();
-const LINEUP=["QB","RB","WR","WR","TE","FLEX","FLEX"];
+const LINEUP0=["QB","RB","WR","WR","TE","FLEX","FLEX"];
+const curLineup=()=>S.sf?[...LINEUP0,"SF"]:LINEUP0;
+const fitsSlot=(pos,nd)=>nd.includes(pos)||(pos!=="QB"&&nd.includes("FLEX"))||nd.includes("SF");
 const STRATS={bal:"Balanced",zero:"Zero RB",hero:"Hero RB",robust:"Robust RB",wr:"WR heavy",te:"Elite TE",eqb:"Early QB",lqb:"Late QB"};
 const STRAT_DESC={bal:"Follows the rankings and fills open lineup spots.",zero:"Avoids RBs in Rounds 1–5, loads up on WRs.",hero:"One RB early, then no RBs until Round 6.",robust:"Takes RBs heavily in Rounds 1–4.",wr:"Leans WR in the first six rounds.",te:"Grabs a top TE in Rounds 1–3.",eqb:"Takes a QB in Rounds 2–4.",lqb:"Waits on QB until Round 9 or later."};
 
 /* ---------- state ---------- */
-const FRESH=()=>({v:1,teams:16,rounds:15,names:[],strat:[],user:[0],needW:55,chaos:30,trades:{},sel:{},log:[]});
+const FRESH=()=>({v:1,scoring:"ppr",sf:false,teams:16,rounds:15,names:[],strat:[],user:[0],needW:55,chaos:30,trades:{},sel:{},log:[]});
 let S=FRESH();
 try{const r=localStorage.getItem("dr27-current");if(r)S=Object.assign(FRESH(),JSON.parse(r))}catch(e){}
+applyBoard();
 const persist=()=>{try{localStorage.setItem("dr27-current",JSON.stringify(S))}catch(e){}};
 const tname=i=>S.names[i]||(S.user.includes(i)?`You (Team ${i+1})`:`Team ${i+1}`);
 const tshort=i=>S.names[i]?S.names[i].slice(0,10):(S.user.includes(i)?"You":`T${i+1}`);
@@ -408,9 +445,9 @@ function rosterOf(team){
 }
 function lineupOf(team){
   const pl=rosterOf(team).map(x=>x.p).sort((a,b)=>b.proj-a.proj);
-  const used=new Set(),slots=LINEUP.map(s=>({s,p:null}));
+  const used=new Set(),slots=curLineup().map(s=>({s,p:null}));
   for(const sl of slots){
-    const c=pl.find(p=>!used.has(p.id)&&(sl.s==="FLEX"?p.pos!=="QB":p.pos===sl.s));
+    const c=pl.find(p=>!used.has(p.id)&&(sl.s==="FLEX"?p.pos!=="QB":sl.s==="SF"?true:p.pos===sl.s));
     if(c){sl.p=c;used.add(c.id)}
   }
   return {slots,bench:pl.filter(p=>!used.has(p.id))};
@@ -435,10 +472,10 @@ function scorePl(team,pl,num,round,c,needs){
   const st=strat(team);
   if(st==="hero"&&pl.pos==="RB"){if(c.RB>=1&&round<6)v*=.3;if(c.RB===0&&round<=2)v*=1.3}
   v*=stratMult(st,pl.pos,round);
-  const early=(pl.pos==="QB"||pl.pos==="TE")&&round<5;
-  const needSlot=needs.includes(pl.pos)&&!early,flexOk=pl.pos!=="QB"&&needs.includes("FLEX");
+  const early=((pl.pos==="QB"&&!S.sf)||pl.pos==="TE")&&round<5;
+  const needSlot=needs.includes(pl.pos)&&!early,flexOk=(pl.pos!=="QB"&&needs.includes("FLEX"))||needs.includes("SF");
   v*=1+w*(needSlot?.35:flexOk?.12:early?0:-.15);
-  if(pl.pos==="QB"){if(c.QB>=1)v*=round>=11?.5:.12;if(c.QB>=2)v*=.03}
+  if(pl.pos==="QB"){if(S.sf){if(c.QB>=2)v*=round>=11?.5:.12;if(c.QB>=3)v*=.03}else{if(c.QB>=1)v*=round>=11?.5:.12;if(c.QB>=2)v*=.03}}
   if(pl.pos==="TE"){if(c.TE>=1)v*=round>=10?.55:.2;if(c.TE>=2)v*=.03}
   if(pl.pos==="RB"&&c.RB>=6)v*=.5; if(pl.pos==="WR"&&c.WR>=7)v*=.5;
   if(pl.rank-num>36)v*=.55;
@@ -506,7 +543,7 @@ function renderBoard(){
       h+=`<div class="slip${isC?" clock":""}${mine?" mine":""}${justPicked.has(p.num)?" new":""}">
         <div class="no">${p.label}<small>#${p.num}</small></div>
         <div style="min-width:0"><div class="team">${esc(tname(p.owner))} <span class="via">${p.via}</span></div>
-        ${pl?`<div class="player">${posTag(pl.pos)}<b>${esc(pl.name)}</b><span class="sub">${esc(pl.team)} · ${pl.proj} proj PPR/G</span>${valueTag(pl,p.num)}</div>`
+        ${pl?`<div class="player">${posTag(pl.pos)}<b>${esc(pl.name)}</b><span class="sub">${esc(pl.team)} · ${pl.proj} proj ${projLbl()}</span>${valueTag(pl,p.num)}</div>`
           :isC?`<div class="clocktag">On the clock</div><div class="why">Open spots: ${nd.length?nd.join(" · "):"bench"}</div>`
           :`<div class="why faint">Open spots: ${nd.length?nd.join(" · "):"bench"}</div>`}</div>
         <div class="btns"><button class="btn sm" data-pick="${p.num}">${pl?"Change":"Pick"}</button>${pl?`<button class="btn sm ghost" data-clear="${p.num}">Clear</button>`:`<button class="btn sm ghost" data-trade="${p.num}">Trade</button>`}</div></div>`;
@@ -550,14 +587,15 @@ function renderAvail(){
   const tk=takenSet(),q=$("#availSearch").value.trim().toLowerCase(),clock=nextOpen();
   const list=P.filter(p=>!tk.has(p.id)&&(availPos==="ALL"||(availPos==="FLEX"?p.pos!=="QB":p.pos===availPos))&&matchQ(p,q)).slice(0,150);
   $("#availCount").textContent=`${P.length-tk.size} left`;
-  $("#availHint").innerHTML=boardNote()+(clock?`<div class="hint"><b>${esc(tname(clock.owner))}</b> at ${clock.label}. Tap a name for his bio, or “Draft”.</div>`:`<div class="hint">Every pick is in. Tap “Change” on any slot to swap a player.</div>`);
+  $("#availHint").innerHTML=(clock?runAlert(clock.num):"")+boardNote()+(clock?`<div class="hint"><b>${esc(tname(clock.owner))}</b> at ${clock.label}. Tap a name for his bio, or “Draft”.</div>`:`<div class="hint">Every pick is in. Tap “Change” on any slot to swap a player.</div>`);
   $("#availList").innerHTML=list.length?list.map(p=>`<div class="prow"><div class="rk">${p.rank}${mvMark(p)}</div>
-    <div style="min-width:0"><div>${nameBtn(p,availBio===p.id)}</div><div class="meta">${esc(p.team)} · ${p.proj} proj PPR/G${p.ts!=null&&p.pos!=="QB"?` · ${p.ts}% tgt share`:""}</div>${badgeRow(p)}</div>
+    <div style="min-width:0"><div>${nameBtn(p,availBio===p.id)}</div><div class="meta">${esc(p.team)} · ${p.proj} proj ${projLbl()}${p.ts!=null&&p.pos!=="QB"?` · ${p.ts}% tgt share`:""} ${tierChip(p)}</div>${badgeRow(p)}</div>
     <span class="rowbtns"><button class="btn sm ghost mvbtn" data-move="${p.id}" aria-label="Move ${esc(p.name)} in the rankings" title="Move in rankings">⇅</button><button class="btn sm" data-draft="${p.id}" ${clock?"":"disabled"}>Draft</button></span></div>`).join(""):`<div class="empty">No players match.</div>`;
 }
 function renderUserTeams(){$("#userTeams").innerHTML=Array.from({length:S.teams},(_,i)=>`<button aria-pressed="${S.user.includes(i)}" data-ut="${i}">${i+1}${S.names[i]?" · "+esc(S.names[i].slice(0,8)):""}</button>`).join("")}
 function renderControls(){
-  $("#nTeams").value=S.teams;$("#nRounds").value=S.rounds;$("#needW").value=S.needW;$("#rnd").value=S.chaos;
+  $("#nTeams").value=S.teams;$("#nRounds").value=S.rounds;$("#scoring").value=S.scoring;$("#sfSel").value=S.sf?"1":"0";
+  $("#leagueLine").textContent=`2027 Fantasy Redraft · ${scoringName()} · QB · RB · 2 WR · TE · 2 FLEX${S.sf?" · Superflex":""} · ${S.teams} teams`;$("#needW").value=S.needW;$("#rnd").value=S.chaos;
   $("#needWLbl").textContent=S.needW<35?"Rankings":S.needW>70?"Needs":"Balanced";
   $("#rndLbl").textContent=S.chaos<25?"Low":S.chaos>65?"High":"Medium";
   $("#tradeLog").innerHTML=S.log.length?S.log.map(l=>"• "+esc(l)).join("<br>"):"No trades yet.";
@@ -635,29 +673,30 @@ function bioPageHtml(p,ctx){
   const B=BADGES[p.id]||{b:[],w:{}},clock=ctx.num?picks().find(x=>x.num===ctx.num):nextOpen(),team=clock?clock.owner:null;
   const taken=takenSet(ctx.num||undefined).has(p.id);
   let fit="";if(team!=null&&!taken){const nd=openNeeds(team),who=S.user.includes(team)?"your":esc(tname(team))+"’s";
-    fit=nd.includes(p.pos)?`<div class="bfit">Fills ${who} open ${p.pos} spot.</div>`:(p.pos!=="QB"&&nd.includes("FLEX"))?`<div class="bfit">Fits ${who} open FLEX spot.</div>`:`<div class="bfit bench">Would be a bench pick for ${S.user.includes(team)?"you":esc(tname(team))}.</div>`}
+    fit=nd.includes(p.pos)?`<div class="bfit">Fills ${who} open ${p.pos} spot.</div>`:(p.pos!=="QB"&&nd.includes("FLEX"))?`<div class="bfit">Fits ${who} open FLEX spot.</div>`:nd.includes("SF")?`<div class="bfit">Fits ${who} open Superflex spot.</div>`:`<div class="bfit bench">Would be a bench pick for ${S.user.includes(team)?"you":esc(tname(team))}.</div>`}
   const tr=p.t==="up"?`<span class="chip trend-up">▲ Up from 2025</span>`:p.t==="down"?`<span class="chip trend-down">▼ Down from 2025</span>`:"";
   const posN={QB:"QBs",RB:"RBs",WR:"WRs",TE:"TEs"}[p.pos];
   const t3=p.pos!=="QB"&&p.ts!=null?`<div class="tile"><div class="k">Target share</div><div class="v">${p.ts}%</div><div class="s">${B.tr?ordn(B.tr)+" among "+posN:"of team targets"}</div></div>`:`<div class="tile"><div class="k">2026 total</div><div class="v">${p.g?p.ppr:"—"}</div><div class="s">PPR points</div></div>`;
   const t4=`<div class="tile"><div class="k">Snaps</div><div class="v">${p.snap!=null?p.snap+"%":"—"}</div><div class="s">of offensive snaps</div></div>`;
   return`<div class="bpbar"><button class="linkbtn bpback" data-bioclose>‹ Back</button>${clock?`<span class="bpclk num">${S.user.includes(clock.owner)?"You":esc(tshort(clock.owner))} · Pick ${clock.label}</span>`:""}</div>
   <div class="bpwrap">
-    <div class="bptop">${posTag(p.pos)}<span class="chip num">Overall #${p.rank}</span><span class="chip num">${p.pos}${p.prank}</span>${tr}</div>
+    <div class="bptop">${posTag(p.pos)}<span class="chip num">Overall #${p.rank}</span><span class="chip num">${p.pos}${p.prank}</span>${tierChip(p)}${tr}</div>
     <h2 class="bpname">${esc(p.name)}</h2>
     <div class="muted" style="font-size:13px">${esc(p.team)} · Age ${p.age??"—"} in Sept. 2027 · ${esc(p.ht)}, ${p.wt||"—"} lb</div>
     ${B.b.length?`<div class="bds bpbds">${B.b.map(bdPill).join("")}</div>`:""}
-    ${taken?`<div class="bfit bench">Already drafted.</div>`:fit}
+    ${taken?`<div class="bfit bench">Already drafted.</div>`:fit}${team!=null&&!taken?(()=>{const lc=linkChips(p,team);return lc?`<div class="bds" style="margin-top:8px">${lc}</div>`:""})():""}
     <div class="tiles"><div class="tile"><div class="k">2026 PPR/G</div><div class="v">${p.g?p.ppg:"—"}</div><div class="s">${p.g?(B.pr?p.pos+B.pr+" · ":"")+p.g+" game"+(p.g>1?"s":""):"No NFL games yet"}</div></div>
-      <div class="tile"><div class="k">2027 projection</div><div class="v">${p.proj}</div><div class="s">PPR/G · ${p.pts} pts</div></div>${t3}${t4}</div>
+      <div class="tile"><div class="k">2027 projection</div><div class="v">${p.proj}</div><div class="s">${projLbl()} · ${p.pts} pts</div></div>${t3}${t4}</div>
     <section class="bsec"><div class="eyebrow">Week by week · PPR points</div>${wkChart(p)}</section>
     <section class="bsec"><div class="eyebrow bsech">Badges · why he has them <button class="linkbtn" data-bguide>Badge guide ⓘ</button></div>
       ${B.b.length?`<div class="bwhy">${B.b.map(k=>`<div>${bdPill(k)}<p>${esc(B.w[k]||"")}</p></div>`).join("")}</div>`:`<div class="faint" style="font-size:13px">${p.g>=4?"No badges: his weekly scoring doesn’t stand out in either direction.":"Badges need at least 4 NFL games this season."}</div>`}</section>
     <section class="bsec"><div class="eyebrow">Stats</div><dl class="bdl"><dt>2026</dt><dd>${esc(p.line)}${p.g?` <span class="faint">(${p.g} games)</span>`:""}</dd>${p.g?`<dt>PPR</dt><dd><b class="num">${p.ppg}</b> per game · ${p.ppr} total</dd>`:""}${p.prev?`<dt>2025</dt><dd>${esc(p.prev)}</dd>`:""}</dl></section>
     ${p.str&&p.str.length?`<section class="bsec"><div class="eyebrow">Strengths</div><ul class="bul">${p.str.map(x=>`<li>${esc(x)}</li>`).join("")}</ul></section>`:""}
+    ${teammatesHtml(p)}
     ${p.note?`<section class="bsec"><div class="eyebrow">Watch</div><p style="margin:0;font-size:13px">${esc(p.note)}</p></section>`:""}
     <section class="bsec"><div class="eyebrow">Profile</div><dl class="bdl"><dt>College</dt><dd>${esc(p.college)}</dd>${p.draft?`<dt>Drafted</dt><dd>${esc(p.draft)}</dd>`:""}${p.exp!=null&&p.exp>0?`<dt>NFL</dt><dd>${p.exp} yr${p.exp>1?"s":""} by 2027</dd>`:""}</dl></section>
   </div>
-  <div class="bpact"><button class="btn mvbtn2" data-move="${p.id}">⇅ Move</button>${clock&&!taken?`<button class="btn primary bpdraft" data-biodraft="${p.id}">Draft ${esc(p.name.split(" ").slice(-1)[0].replace(/^(Jr\.|Sr\.|II|III|IV)$/,p.name.split(" ").slice(-2,-1)[0]))}</button>`:""}</div>`;
+  <div class="bpact"><button class="btn mvbtn2" data-move="${p.id}">⇅ Move</button><button class="btn mvbtn2" data-compare="${p.id}">⇆ Compare</button>${clock&&!taken?`<button class="btn primary bpdraft" data-biodraft="${p.id}">Draft ${esc(p.name.split(" ").slice(-1)[0].replace(/^(Jr\.|Sr\.|II|III|IV)$/,p.name.split(" ").slice(-2,-1)[0]))}</button>`:""}</div>`;
 }
 function openBioPage(id,ctx={}){
   const p=BYID[id];if(!p)return;bioCtx={id,ctx};let host=$("#bioHost");
@@ -665,7 +704,7 @@ function openBioPage(id,ctx={}){
   host.innerHTML=`<div class="biopg" role="dialog" aria-modal="true" aria-label="${esc(p.name)} bio">${bioPageHtml(p,ctx)}</div>`;
   requestAnimationFrame(()=>host.firstElementChild.classList.add("open"));
 }
-function redrawBio(){if(!bioCtx||!$("#bioHost .biopg"))return;const pg=$("#bioHost .biopg"),y=pg.scrollTop;pg.innerHTML=bioPageHtml(BYID[bioCtx.id],bioCtx.ctx);pg.scrollTop=y}
+function redrawBio(){if(!bioCtx||!$("#bioHost .biopg"))return;const pg=$("#bioHost .biopg"),y=pg.scrollTop;pg.innerHTML=bioCtx.cmp?compareHtml(BYID[bioCtx.id],BYID[bioCtx.cmp],bioCtx.ctx):bioPageHtml(BYID[bioCtx.id],bioCtx.ctx);pg.scrollTop=y}
 function closeBio(){const pg=$("#bioHost .biopg");bioCtx=null;if(!pg)return;pg.classList.remove("open");setTimeout(()=>{const h=$("#bioHost");if(h&&!bioCtx)h.innerHTML=""},200)}
 function bioDraft(id){const ctx=bioCtx?bioCtx.ctx:{};const p=ctx.num?picks().find(x=>x.num===ctx.num):nextOpen();if(!p)return;
   S.sel[p.num]=id;justPicked.add(p.num);persist();closeBio();closeSheet();render();toast(`${BYID[id].name} drafted at ${p.label}.`)}
@@ -678,6 +717,125 @@ function openGuide(){
   document.body.appendChild(host);requestAnimationFrame(()=>host.classList.add("open"));
   host.addEventListener("click",e=>{if(e.target===host||e.target.closest("[data-gclose]")){host.classList.remove("open");setTimeout(()=>host.remove(),200)}});
 }
+
+
+/* ---------- league labels ---------- */
+const scoringName=()=>({ppr:"Full PPR",half:"Half PPR",std:"Standard"})[S.scoring||"ppr"];
+const projLbl=()=>({ppr:"PPR/G",half:"half-PPR/G",std:"pts/G"})[S.scoring||"ppr"];
+const lastName=n=>{const w=n.split(" ");const l=w[w.length-1];return /^(Jr\.|Sr\.|II|III|IV)$/.test(l)&&w.length>2?w[w.length-2]:l};
+
+/* ---------- tiers, runs, stacks ---------- */
+const tierChip=x=>`<span class="tierchip" title="${x.pos} tier ${x.tier}">T${x.tier}</span>`;
+function lastInTier(x,tk){return !P.some(y=>y!==x&&!tk.has(y.id)&&y.pos===x.pos&&y.tier===x.tier)}
+function runAlert(num){
+  const made=picks().filter(p=>S.sel[p.num]&&p.num<num).slice(-8);if(made.length<5)return"";
+  const pos=made.map(p=>(BYID[S.sel[p.num]]||{}).pos);
+  for(const k of ["RB","WR","QB","TE"]){const l5=pos.slice(-5).filter(x=>x===k).length,l8=pos.filter(x=>x===k).length;
+    const hit=(k==="RB"||k==="WR")?(l5>=4?`${l5} of the last 5`:l8>=6?`${l8} of the last 8`:""):(l8>=3?`${l8} of the last 8`:"");
+    if(hit)return`<div class="runalert" role="status">🏃 <b>${k} run:</b> ${hit} picks were ${k}s.</div>`}
+  return"";
+}
+function linkChips(x,team){
+  if(team==null||!x.team||x.team==="FA")return"";const ros=rosterOf(team).map(r=>r.p).filter(r=>r.id!==x.id);const out=[];
+  if(x.pos==="QB"){const m=ros.filter(r=>(r.pos==="WR"||r.pos==="TE")&&r.team===x.team);if(m.length)out.push(`🔗 Stack with ${m.map(r=>lastName(r.name)).join(", ")}`)}
+  if(x.pos==="WR"||x.pos==="TE"){const q=ros.find(r=>r.pos==="QB"&&r.team===x.team);if(q)out.push(`🔗 Stack with ${lastName(q.name)}`)}
+  if(x.pos==="RB"){const r=ros.find(r=>r.pos==="RB"&&r.team===x.team);if(r)out.push(`🤝 Handcuff for ${lastName(r.name)}`)}
+  return out.map(t=>`<span class="lnk">${esc(t)}</span>`).join("");
+}
+function teammatesHtml(p){
+  if(!p.team||p.team==="FA")return"";const mates=P.filter(y=>y.team===p.team&&y.id!==p.id);const it=y=>`${esc(y.name)} <span class="faint">${y.pos} · #${y.rank}</span>`;let rows=[];
+  if(p.pos==="QB"){const c=mates.filter(y=>y.pos==="WR"||y.pos==="TE").slice(0,3);if(c.length)rows.push(["Stack with",c.map(it).join("<br>")])}
+  if(p.pos==="WR"||p.pos==="TE"){const q=mates.find(y=>y.pos==="QB");if(q)rows.push(["His QB",it(q)])}
+  if(p.pos==="RB"){const r=mates.filter(y=>y.pos==="RB");const lead=P.find(y=>y.team===p.team&&y.pos==="RB");
+    if(lead&&lead.id===p.id){if(r[0])rows.push(["Handcuff",it(r[0])])}else if(lead)rows.push(["Lead back",it(lead)]);
+    if(lead&&lead.id!==p.id)rows.push(["Note","He’s the handcuff: his value jumps if the lead back misses time."])}
+  if(!rows.length)return"";
+  return`<section class="bsec"><div class="eyebrow">Stacks &amp; handcuffs · ${esc(p.team)}</div><dl class="bdl">${rows.map(([k,v])=>`<dt>${k}</dt><dd>${v}</dd>`).join("")}</dl></section>`;
+}
+
+/* ---------- draft assistant ---------- */
+function replLevels(){const n=S.teams,cnt={QB:Math.round(n*(S.sf?1.9:1.1)),RB:Math.round(n*2.3),WR:Math.round(n*3.2),TE:Math.round(n*1.15)},r={};
+  for(const k in cnt){const L=P.filter(p=>p.pos===k).map(p=>p.proj).sort((a,b)=>b-a);r[k]=L[Math.min(L.length-1,cnt[k]-1)]||0}return r}
+function assistPicks(p){
+  const team=p.owner,tk=takenSet(p.num),avail=P.filter(x=>!tk.has(x.id)),nd=openNeeds(team);
+  const nxt=picks().find(x=>x.owner===team&&x.num>p.num&&!S.sel[x.num]);const k=nxt?nxt.num-p.num-1:S.teams;
+  const gone=new Set(avail.slice(0,k).map(x=>x.id)),repl=replLevels();
+  const left=avail.filter(x=>!gone.has(x.id));
+  const bestAfter=(x)=>{let b=null;for(const y of left){if(y.pos===x.pos&&y.id!==x.id&&(b==null||y.proj>b))b=y.proj}return b??repl[x.pos]};
+  return avail.slice(0,45).map(x=>{const fill=nd.includes(x.pos)?1:fitsSlot(x.pos,nd)?.9:.55,drop=Math.max(0,x.proj-bestAfter(x)),vor=Math.max(0,x.proj-repl[x.pos]),fall=p.num-x.rank;
+    const bad=bdOf(x).includes("bust")?.85:1;
+    return{x,fill,drop,fall,sc:((vor+.6*drop)*fill+.05*Math.max(-10,Math.min(20,fall)))*bad}}).sort((a,b)=>b.sc-a.sc).slice(0,3).map(o=>({...o,nxt,tk,nd}));
+}
+function assistHtml(p){
+  const L=assistPicks(p);if(!L.length)return"";const me=S.user.includes(p.owner);
+  return`<div class="assist"><div class="eyebrow">✨ Best picks for ${me?"you":esc(tname(p.owner))}</div><div class="asl">${L.map(({x,fill,drop,fall,nxt,tk,nd})=>{
+    const why=[];if(nd.includes(x.pos))why.push(`Fills ${me?"your":"their"} ${x.pos} spot`);else if(fitsSlot(x.pos,nd))why.push(`Fits ${nd.includes("FLEX")&&x.pos!=="QB"?"FLEX":"Superflex"}`);else why.push("Depth pick");
+    if(lastInTier(x,tk))why.push(`Last ${x.pos} in Tier ${x.tier}`);
+    if(drop>=1&&nxt)why.push(`Next ${x.pos} at ${nxt.label}: ~${drop.toFixed(1)} pts/G worse`);
+    if(fall>=Math.max(4,S.teams/2))why.push(`Falling: ranked #${x.rank}`);
+    return`<div class="ascard"><div class="asname">${nameBtn(x,false)}</div><div class="meta">${esc(x.team)} · ${x.proj} proj ${projLbl()} · ${x.pos}${x.prank} ${tierChip(x)}</div>${badgeRow(x,2)}<div class="aswhy">${why.map(w=>`<span>${esc(w)}</span>`).join("")}</div><button class="btn sm primary" data-take="${x.id}">Draft ${esc(lastName(x.name))}</button></div>`}).join("")}</div></div>`;
+}
+
+/* ---------- compare ---------- */
+function compareHtml(a,b,ctx){
+  const clock=ctx.num?picks().find(x=>x.num===ctx.num):nextOpen(),tk=takenSet(ctx.num||undefined);
+  const Ba=BADGES[a.id]||{},Bb=BADGES[b.id]||{};
+  const rows=[["Overall rank",a.rank,b.rank,-1,"#"],["Position rank",a.prank,b.prank,-1,a.pos],["2027 projection",a.proj,b.proj,1,""],["2026 PPR/G",a.g?a.ppg:null,b.g?b.ppg:null,1,""],["Games played",a.g,b.g,1,""],["Target share",a.pos==="QB"?null:a.ts,b.pos==="QB"?null:b.ts,1,"%"],["Snaps",a.snap,b.snap,1,"%"],["Age in Sept. 2027",a.age,b.age,-1,""],["Tier",a.tier,b.tier,a.pos===b.pos?-1:0,"T"]];
+  const cell=(v,o,dir,u,lab)=>{if(v==null||v==="")return`<td class="faint">—</td>`;const win=dir&&o!=null&&o!==""&&(dir>0?v>o:v<o);
+    const txt=u==="#"?"#"+v:u==="%"?v+"%":u==="T"?"T"+v:(lab&&u&&u.length===2?u+v:v);return`<td class="${win?"win":""}">${txt}</td>`};
+  return`<div class="bpbar"><button class="linkbtn bpback" data-cmpback>‹ Back</button><span class="eyebrow" style="margin:0">Compare</span></div>
+  <div class="bpwrap"><table class="cmpt"><thead><tr><th></th><th>${posTag(a.pos)}<div class="cmpn">${esc(a.name)}</div><div class="faint">${esc(a.team)}</div></th><th>${posTag(b.pos)}<div class="cmpn">${esc(b.name)}</div><div class="faint">${esc(b.team)}</div></th></tr></thead>
+  <tbody>${rows.map(([l,x,y,d,u])=>`<tr><th scope="row">${l}</th>${cell(x,y,d,u,1)}${cell(y,x,d,u,1)}</tr>`).join("")}
+  <tr><th scope="row">Badges</th><td>${(Ba.b||[]).map(bdPill).join(" ")||'<span class="faint">—</span>'}</td><td>${(Bb.b||[]).map(bdPill).join(" ")||'<span class="faint">—</span>'}</td></tr></tbody></table>
+  <p class="faint" style="font-size:12px;margin:6px 2px 0">Bold blue marks the better number in each row.</p>
+  <section class="bsec"><div class="eyebrow">${esc(a.name)} · week by week</div>${wkChart(a)}</section>
+  <section class="bsec"><div class="eyebrow">${esc(b.name)} · week by week</div>${wkChart(b)}</section></div>
+  <div class="bpact">${clock&&!tk.has(a.id)?`<button class="btn primary bpdraft" data-biodraft="${a.id}">Draft ${esc(lastName(a.name))}</button>`:""}${clock&&!tk.has(b.id)?`<button class="btn primary bpdraft" data-biodraft="${b.id}">Draft ${esc(lastName(b.name))}</button>`:""}</div>`;
+}
+function openCompareChooser(aId){
+  const a=BYID[aId];const host=document.createElement("div");host.className="mvscrim";
+  host.innerHTML=`<div class="mover" role="dialog" aria-modal="true" aria-label="Compare ${esc(a.name)} with"><div class="mvgrab" aria-hidden="true"></div>
+  <div class="eyebrow">Compare ${esc(a.name)} with…</div><input type="search" id="cmpq" placeholder="Search players" style="width:100%;margin:8px 0"><div id="cmpl" class="cmpl"></div>
+  <div class="actions" style="margin-top:10px"><button class="btn" data-cmpclose>Cancel</button></div></div>`;
+  document.body.appendChild(host);requestAnimationFrame(()=>host.classList.add("open"));
+  const draw=()=>{const q=($("#cmpq").value||"").toLowerCase();const L=P.filter(x=>x.id!==aId&&matchQ(x,q)).sort((x,y)=>(y.pos===a.pos)-(x.pos===a.pos)||x.rank-y.rank).slice(0,40);
+    $("#cmpl").innerHTML=L.map(x=>`<button class="cmprow" data-cmpwith="${x.id}">${posTag(x.pos)} <b>${esc(x.name)}</b> <span class="faint">${esc(x.team)} · #${x.rank}</span></button>`).join("")};
+  const close=()=>{host.classList.remove("open");setTimeout(()=>host.remove(),200)};
+  $("#cmpq").oninput=draw;draw();
+  host.addEventListener("click",e=>{if(e.target===host||e.target.closest("[data-cmpclose]")){close();return}const w=e.target.closest("[data-cmpwith]");if(w){close();if(bioCtx){bioCtx.cmp=w.dataset.cmpwith;redrawBio();$("#bioHost .biopg").scrollTop=0}}});
+}
+
+/* ---------- grades & standings ---------- */
+function teamStrength(t){const L=lineupOf(t);const st=L.slots.reduce((a,s)=>a+(s.p?s.p.proj:0),0);const bench=L.bench.slice(0,3).reduce((a,p)=>a+p.proj,0);return{st,score:st+.12*bench,L}}
+function gradeOf(z){return z>=1.5?"A+":z>=1?"A":z>=.7?"A-":z>=.4?"B+":z>=.1?"B":z>=-.2?"B-":z>=-.5?"C+":z>=-.8?"C":z>=-1.1?"C-":z>=-1.5?"D":"F"}
+function simSeason(T,str,N=1500){
+  let seed=12345;const rnd=()=>{seed=(seed*1103515245+12345)%2147483648;return seed/2147483648};
+  const gauss=()=>{let u=0,v=0;while(!u)u=rnd();while(!v)v=rnd();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v)};
+  const wk=()=>str.map(x=>x.st+gauss()*Math.max(8,.17*x.st));
+  const P_=T>=12?6:4,res=Array.from({length:T},()=>({w:0,po:0,ti:0,seed1:0}));
+  for(let n=0;n<N;n++){const W=Array(T).fill(0),PF=Array(T).fill(0);
+    for(let w=0;w<14;w++){const ord=[...Array(T).keys()].sort(()=>rnd()-.5),sc=wk();for(let i=0;i+1<T;i+=2){const a=ord[i],b=ord[i+1];PF[a]+=sc[a];PF[b]+=sc[b];if(sc[a]>sc[b])W[a]++;else W[b]++}}
+    const stand=[...Array(T).keys()].sort((a,b)=>W[b]-W[a]||PF[b]-PF[a]);stand.slice(0,P_).forEach(t=>res[t].po++);res[stand[0]].seed1++;W.forEach((x,i)=>res[i].w+=x);
+    let alive=stand.slice(0,P_);const play=(a,b)=>{const sc=wk();return sc[a]>=sc[b]?a:b};
+    if(P_===6){const w1=play(alive[2],alive[5]),w2=play(alive[3],alive[4]);alive=[alive[0],alive[1],w1,w2]}
+    const f1=play(alive[0],alive[3]),f2=play(alive[1],alive[2]);res[play(f1,f2)].ti++}
+  return res.map(r=>({w:r.w/N,po:r.po/N,ti:r.ti/N,s1:r.seed1/N}));
+}
+function gradesHtml(){
+  const T=S.teams,str=Array.from({length:T},(_,i)=>teamStrength(i)),m=str.reduce((a,x)=>a+x.score,0)/T,sd=Math.sqrt(str.reduce((a,x)=>a+(x.score-m)**2,0)/T)||1;
+  const sim=simSeason(T,str),done=!nextOpen(),made=Object.keys(S.sel).length;
+  const rows=str.map((x,i)=>({i,...x,z:(x.score-m)/sd,...sim[i]})).sort((a,b)=>b.po-a.po||b.score-a.score);
+  return`<div class="bpbar"><button class="linkbtn bpback" data-bioclose>‹ Back</button><span class="eyebrow" style="margin:0">Grades &amp; standings</span></div>
+  <div class="bpwrap"><h2 class="bpname" style="font-size:clamp(28px,8vw,38px)">Who won the draft?</h2>
+  <p class="muted" style="font-size:13px;margin:4px 0 10px">${done?"Final grades for this mock.":`Draft in progress: ${made} of ${T*S.rounds} picks made. Grades use the picks so far.`} Grades compare each starting lineup’s projected ${projLbl().replace("/G","")} points per week (plus a little bench depth) to the rest of the league. Standings come from 1,500 simulated 14-week seasons; the top ${T>=12?6:4} make the playoffs.</p>
+  <div class="gwrap"><table class="gtab"><thead><tr><th>Team</th><th>Grade</th><th>Proj/wk</th><th>Avg wins</th><th>Playoffs</th><th>Title</th></tr></thead><tbody>
+  ${rows.map(r=>`<tr class="${S.user.includes(r.i)?"me":""}"><td><b>${esc(tname(r.i))}</b><div class="faint" style="font-size:11.5px">${esc(STRATS[strat(r.i)]||"")}</div></td><td><span class="grade g${gradeOf(r.z)[0]}">${gradeOf(r.z)}</span></td><td class="num">${r.st.toFixed(1)}</td><td class="num">${r.w.toFixed(1)}–${(14-r.w).toFixed(1)}</td><td class="num">${Math.round(r.po*100)}%</td><td class="num">${Math.round(r.ti*100)}%</td></tr>`).join("")}
+  </tbody></table></div>
+  ${S.user.map(u=>{const x=str[u];return`<section class="bsec"><div class="eyebrow">${esc(tname(u))} · starting lineup</div><dl class="bdl">${x.L.slots.map(s=>`<dt>${s.s==="SF"?"SFLEX":s.s}</dt><dd>${s.p?`${esc(s.p.name)} <span class="faint">${s.p.proj}</span>`:'<span class="faint">Empty</span>'}</dd>`).join("")}</dl></section>`}).join("")}
+  </div>`;
+}
+function openGrades(){bioCtx=null;let host=$("#bioHost");if(!host){host=document.createElement("div");host.id="bioHost";document.body.appendChild(host)}
+  host.innerHTML=`<div class="biopg" role="dialog" aria-modal="true" aria-label="Grades and standings">${gradesHtml()}</div>`;requestAnimationFrame(()=>host.firstElementChild.classList.add("open"))}
 
 /* ---------- move-a-player panel ---------- */
 let pkRedraw=null,bdFilter=null,bdHide=false;
@@ -721,9 +879,10 @@ function openPicker(num){
   let pos="ALL",openBio=null;
   const draw=()=>{
     const tk=takenSet(num),q=($("#pkq")?.value||"").toLowerCase(),nd=openNeeds(p.owner);
-    const list=P.filter(x=>!tk.has(x.id)&&(pos==="ALL"||(pos==="NEED"?(nd.includes(x.pos)||(x.pos!=="QB"&&nd.includes("FLEX"))):pos==="FLEX"?x.pos!=="QB":x.pos===pos))&&matchQ(x,q)&&bdPass(x)).slice(0,60);
-    $("#pkBoardNote").innerHTML=boardNote();
-    $("#pkl").innerHTML=list.map(x=>`<div class="prow"><div class="rk">${x.rank}${mvMark(x)}</div><div style="min-width:0"><div>${nameBtn(x,openBio===x.id)}${nd.includes(x.pos)?` <span class="chip" style="font-size:11px">fills ${x.pos}</span>`:""}</div><div class="meta">${esc(x.team)} · ${x.proj} proj PPR/G${x.ts!=null&&x.pos!=="QB"?` · ${x.ts}% tgt share`:""}</div>${badgeRow(x)}</div><span class="rowbtns"><button class="btn sm ghost mvbtn" data-move="${x.id}" aria-label="Move ${esc(x.name)} in the rankings" title="Move in rankings">⇅</button><button class="btn sm primary" data-take="${x.id}">Draft</button></span></div>`).join("")||`<div class="empty">No players match.</div>`;
+    const list=P.filter(x=>!tk.has(x.id)&&(pos==="ALL"||(pos==="NEED"?fitsSlot(x.pos,nd):pos==="FLEX"?x.pos!=="QB":x.pos===pos))&&matchQ(x,q)&&bdPass(x)).slice(0,60);
+    $("#pkBoardNote").innerHTML=runAlert(num)+(q||bdFilter||bdHide||pos!=="ALL"?"":assistHtml(p))+boardNote();
+    const single=["QB","RB","WR","TE"].includes(pos);let lastT=null;
+    $("#pkl").innerHTML=list.map(x=>{const div=single&&x.tier!==lastT?`<div class="tierdiv">${x.pos} Tier ${x.tier}</div>`:"";lastT=x.tier;return div+`<div class="prow"><div class="rk">${x.rank}${mvMark(x)}</div><div style="min-width:0"><div>${nameBtn(x,openBio===x.id)}${nd.includes(x.pos)?` <span class="chip" style="font-size:11px">fills ${x.pos}</span>`:""}</div><div class="meta">${esc(x.team)} · ${x.proj} proj ${projLbl()}${x.ts!=null&&x.pos!=="QB"?` · ${x.ts}% tgt share`:""} ${tierChip(x)}</div>${badgeRow(x)}${(()=>{const lc=linkChips(x,p.owner),lt=lastInTier(x,tk)&&x.tier<=8?`<span class="lnk lastt">⚠️ Last ${x.pos} in Tier ${x.tier}</span>`:"";return lc||lt?`<div class="bds">${lt}${lc}</div>`:""})()}</div><span class="rowbtns"><button class="btn sm ghost mvbtn" data-move="${x.id}" aria-label="Move ${esc(x.name)} in the rankings" title="Move in rankings">⇅</button><button class="btn sm primary" data-take="${x.id}">Draft</button></span></div>`}).join("")||`<div class="empty">No players match.</div>`;
   };
   $("#sheetHost").innerHTML=`<div class="scrim" id="scrim"><div class="sheet" role="dialog" aria-modal="true" aria-label="Make a pick">
     <div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start"><div><div class="eyebrow">Pick ${p.label} · No. ${p.num} overall</div><h2>${esc(tname(p.owner))}</h2><div class="muted" style="font-size:13px">Open spots: ${openNeeds(p.owner).join(" · ")||"bench"}</div></div><button class="btn sm" id="pkx">Close</button></div>
@@ -747,6 +906,7 @@ function openPicker(num){
   $("#pkl").onclick=e=>{const bi=e.target.closest("[data-bio]");if(bi){openBioPage(bi.dataset.bio,{num});return}
     const b=e.target.closest("[data-take]");if(!b)return;S.sel[num]=b.dataset.take;justPicked.add(num);persist();closeSheet();render();
     const nx=nextOpen();if(nx&&!S.user.includes(nx.owner))toast("Pick is in. Tap “Sim to my pick” to continue.")};
+  $("#pkBoardNote").onclick=e=>$("#pkl").onclick(e);
 }
 const pv=n=>Math.round(1000*Math.exp(-0.021*(n-1)));
 function openTrade(fromNum){
@@ -866,6 +1026,9 @@ $("#boardView").onclick=()=>openBoardView(JSON.parse(JSON.stringify(S)),{eyebrow
 $("#needW").oninput=e=>{S.needW=+e.target.value;persist();renderControls()};
 $("#rnd").oninput=e=>{S.chaos=+e.target.value;persist();renderControls()};
 $("#nTeams").onchange=e=>{S.teams=+e.target.value;S.sel={};S.trades={};S.log=[];S.user=S.user.filter(i=>i<S.teams);if(!S.user.length)S.user=[0];persist();render();toast("League size changed. Picks and trades cleared.")};
+$("#gradesBtn").onclick=openGrades;
+$("#scoring").onchange=e=>{S.scoring=e.target.value;applyBoard();persist();render();toast(`Scoring set to ${scoringName()}. Projections and rankings updated.`)};
+$("#sfSel").onchange=e=>{S.sf=e.target.value==="1";applyBoard();persist();render();toast(S.sf?"Superflex on: QBs move up and every team gets a Superflex spot.":"Superflex off.")};
 $("#nRounds").onchange=e=>{S.rounds=+e.target.value;const max=S.teams*S.rounds;for(const k in S.sel)if(+k>max)delete S.sel[k];for(const k in S.trades)if(+k>max)delete S.trades[k];persist();render()};
 $("#userTeams").onclick=e=>{const b=e.target.closest("[data-ut]");if(!b)return;const t=+b.dataset.ut;S.user=S.user.includes(t)?S.user.filter(x=>x!==t):[...S.user,t];persist();render()};
 $("#openTrade").onclick=()=>openTrade(null);
@@ -887,6 +1050,8 @@ document.addEventListener("click",e=>{
   if(e.target.closest("[data-bioclose]")){closeBio();return}
   const bdr=e.target.closest("[data-biodraft]");if(bdr){bioDraft(bdr.dataset.biodraft);return}
   if(e.target.closest("[data-bguide]")){openGuide();return}
+  const cmp=e.target.closest("[data-compare]");if(cmp){openCompareChooser(cmp.dataset.compare);return}
+  if(e.target.closest("[data-cmpback]")){if(bioCtx){delete bioCtx.cmp;redrawBio()}return}
   const mv=e.target.closest("[data-move]");if(mv){openMover(mv.dataset.move);return}
   const rb=e.target.closest("[data-resetboard]");if(rb){resetBoard();toast("Rankings reset to the default board.");afterMove();return}
   const pk=e.target.closest("[data-pick]");if(pk){openPicker(+pk.dataset.pick);return}

@@ -81,7 +81,8 @@ for x in P:
     if 'bust' in B and 'sleeper' in B: B.remove('sleeper');W.pop('sleeper',None)
     order=['safety','consistent','volume','breakout','ceiling','sleeper','bust','volatile','floor','under']
     B=sorted(B,key=order.index)
-    out[pid]={'b':B,'w':W,'wk':wk,'pr':ppg_rank.get(pid),'tr':ts_rank.get(pid)}
+    rpg=round((x.get('rec') or 0)/x['g'],2) if x['g']>=3 else {'QB':0,'RB':2.0,'WR':3.5,'TE':3.0}[pos]
+    out[pid]={'b':B,'w':W,'wk':wk,'pr':ppg_rank.get(pid),'tr':ts_rank.get(pid),'rpg':rpg}
 json.dump(out,open('/home/claude/fantasy/badges.json','w'),separators=(',',':'))
 from collections import Counter
 print('badges',dict(Counter(b for o in out.values() for b in o['b'])),'players',len(out))
