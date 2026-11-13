@@ -216,6 +216,13 @@ details.more>summary::before{content:"▸ "} details.more[open]>summary::before{
 table.grid td.r .dir{display:block;font-size:10px;font-weight:600;color:var(--ink-3)}
 .gc[data-gbio]{cursor:pointer}.gc.mine{box-shadow:inset 0 0 0 1.5px var(--accent)}.gc.clock{background:var(--accent-soft);color:var(--accent);border-left-color:var(--accent);box-shadow:inset 0 0 0 1.5px var(--accent)}.gc.clock .n{font-weight:800}
 .gridhead{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:8px}.gridhead .actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.pkclock{margin-top:10px;border:1.5px solid var(--accent);background:var(--accent-soft);border-radius:14px;padding:8px 10px 0;overflow:hidden}
+.pkcrow{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;padding-bottom:8px}.pkct{font-size:13px;color:var(--ink-2)}.pkct b{font:800 22px var(--f-display);color:var(--ink);font-variant-numeric:tabular-nums;margin-right:4px}.pkcb{display:flex;gap:6px}
+.pkbarbg{height:5px;margin:0 -10px;background:rgba(0,0,0,.06)}.pkbarbg i{display:block;height:100%;background:var(--accent);transition:width .25s linear}
+.pkclock.hot{border-color:#E5484D;background:#FDECEC}.pkclock.hot b{color:#E5484D}.pkclock.hot .pkbarbg i{background:#E5484D}
+.clockpill{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(76px + env(safe-area-inset-bottom,0px));z-index:22;display:flex;align-items:center;gap:10px;border:0;border-radius:999px;padding:9px 16px;background:var(--accent);color:#fff;font:inherit;font-weight:700;font-size:13px;box-shadow:0 6px 20px rgba(0,0,0,.18);cursor:pointer;white-space:nowrap}
+.clockpill .cpt{font:800 20px var(--f-display);font-variant-numeric:tabular-nums}.clockpill.hot{background:#E5484D;animation:cpulse 1s ease-in-out infinite}.clockpill.paused{background:var(--ink-2)}
+@keyframes cpulse{50%{transform:translateX(-50%) scale(1.05)}}
 .teamchips{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;margin-top:10px;padding-bottom:2px}.teamchips::-webkit-scrollbar{display:none}
 .teamchips button{flex:none;border:1px solid var(--line);background:var(--bg);color:var(--ink-2);border-radius:999px;padding:6px 12px;font:inherit;font-weight:700;font-size:12.5px;white-space:nowrap;cursor:pointer}
 .teamchips button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:#fff}
@@ -438,6 +445,12 @@ table.grid td.r{font-family:var(--f-display);font-weight:800;font-size:15px;colo
     </div>
     <div class="dgrid" id="teamsGrid"></div>
 </div></details></section>
+  <section class="sgrp"><div class="eyebrow">⏱ Pick timer</div><div class="sgrid">
+    <label class="field" for="tmSec">Time per pick<select id="tmSec"><option value="0">Off</option><option value="30">30 seconds</option><option value="45">45 seconds</option><option value="60">1 minute</option><option value="90">1 min 30 sec</option><option value="120">2 minutes</option><option value="180">3 minutes</option><option value="300">5 minutes</option><option value="custom">Custom…</option></select></label>
+    <label class="field" for="tmCustom" id="tmCustomWrap" hidden>Custom time (seconds)<input type="number" id="tmCustom" min="5" max="900" step="5" inputmode="numeric"></label>
+    <label class="field" for="tmEnd">When time runs out<select id="tmEnd"><option value="best">Auto-draft ✨ best pick</option><option value="rank">Auto-draft top ranked</option><option value="warn">Just alert me</option></select></label>
+    <label class="field" for="tmBeep">Warning<select id="tmBeep"><option value="1">Beep + buzz at 0:10</option><option value="0">Silent</option></select></label>
+  </div><div class="faint" style="font-size:12.5px">The clock starts when your pick window opens and keeps running if you close it. Pause or add 30 seconds from the pick window.</div></section>
   <section class="sgrp"><div class="eyebrow">Trades</div>
             <div style="display:grid;gap:10px;margin-top:10px">
               <div class="actions"><button class="btn sm" id="openTrade">New trade</button><button class="btn sm danger" id="resetTrades">Undo all trades</button></div>
@@ -448,6 +461,7 @@ table.grid td.r{font-family:var(--f-display);font-weight:800;font-size:15px;colo
 </div></div>
 <div id="sheetHost"></div>
 <div id="toastHost"></div>
+<button class="clockpill" id="clockPill" hidden><span class="cpt" data-clocktxt>0:00</span><span class="cpl" id="clockPillLbl">Your pick</span></button>
 
 <script>
 const RAW=__PLAYERS__;
@@ -667,7 +681,7 @@ function renderControls(){
   $("#rndLbl").textContent=S.chaos<25?"Low":S.chaos>65?"High":"Medium";
   $("#tradeLog").innerHTML=S.log.length?S.log.map(l=>"• "+esc(l)).join("<br>"):"No trades yet.";
 }
-function render(){renderControls();renderUserTeams();renderBoard();renderAvail();if(!$("#setScrim").hidden)renderTeams();if(!$("#p-board").hidden)renderBoardTab();if(!$("#p-top").hidden)renderTop();if(!$("#p-mocks").hidden)renderMocks()}
+function render(){if(typeof syncClock==="function"){syncClock();paintClock()}renderControls();renderUserTeams();renderBoard();renderAvail();if(!$("#setScrim").hidden)renderTeams();if(!$("#p-board").hidden)renderBoardTab();if(!$("#p-top").hidden)renderTop();if(!$("#p-mocks").hidden)renderMocks()}
 
 /* ---------- drafters ---------- */
 function renderTeams(){
@@ -962,9 +976,54 @@ function openMover(id){
 }
 
 /* ---------- sheets ---------- */
-function closeSheet(){$("#sheetHost").innerHTML="";pkRedraw=null}
+/* ---------- pick timer ---------- */
+const TM=Object.assign({sec:90,end:"best",beep:true},(()=>{try{return JSON.parse(localStorage.getItem("dr27-timer"))||{}}catch(e){return{}}})());
+const saveTM=()=>{try{localStorage.setItem("dr27-timer",JSON.stringify(TM))}catch(e){}};
+const clk={num:null,dl:0,left:0,paused:false,warned:false,over:false,iv:null};
+const fmtT=s=>{s=Math.max(0,Math.ceil(s));return`${Math.floor(s/60)}:${String(s%60).padStart(2,"0")}`};
+function clockLeft(){return clk.paused?clk.left:(clk.dl-Date.now())/1000}
+function armClock(num){const n=nextOpen();
+  if(!TM.sec||!n||n.num!==num||!S.user.includes(n.owner)){if(clk.num!==num)stopClock();paintClock();return}
+  if(clk.num!==num){clk.num=num;clk.dl=Date.now()+TM.sec*1000;clk.left=TM.sec;clk.paused=false;clk.warned=false;clk.over=false}
+  if(!clk.iv)clk.iv=setInterval(tickClock,250);paintClock()}
+function stopClock(){clk.num=null;clk.over=false;if(clk.iv){clearInterval(clk.iv);clk.iv=null}paintClock()}
+function syncClock(){if(clk.num==null)return;const n=nextOpen();if(!n||n.num!==clk.num||!S.user.includes(n.owner)||!TM.sec)stopClock()}
+let actx=null;function beep(){try{actx=actx||new (window.AudioContext||window.webkitAudioContext)();[0,.22].forEach(t=>{const o=actx.createOscillator(),g=actx.createGain();o.frequency.value=880;g.gain.setValueAtTime(.0001,actx.currentTime+t);g.gain.exponentialRampToValueAtTime(.25,actx.currentTime+t+.02);g.gain.exponentialRampToValueAtTime(.0001,actx.currentTime+t+.16);o.connect(g).connect(actx.destination);o.start(actx.currentTime+t);o.stop(actx.currentTime+t+.18)})}catch(e){}try{navigator.vibrate&&navigator.vibrate([120,80,120])}catch(e){}}
+function tickClock(){if(clk.num==null||clk.paused||clk.over)return;const l=clockLeft();
+  if(l<=10&&!clk.warned){clk.warned=true;if(TM.beep&&TM.sec>10)beep()}
+  if(l<=0){expireClock();return}paintClock()}
+function expireClock(){const num=clk.num,p=picks().find(x=>x.num===num);if(!p||S.sel[num]){stopClock();return}
+  if(TM.end==="warn"){clk.over=true;paintClock();if(TM.beep)beep();toast("⏱ Time’s up! Make your pick.");return}
+  const tk=takenSet(num);let pl=null;
+  if(TM.end==="best"){const L=assistPicks(p);pl=L.length?L[0].x:null}
+  if(!pl)pl=P.find(x=>!tk.has(x.id));
+  if(!pl){stopClock();return}
+  S.sel[num]=pl.id;justPicked.add(num);stopClock();persist();closeSheet();render();if(TM.beep)beep();
+  toast(`⏱ Time’s up. Auto-drafted ${pl.name} at ${p.label}.`)}
+function paintClock(){
+  const on=clk.num!=null,l=on?clockLeft():0,p=on?picks().find(x=>x.num===clk.num):null,hot=on&&(clk.over||l<=10);
+  document.querySelectorAll("[data-clocktxt]").forEach(e=>e.textContent=clk.over?"0:00":fmtT(l));
+  document.querySelectorAll("[data-clocksub]").forEach(e=>e.textContent=clk.over?" · Time’s up":clk.paused?" · Paused":TM.end==="warn"?" left to pick":TM.end==="best"?" · then auto-drafts your ✨ best pick":" · then auto-drafts top of your board");
+  document.querySelectorAll("[data-clockbar]").forEach(e=>e.style.width=(clk.over?0:Math.max(0,Math.min(100,l/Math.max(TM.sec,l)*100)))+"%");
+  document.querySelectorAll("[data-clockpause]").forEach(e=>{e.textContent=clk.paused?"▶ Resume":"Pause";e.hidden=clk.over});
+  const pk=$("#pkClock");if(pk){const mine=on&&$("#sheetHost .sheet[data-pnum='"+clk.num+"']");pk.hidden=!mine;pk.classList.toggle("hot",!!hot)}
+  const pill=$("#clockPill"),sheetOpen=!!$("#sheetHost").children.length;pill.hidden=!on||sheetOpen;pill.classList.toggle("hot",!!hot);pill.classList.toggle("paused",clk.paused);
+  if(p)$("#clockPillLbl").textContent=clk.over?`Time’s up · ${p.label}`:clk.paused?`Paused · ${p.label}`:`Your pick · ${p.label}`;
+}
+document.addEventListener("click",e=>{
+  if(e.target.closest("[data-clockpause]")){if(clk.num==null)return;if(clk.paused){clk.dl=Date.now()+clk.left*1000;clk.paused=false}else{clk.left=clockLeft();clk.paused=true}paintClock();return}
+  if(e.target.closest("[data-clockadd]")){if(clk.num==null)return;if(clk.over){clk.over=false;clk.warned=false;clk.dl=Date.now()+30000;clk.left=30;clk.paused=false}else if(clk.paused)clk.left+=30;else clk.dl+=30000;if(clockLeft()>10)clk.warned=false;paintClock();return}
+});
+$("#clockPill").onclick=()=>{if(clk.num!=null)openPicker(clk.num)};
+function renderTimerSettings(){const preset=["0","30","45","60","90","120","180","300"].includes(String(TM.sec));$("#tmSec").value=preset?String(TM.sec):"custom";$("#tmCustomWrap").hidden=preset;$("#tmCustom").value=TM.sec||"";$("#tmEnd").value=TM.end;$("#tmBeep").value=TM.beep?"1":"0"}
+$("#tmSec").onchange=e=>{const v=e.target.value;if(v==="custom"){$("#tmCustomWrap").hidden=false;$("#tmCustom").value=TM.sec||75;TM.sec=+$("#tmCustom").value;$("#tmCustom").focus()}else{$("#tmCustomWrap").hidden=true;TM.sec=+v}saveTM();if(!TM.sec)stopClock();else if(clk.num!=null){clk.dl=Date.now()+TM.sec*1000;clk.left=TM.sec;clk.warned=false;clk.over=false}toast(TM.sec?`Pick timer: ${fmtT(TM.sec)} per pick.`:"Pick timer off.")};
+$("#tmCustom").onchange=e=>{let v=Math.round(+e.target.value||0);v=Math.max(5,Math.min(900,v));e.target.value=v;TM.sec=v;saveTM();toast(`Pick timer: ${fmtT(v)} per pick.`)};
+$("#tmEnd").onchange=e=>{TM.end=e.target.value;saveTM();paintClock()};
+$("#tmBeep").onchange=e=>{TM.beep=e.target.value==="1";saveTM();if(TM.beep)beep()};
+function closeSheet(){$("#sheetHost").innerHTML="";pkRedraw=null;if(typeof paintClock==="function")paintClock()}
 function openPicker(num){
   const p=picks().find(x=>x.num===num);if(!p)return;
+  setTimeout(()=>armClock(num),0);
   let pos="ALL",openBio=null;
   const draw=()=>{
     const tk=takenSet(num),q=($("#pkq")?.value||"").toLowerCase(),nd=openNeeds(p.owner);
@@ -973,8 +1032,9 @@ function openPicker(num){
     const single=["QB","RB","WR","TE"].includes(pos);let lastT=null;
     $("#pkl").innerHTML=list.map(x=>{const div=single&&x.tier!==lastT?`<div class="tierdiv">${x.pos} Tier ${x.tier}</div>`:"";lastT=x.tier;return div+`<div class="prow" data-row="${x.id}"><div class="rk">${x.rank}${mvMark(x)}</div><div style="min-width:0"><div>${nameBtn(x,openBio===x.id)}${nd.includes(x.pos)?` <span class="chip" style="font-size:11px">fills ${x.pos}</span>`:""}</div><div class="meta">${esc(x.team)} · ${x.proj} proj ${projLbl()}${x.ts!=null&&x.pos!=="QB"?` · ${x.ts}% tgt share`:""} ${tierChip(x)}</div>${badgeRow(x,2)}${(()=>{const lc=linkChips(x,p.owner),lt=lastInTier(x,tk)&&x.tier<=8?`<span class="lnk lastt">⚠️ Last ${x.pos} in Tier ${x.tier}</span>`:"";return lc||lt?`<div class="bds">${lt}${lc}</div>`:""})()}</div><span class="rowbtns">${favBtn(x.id)}<button class="btn sm ghost mvbtn" data-move="${x.id}" aria-label="Move ${esc(x.name)} in the rankings" title="Move in rankings">⇅</button><button class="btn sm primary" data-take="${x.id}">Draft</button></span></div>`}).join("")||`<div class="empty">No players match.</div>`;
   };
-  $("#sheetHost").innerHTML=`<div class="scrim" id="scrim"><div class="sheet" role="dialog" aria-modal="true" aria-label="Make a pick">
+  $("#sheetHost").innerHTML=`<div class="scrim" id="scrim"><div class="sheet" role="dialog" aria-modal="true" aria-label="Make a pick" data-pnum="${p.num}">
     <div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start"><div><div class="eyebrow">Pick ${p.label} · No. ${p.num} overall</div><h2>${esc(tname(p.owner))}</h2><div class="muted" style="font-size:13px">Open spots: ${openNeeds(p.owner).join(" · ")||"bench"}</div></div><button class="btn sm" id="pkx">Close</button></div>
+    <div class="pkclock" id="pkClock" hidden><div class="pkcrow"><span class="pkct">⏱ <b data-clocktxt>0:00</b><span class="faint" data-clocksub></span></span><span class="pkcb"><button class="btn sm" data-clockpause>Pause</button><button class="btn sm" data-clockadd>+30s</button></span></div><div class="pkbarbg"><i data-clockbar></i></div></div>
     <div class="subtabs" role="tablist" id="pktabs" style="margin-top:12px"><button role="tab" data-pt="players" aria-selected="true">Players</button><button role="tab" data-pt="team" aria-selected="false">My team</button><button role="tab" data-pt="prev" aria-selected="false">Picks</button><button role="tab" data-pt="fav" aria-selected="false" aria-label="Favorites">♥</button></div>
     <div id="pkPlayers"><div class="pkbar" style="margin-top:10px"><input type="search" id="pkq" placeholder="Search players or NFL teams"><button class="btn sm" id="pkFilterBtn" aria-expanded="false">Filter ▾</button></div>
     <div id="pkFilter" class="pkfilter" hidden><div class="eyebrow">Position</div><div class="poschips" id="pkpos"></div><div class="eyebrow" style="margin-top:8px">Badges</div><div class="poschips bdchips" id="pkbd"></div></div>
@@ -1119,7 +1179,7 @@ function renderSaved(){
 
 
 /* ---------- settings sheet ---------- */
-function openSettings(){const sc=$("#setScrim");sc.hidden=false;renderTeams();requestAnimationFrame(()=>sc.classList.add("open"))}
+function openSettings(){const sc=$("#setScrim");sc.hidden=false;renderTeams();renderTimerSettings();requestAnimationFrame(()=>sc.classList.add("open"))}
 function closeSettings(){const sc=$("#setScrim");sc.classList.remove("open");setTimeout(()=>{sc.hidden=true},200)}
 $("#openSettings").onclick=openSettings;$("#closeSettings").onclick=closeSettings;
 $("#setScrim").addEventListener("click",e=>{if(e.target.id==="setScrim")closeSettings()});
