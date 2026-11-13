@@ -1,0 +1,12 @@
+const {chromium,devices}=require('playwright');(async()=>{const b=await chromium.launch();const errs=[];const c=await b.newContext({...devices['iPhone 13'],serviceWorkers:'block'});const p=await c.newPage();p.on('pageerror',e=>errs.push(e.message));
+await p.goto('http://localhost:8765/index.html');await p.waitForTimeout(500);
+await p.click('.bnav [data-tab="board"]');await p.click('#bSeg [data-v="grid"]');await p.waitForTimeout(300);await p.screenshot({path:'g0.png'});
+await p.click('.bnav [data-tab="mock"]');await p.evaluate(()=>closeSheet());
+await p.evaluate(()=>{for(let i=0;i<40;i++){const n=nextOpen();if(!n)break;if(S.user.includes(n.owner)){const bp=P.find(x=>!Object.values(S.sel).includes(x.id));S.sel[n.num]=bp.id}else simulate("one")}persist();render()});
+await p.click('.bnav [data-tab="board"]');await p.waitForTimeout(400);await p.screenshot({path:'g1.png'});
+await p.click('#boardList .gc[data-gbio] >> nth=0');await p.waitForTimeout(400);console.log('bio',await p.evaluate(()=>!!document.querySelector('#bioHost')&&document.querySelector('#bioHost').innerText.slice(0,60)));
+await p.evaluate(()=>closeBio&&closeBio());await p.waitForTimeout(300);
+await p.click('#boardList [data-boardview]');await p.waitForTimeout(400);console.log('fullscreen',await p.isVisible('.bv'));
+const d=await b.newContext({viewport:{width:1280,height:900},serviceWorkers:'block'});const dp=await d.newPage();dp.on('pageerror',e=>errs.push('D '+e.message));
+await dp.goto('http://localhost:8765/index.html');await dp.waitForTimeout(500);await dp.click('#simAll');await dp.waitForTimeout(1500);await dp.click('.bnav [data-tab="board"]');await dp.click('#bSeg [data-v="grid"]');await dp.waitForTimeout(300);await dp.screenshot({path:'g2.png'});
+console.log('errs',errs);await b.close()})();

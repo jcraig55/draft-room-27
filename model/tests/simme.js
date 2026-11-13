@@ -1,0 +1,11 @@
+const {chromium,devices}=require('playwright');(async()=>{const b=await chromium.launch();const errs=[];const c=await b.newContext({...devices['iPhone 13'],serviceWorkers:'block'});const p=await c.newPage();p.on('pageerror',e=>errs.push(e.message));
+await p.goto('http://localhost:8765/index.html');await p.waitForTimeout(500);
+await p.evaluate(()=>{S.user=[9];TM.pace="slow";persist();render()});
+console.log('hidden before start',await p.isHidden('#simToMe'));
+await p.click('#simUser');await p.waitForTimeout(600);console.log('shown',await p.isVisible('#simToMe'),await p.textContent('#simToMe'));
+await p.screenshot({path:'sm1.png'});
+await p.click('.bnav [data-tab="board"]');await p.waitForTimeout(200);console.log('on board tab',await p.isVisible('#simToMe'));
+await p.click('#simToMe');await p.waitForTimeout(500);console.log('picker at',await p.evaluate(()=>nextOpen().label),'sheet',await p.isVisible('#pkClock'),'btn hidden',await p.isHidden('#simToMe'),'live',await p.evaluate(()=>live.on));
+await p.click('#pkl [data-take] >> nth=0');await p.waitForTimeout(800);console.log('after pick shown again',await p.isVisible('#simToMe'),await p.textContent('#simToMe'));
+await p.click('.bnav [data-tab="mock"]');await p.click('#simUser');await p.waitForTimeout(300);console.log('paused → hidden',await p.isHidden('#simToMe'));
+console.log('errs',errs);await b.close()})();

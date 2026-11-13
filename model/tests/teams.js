@@ -1,0 +1,13 @@
+const {chromium,devices}=require('playwright');(async()=>{const b=await chromium.launch();const errs=[];const c=await b.newContext({...devices['iPhone 13'],serviceWorkers:'block'});const p=await c.newPage();p.on('pageerror',e=>errs.push(e.message));
+await p.goto('http://localhost:8765/index.html');await p.waitForTimeout(500);
+await p.click('.bnav [data-tab="board"]');await p.click('#bSeg [data-v="teams"]');await p.waitForTimeout(300);await p.screenshot({path:'tm0.png'});
+await p.click('.bnav [data-tab="mock"]');await p.click('#simUser');await p.waitForTimeout(500);
+await p.evaluate(()=>{const c=nextOpen();});await p.click('#pkl [data-take] >> nth=0').catch(()=>{});await p.waitForTimeout(300);
+await p.keyboard.press('Escape');await p.evaluate(()=>{document.querySelectorAll('[data-close],.sheet .close').forEach(()=>{});});
+await p.click('#simAll').catch(async()=>{await p.evaluate(()=>document.querySelector('#simAll').click())});await p.waitForTimeout(1500);
+await p.click('.bnav [data-tab="board"]');await p.waitForTimeout(300);await p.screenshot({path:'tm1.png'});
+console.log(await p.$eval('#boardList .teamhead',e=>e.innerText));
+await p.click('#bTeams [data-bt="6"]');await p.waitForTimeout(200);console.log(await p.$eval('#boardList .teamhead',e=>e.innerText));await p.screenshot({path:'tm2.png',fullPage:false});
+await p.click('[data-tstep="1"]');console.log(await p.$eval('#boardList .teamhead h3',e=>e.innerText));
+await p.click('#bSeg [data-v="list"]');console.log('filters visible',await p.isVisible('#bQ'),'teams hidden',await p.isHidden('#bTeams'));
+console.log('errs',errs);await b.close()})();

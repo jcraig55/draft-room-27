@@ -1,0 +1,10 @@
+const {chromium,devices}=require('playwright');(async()=>{const b=await chromium.launch();const errs=[];const c=await b.newContext({...devices['iPhone 13'],serviceWorkers:'block'});const p=await c.newPage();p.on('pageerror',e=>errs.push(e.message));
+await p.goto('http://localhost:8765/index.html');await p.waitForTimeout(500);
+await p.click('#simUser');await p.waitForTimeout(500);
+console.log('open by default',await p.isVisible('#pkFilter'),await p.textContent('#pkFilterBtn'));await p.screenshot({path:'f1.png'});
+await p.click('#pkpos [data-p="RB"]');console.log('btn',await p.textContent('#pkFilterBtn'));
+await p.click('#pkFilterX');console.log('closed',await p.isHidden('#pkFilter'),await p.textContent('#pkFilterBtn'));await p.screenshot({path:'f2.png'});
+await p.click('#pkFilterBtn');console.log('reopened',await p.isVisible('#pkFilter'),await p.textContent('#pkFilterBtn'));
+await p.click('#pkFilterBtn');console.log('closed via btn',await p.isHidden('#pkFilter'));
+await p.click('#pkx');await p.click('#simUser').catch(()=>{});await p.evaluate(()=>{if(!document.querySelector('#pkFilter'))openPicker(nextOpen().num)});await p.waitForTimeout(300);console.log('reopen picker → open',await p.isVisible('#pkFilter'));
+console.log('errs',errs);await b.close()})();
