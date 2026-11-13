@@ -20,3 +20,13 @@ subprocess.run(['python3','/home/claude/fantasy/final.py'],capture_output=True)
 NP=[x['name'] for x in json.load(open('/home/claude/fantasy/proj.json'))]
 bad=[(i+1,a,b) for i,(a,b) in enumerate(zip(L,NP)) if a!=b][:10]
 print('matches intended order' if not bad else ('MISMATCH',bad))
+# Apply the same moves to the frozen draft order (draft_order.json), which weekly updates never touch.
+NM={r[1]:r[0] for r in json.load(open('/home/claude/fantasy/players.json'))}
+D=json.load(open('/home/claude/fantasy/draft_order.json'))
+for n in sorted(T,key=lambda n:T[n]):
+    i=NM.get(n)
+    if i is None: continue
+    if i in D['ids']: D['ids'].remove(i)
+    D['ids'].insert(T[n]-1,i)
+json.dump(D,open('/home/claude/fantasy/draft_order.json','w'))
+print('draft order updated:',', '.join(f'{n} -> {D["ids"].index(NM[n])+1}' for n in T if n in NM))

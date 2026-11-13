@@ -20,3 +20,5 @@ This folder backs up everything behind the app: projection code, Jared's manual 
 
 
 Badges (7): Safety pick, Volume machine, Breakout, High ceiling, Sleeper, Bust?, Volatile. badges.py guarantees every player gets at least one via fallback rules.
+
+Draft order vs Top 125: `fantasy/draft_order.json` is the FROZEN draft board order (set Nov 13, 2026). Weekly updates must never regenerate or edit it. The app's draft (Board tab, pick window, computer drafters) uses it; the Top 125 tab and PDF use the live weekly rank. `move.py` applies the user's manual moves to BOTH lists.

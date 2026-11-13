@@ -418,7 +418,7 @@ table.grid td.r{font-family:var(--f-display);font-weight:800;font-size:15px;colo
     </div>
   </section>
   <section class="panel" id="p-board" hidden>
-    <div class="tabhead"><div><h2 class="ttl">Board</h2><div class="sub">Your full rankings · stats through Week __WEEK__ · updated __DATE__</div></div></div>
+    <div class="tabhead"><div><h2 class="ttl">Board</h2><div class="sub">Your draft board · order set __DRAFTSET__, changes only when you move players · stats through Week __WEEK__</div></div></div>
     <div class="seg" role="tablist" id="bSeg"><button role="tab" data-v="list" aria-selected="true">List</button><button role="tab" data-v="stats" aria-selected="false">Stats</button><button role="tab" data-v="teams" aria-selected="false">Teams</button><button role="tab" data-v="grid" aria-selected="false">Draft board</button></div>
     <div id="bFilters"><div class="pkbar" style="margin-top:10px"><input type="search" id="bQ" placeholder="Search players or NFL teams"></div>
     <div class="poschips" id="bPos" style="margin-top:8px"></div></div>
@@ -508,6 +508,12 @@ const BADGES=__BADGES__;
 const POS=["QB","RB","WR","TE"];
 const P=RAW.map(a=>({id:a[0],name:a[1],pos:a[2],team:a[3],age:a[4],ht:a[5],wt:a[6],college:a[7],draft:a[8],g:a[9],ppr:a[10],ppg:a[11],line:a[12],ts:a[13],snap:a[14],prev:a[15],proj:a[16],pts:a[17],rank:a[18],prank:a[19],note:a[20],str:a[21],t:a[22],exp:a[23]}));
 const BYID=Object.fromEntries(P.map(p=>[p.id,p]));
+/* Draft order is frozen (DRAFT); the Top 125 tab uses the live weekly rank (trank). */
+const DRAFT=__DRAFT__;
+P.forEach(p=>p.trank=p.rank);
+{const di={};DRAFT.ids.forEach((id,i)=>di[id]=i);P.sort((a,b)=>((a.id in di)?di[a.id]:1e4+a.trank)-((b.id in di)?di[b.id]:1e4+b.trank));
+ const c={};P.forEach((p,i)=>{p.rank=i+1;c[p.pos]=(c[p.pos]||0)+1;p.prank=c[p.pos]})}
+const TOP=P.slice().sort((a,b)=>a.trank-b.trank);{const c={};TOP.forEach(p=>{c[p.pos]=(c[p.pos]||0)+1;p.tprank=c[p.pos]})}
 /* ---------- my board: rank moves made while drafting ---------- */
 const BASE=P.map(p=>p.id);P.forEach(p=>{p.base=p.rank;p.prank0=p.prank;p.proj0=p.proj;p.pts0=p.pts});
 const REPL_RPG={QB:0,RB:2.5,WR:4,TE:3.5};
@@ -1276,11 +1282,12 @@ $("#setScrim").addEventListener("click",e=>{if(e.target.id==="setScrim")closeSet
 const sortState={};
 function statsTable(key,list){
   const st=sortState[key]||(sortState[key]={k:key==="top"?"ppg":"rank",d:key==="top"?-1:1});
-  const v=(p,k)=>{const b=BADGES[p.id]||{};return k==="rank"?p.rank:k==="pr"?(b.pr??999):k==="ppg"?(p.g?p.ppg:-1):k==="p25"?(b.p25??-1):k==="proj"?p.proj:k==="name"?p.name.toLowerCase():0};
+  const rk=p=>key==="top"?p.trank:p.rank;
+  const v=(p,k)=>{const b=BADGES[p.id]||{};return k==="rank"?rk(p):k==="pr"?(b.pr??999):k==="ppg"?(p.g?p.ppg:-1):k==="p25"?(b.p25??-1):k==="proj"?p.proj:k==="name"?p.name.toLowerCase():0};
   const L=list.slice().sort((a,b)=>{const x=v(a,st.k),y=v(b,st.k);return(x<y?-1:x>y?1:0)*st.d});
   const th=(k,l,n)=>`<th class="${n?"n":""}" data-sort="${k}" data-tbl="${key}" aria-sort="${st.k===k?(st.d>0?"ascending":"descending"):"none"}">${l}</th>`;
   return`<div class="swrap"><table class="stab"><thead><tr>${th("rank","Rank",1)}${th("name","Player")}${th("pr","Pos rank (PPG)",1)}${th("ppg","2026 PPR/G",1)}${th("p25","2025 PPR/G",1)}${th("proj","2027 proj",1)}</tr></thead><tbody>
-  ${L.map(p=>{const b=BADGES[p.id]||{};return`<tr data-row="${p.id}"><td class="n">${p.rank}</td><td class="pl">${posTag(p.pos)} <button class="linkbtn" data-bio="${p.id}" style="text-decoration:none;color:var(--ink);font-weight:600">${esc(p.name)}</button> <span class="faint">${esc(p.team)}</span></td><td class="n">${b.pr?p.pos+b.pr:"—"}</td><td class="n">${p.g?p.ppg.toFixed(1):"—"}<small>${p.g||0} g</small></td><td class="n">${b.p25!=null?b.p25.toFixed(1):"—"}</td><td class="n">${p.proj}</td></tr>`}).join("")}</tbody></table></div>
+  ${L.map(p=>{const b=BADGES[p.id]||{};return`<tr data-row="${p.id}"><td class="n">${rk(p)}</td><td class="pl">${posTag(p.pos)} <button class="linkbtn" data-bio="${p.id}" style="text-decoration:none;color:var(--ink);font-weight:600">${esc(p.name)}</button> <span class="faint">${esc(p.team)}</span></td><td class="n">${b.pr?p.pos+b.pr:"—"}</td><td class="n">${p.g?p.ppg.toFixed(1):"—"}<small>${p.g||0} g</small></td><td class="n">${b.p25!=null?b.p25.toFixed(1):"—"}</td><td class="n">${p.proj}</td></tr>`}).join("")}</tbody></table></div>
   <p class="faint" style="font-size:12px;margin:8px 2px">Tap a column to sort. Pos rank ranks 2026 points per game among players with 4+ games.</p>`;
 }
 document.addEventListener("click",e=>{const t=e.target.closest("th[data-sort]");if(!t)return;const st=sortState[t.dataset.tbl];const k=t.dataset.sort;
@@ -1341,14 +1348,14 @@ $("#bQ").oninput=renderBoardTab;
 /* ---------- Top 125 tab ---------- */
 let tView="list",tPos="ALL";
 function renderTop(){
-  $("#topSub").textContent=`${scoringName()} · ${S.teams} teams · stats through Week __WEEK__ · updated __DATE__`;
+  $("#topSub").textContent=`Full PPR · re-ranked weekly · stats through Week __WEEK__ · updated __DATE__`;
   $("#tPos").innerHTML=chipsHtml(tPos,"data-tp");
   document.querySelectorAll("#tSeg button").forEach(b=>b.setAttribute("aria-selected",b.dataset.v===tView));
-  const L=P.slice(0,125).filter(p=>posFilter(p,tPos));
+  const L=TOP.slice(0,125).filter(p=>posFilter(p,tPos));
   if(!L.length){$("#topList").innerHTML=`<div class="empty">${tPos==="FAV"?"No favorites in the Top 125 yet. Tap ♡ to save a player.":"No players match."}</div>`;return}
   if(tView==="stats"){$("#topList").innerHTML=statsTable("top",L);return}
-  const row=p=>`<li data-row="${p.id}"><span class="n num">${p.rank}</span><span class="pos ${p.pos} posrk">${p.pos}${p.prank}</span><button class="nm" data-bio="${p.id}">${esc(p.name)}</button><span class="tm">${esc(p.team)}</span>${favBtn(p.id)}</li>`;
-  if(POS.includes(tPos)){const G=[];L.forEach(p=>{const g=G[G.length-1];if(g&&g.t===p.tier)g.L.push(p);else G.push({t:p.tier,L:[p]})});
+  const row=p=>`<li data-row="${p.id}"><span class="n num">${p.trank}</span><span class="pos ${p.pos} posrk">${p.pos}${p.tprank}</span><button class="nm" data-bio="${p.id}">${esc(p.name)}</button><span class="tm">${esc(p.team)}</span>${favBtn(p.id)}</li>`;
+  if(POS.includes(tPos)){const G=[];let top=null,cm=null,t=0;L.forEach(p=>{const pj=p.proj0;if(top==null){top=cm=pj;t=1}else{cm=Math.min(cm,pj);if(top-cm>=TGAP[p.pos]){t++;top=cm}}const g=G[G.length-1];if(g&&g.t===t)g.L.push(p);else G.push({t,L:[p]})});
     $("#topList").innerHTML=`<div class="tiers">${G.map(g=>`<section class="tierbox t${Math.min(g.t,4)}"><div class="tierdiv">${tPos} Tier ${g.t}<span>${g.L.length} player${g.L.length===1?"":"s"}</span></div><ol class="t125">${g.L.map(row).join("")}</ol></section>`).join("")}</div>`;return}
   $("#topList").innerHTML=`<ol class="t125">${L.map(row).join("")}</ol>`;
 }

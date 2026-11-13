@@ -1,3 +1,4 @@
+import json
 # Builds the Draft Room page + local standalone test copy, then the app.
 import glob,os,datetime
 import pandas as _pd
@@ -5,7 +6,7 @@ WEEK=str(int(_pd.read_csv('/home/claude/nfldata/stats26.csv',usecols=['week']).w
 DATE_LONG=datetime.date.today().strftime('%b %-d, %Y')
 D=datetime.date.today().strftime('%b %-d')
 t=open('/home/claude/fantasy/template.html').read()
-t=t.replace('__PLAYERS__',open('/home/claude/fantasy/players.json').read()).replace('__BREAK__',open('/home/claude/fantasy/breakouts.json').read()).replace('__BADGES__',open('/home/claude/fantasy/badges.json').read()).replace('__WEEK__',WEEK).replace('__DATE__',DATE_LONG)
+t=t.replace('__PLAYERS__',open('/home/claude/fantasy/players.json').read()).replace('__BREAK__',open('/home/claude/fantasy/breakouts.json').read()).replace('__BADGES__',open('/home/claude/fantasy/badges.json').read()).replace('__DRAFT__',open('/home/claude/fantasy/draft_order.json').read()).replace('__DRAFTSET__',json.load(open('/home/claude/fantasy/draft_order.json'))['set']).replace('__WEEK__',WEEK).replace('__DATE__',DATE_LONG)
 open('/home/claude/fantasy/draft-room-2027.html','w').write(t)
 for f in glob.glob('/home/claude/downloads/draft-room-2027*.html'): os.remove(f)
 i=t.index('</style>')+8
