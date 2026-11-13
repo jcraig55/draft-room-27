@@ -223,7 +223,8 @@ table.grid td.r .dir{display:block;font-size:10px;font-weight:600;color:var(--in
 .pickcard small{font-size:11px;color:var(--ink-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .pickcard.me .pct{border-color:var(--accent);background:var(--accent-soft)}.pickcard.me b{color:var(--ink)}
 .ticker{border:1.5px solid var(--accent);background:var(--accent-soft);border-radius:16px;padding:10px 12px;margin:10px 0 2px;display:grid;gap:4px;box-shadow:0 4px 14px rgba(0,0,0,.08)}
-.dock{position:sticky;top:0;z-index:6;padding-top:calc(6px + env(safe-area-inset-top,0px));margin-top:-6px;background:linear-gradient(var(--bg) 70%,transparent)}
+.dock{position:sticky;top:calc(6px + env(safe-area-inset-top,0px));z-index:6}
+.dock::before{content:"";position:absolute;left:-20px;right:-20px;bottom:100%;height:calc(6px + env(safe-area-inset-top,0px));background:var(--bg);opacity:0;pointer-events:none}.dock.stuck::before{opacity:1}
 .dock .controls{padding:8px;box-shadow:0 4px 14px rgba(0,0,0,.06)}.dock .ticker{margin-top:6px}
 .xdock{position:sticky;top:0;height:0;z-index:8;display:flex;justify-content:flex-end;align-items:flex-start;pointer-events:none}
 .xbtn{pointer-events:none;opacity:0;transform:translateY(-6px);transition:opacity .15s,transform .15s;margin-top:4px;border:0;border-radius:999px;background:var(--ink);color:#fff;font:inherit;font-weight:700;font-size:13px;padding:8px 14px;box-shadow:0 4px 14px rgba(0,0,0,.25);cursor:pointer;white-space:nowrap}
@@ -1098,6 +1099,7 @@ document.addEventListener("scroll",e=>{const c=e.target;if(!(c instanceof Elemen
   if(!c.querySelector(":scope>.xdock")){const d=document.createElement("div");d.className="xdock";d.innerHTML='<button type="button" class="xbtn" aria-label="Close">✕ Close</button>';c.prepend(d)}
   c.classList.toggle("xon",c.scrollTop>80)},true);
 document.addEventListener("click",e=>{const b=e.target.closest(".xbtn");if(!b)return;e.stopPropagation();const c=b.closest(XC);if(!c)return;const t=xCloseBtn(c);if(t)t.click();else if(c.parentElement)c.parentElement.click()},true);
+window.addEventListener("scroll",()=>{const d=document.querySelector(".dock");if(!d)return;const t=parseFloat(getComputedStyle(d).top)||0;d.classList.toggle("stuck",d.getBoundingClientRect().top<=t+1&&scrollY>0)},{passive:true});
 function renderTimerSettings(){document.querySelectorAll("#paceSeg button").forEach(b=>{b.setAttribute("aria-selected",b.dataset.pace===TM.pace);b.setAttribute("aria-checked",b.dataset.pace===TM.pace)});$("#tmOn").setAttribute("aria-checked",TM.on);$("#tmBody").classList.toggle("off",!TM.on);
   document.querySelectorAll("#tmSec button").forEach(b=>{b.setAttribute("aria-selected",+b.dataset.s===TM.sec);b.setAttribute("aria-checked",+b.dataset.s===TM.sec)});$("#tmEnd").value=TM.end;$("#tmBeep").value=TM.beep?"1":"0"}
 $("#tmOn").onclick=()=>{TM.on=!TM.on;saveTM();renderTimerSettings();if(!TM.on)stopClock();toast(TM.on?`Pick timer on: ${fmtT(TM.sec)} per pick.`:"Pick timer off.")};
