@@ -1,0 +1,1003 @@
+<title>War Room 2027</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700;800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<style>
+/* Layout: a draft war room — sticky tab rail, the board as a ledger of pick slips, a side "available" stack on wide screens */
+:root{
+  --bg:#EEF1EC;          /* chalkboard-paper, faint turf tint */
+  --surface:#FFFFFF;
+  --surface-2:#F5F7F3;
+  --ink:#16201B;
+  --ink-2:#4A5650;
+  --ink-3:#7C8781;
+  --line:#D6DCD5;
+  --accent:#1E5E3E;      /* field green */
+  --accent-ink:#FFFFFF;
+  --accent-soft:#DCEBE1;
+  --clock:#B87400;       /* on-the-clock amber */
+  --clock-soft:#FBEBCB;
+  --up:#1F7A45; --up-soft:#DDF1E3;
+  --down:#B3362E; --down-soft:#F8DEDA;
+  --warn:#8A5A00;
+  --shadow:0 1px 2px rgba(22,32,27,.06),0 4px 14px rgba(22,32,27,.06);
+  --f-display:"Barlow Condensed","Arial Narrow",Arial,sans-serif;
+  --f-body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0F1512; --surface:#161E1A; --surface-2:#1B2520; --ink:#E7EDE8; --ink-2:#B2BDB6; --ink-3:#7E8A83; --line:#2A3630;
+  --accent:#5FC48C; --accent-ink:#0B1410; --accent-soft:#1D3A2A; --clock:#F0B23E; --clock-soft:#3A2C10;
+  --up:#6BD394; --up-soft:#173322; --down:#F08A80; --down-soft:#3B1C19; --warn:#F0B23E;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 6px 18px rgba(0,0,0,.25); color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0F1512; --surface:#161E1A; --surface-2:#1B2520; --ink:#E7EDE8; --ink-2:#B2BDB6; --ink-3:#7E8A83; --line:#2A3630;
+  --accent:#5FC48C; --accent-ink:#0B1410; --accent-soft:#1D3A2A; --clock:#F0B23E; --clock-soft:#3A2C10;
+  --up:#6BD394; --up-soft:#173322; --down:#F08A80; --down-soft:#3B1C19; --warn:#F0B23E;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 6px 18px rgba(0,0,0,.25); color-scheme:dark}
+*{box-sizing:border-box}
+html,body{background:var(--bg)}
+body{color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.5;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 48px}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+.wrap{max-width:1180px;margin:0 auto}
+h1,h2,h3{font-family:var(--f-display);text-wrap:balance;margin:0;letter-spacing:.01em}
+button,select,input{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.num{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+.muted{color:var(--ink-2)} .faint{color:var(--ink-3)}
+.eyebrow{font-family:var(--f-display);font-weight:600;letter-spacing:.12em;text-transform:uppercase;font-size:12px;color:var(--ink-3)}
+
+/* masthead */
+.mast{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:8px 20px;padding-block:22px 14px}
+.mast h1{font-size:clamp(34px,7vw,52px);font-weight:800;line-height:.9;text-transform:uppercase}
+.mast h1 span{color:var(--accent)}
+.mast p{margin:6px 0 0;color:var(--ink-2);max-width:62ch;font-size:14px}
+.asof{font-family:var(--f-mono);font-size:12px;color:var(--ink-3);text-align:right}
+
+/* tabs */
+.tabs{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);display:flex;gap:4px;padding-block:8px;border-bottom:1px solid var(--line);overflow-x:auto;scrollbar-width:none}
+.tabs button{border:0;background:none;padding:8px 14px;border-radius:999px;font-family:var(--f-display);font-weight:700;font-size:17px;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-2);white-space:nowrap}
+.tabs button[aria-selected="true"]{background:var(--ink);color:var(--bg)}
+.panel{padding-top:18px}
+
+/* generic */
+.card{background:var(--surface);border:1px solid var(--line);border-radius:10px;box-shadow:var(--shadow)}
+.btn{border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:7px 12px;font-weight:600;font-size:14px;line-height:1.2}
+.btn:hover{border-color:var(--ink-3)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.ghost{background:transparent}
+.btn.sm{padding:4px 9px;font-size:13px}
+.btn.danger{color:var(--down);border-color:var(--down)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.chip{display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:600;padding:2px 8px;border-radius:999px;background:var(--surface-2);border:1px solid var(--line);white-space:nowrap}
+.pos{font-family:var(--f-display);font-weight:700;letter-spacing:.06em;font-size:13px;padding:1px 7px;border-radius:4px;background:var(--accent-soft);color:var(--accent)}
+.trend-up{background:var(--up-soft);color:var(--up);border-color:transparent}
+.trend-down{background:var(--down-soft);color:var(--down);border-color:transparent}
+.dot{width:10px;height:10px;border-radius:50%;display:inline-block;flex:none;box-shadow:inset 0 0 0 1px rgba(0,0,0,.15)}
+label.field{display:flex;flex-direction:column;gap:4px;font-size:12px;font-weight:600;color:var(--ink-2)}
+select,input[type=text],input[type=search]{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:7px 10px;font-size:14px;min-width:0}
+input[type=range]{accent-color:var(--accent);width:100%}
+
+/* mock layout */
+.mock{display:grid;grid-template-columns:minmax(0,1fr);gap:16px}
+@media (min-width:980px){.mock{grid-template-columns:minmax(0,1.25fr) minmax(0,1fr)}.side{position:sticky;top:calc(env(safe-area-inset-top,0px) + 62px);align-self:start;max-height:calc(100vh - 80px);display:flex;flex-direction:column}}
+.controls{padding:14px;display:grid;gap:14px}
+.ctl-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+.actions{display:flex;flex-wrap:wrap;gap:8px}
+.teampick{display:flex;flex-wrap:wrap;gap:6px}
+.teampick button{border:1px solid var(--line);background:var(--surface);border-radius:6px;padding:3px 7px;font-family:var(--f-mono);font-size:12px;font-weight:600;display:inline-flex;align-items:center;gap:5px}
+.teampick button[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+details.more>summary{cursor:pointer;font-weight:600;font-size:14px;color:var(--ink-2);list-style:none}
+details.more>summary::before{content:"▸ ";}
+details.more[open]>summary::before{content:"▾ ";}
+
+.roundhead{display:flex;align-items:baseline;justify-content:space-between;margin:18px 2px 8px}
+.roundhead h2{font-size:24px;text-transform:uppercase;font-weight:800}
+.board{display:flex;flex-direction:column;gap:6px}
+.slip{display:grid;grid-template-columns:44px minmax(0,1fr) auto;gap:10px;align-items:center;padding:9px 10px;background:var(--surface);border:1px solid var(--line);border-radius:8px}
+.slip.clock{border-color:var(--clock);background:var(--clock-soft)}
+.slip.mine{box-shadow:inset 3px 0 0 var(--ink)}
+.slip .no{font-family:var(--f-display);font-weight:800;font-size:26px;line-height:1;text-align:center}
+.slip .team{display:flex;align-items:center;gap:6px;font-weight:600;font-size:14px;flex-wrap:wrap}
+.slip .via{font-size:12px;color:var(--ink-3);font-weight:500}
+.slip .player{display:flex;align-items:baseline;gap:6px;flex-wrap:wrap;margin-top:2px}
+.slip .player b{font-size:16px}
+.slip .sub{font-size:12.5px;color:var(--ink-2)}
+.slip .why{font-size:12.5px;color:var(--ink-2);margin-top:2px}
+.val{font-family:var(--f-mono);font-size:11.5px;font-weight:600;padding:1px 6px;border-radius:4px}
+.val.steal{background:var(--up-soft);color:var(--up)} .val.reach{background:var(--down-soft);color:var(--down)} .val.par{background:var(--surface-2);color:var(--ink-2)}
+.slip .btns{display:flex;flex-direction:column;gap:4px;align-items:flex-end}
+.clocktag{font-family:var(--f-display);font-weight:700;letter-spacing:.08em;text-transform:uppercase;font-size:13px;color:var(--clock)}
+
+/* available board */
+.side .card{display:flex;flex-direction:column;min-height:0}
+.availhead{padding:12px 12px 8px;display:grid;gap:8px;border-bottom:1px solid var(--line)}
+.poschips{display:flex;gap:4px;overflow-x:auto;scrollbar-width:thin;padding-bottom:2px}
+.poschips button{border:1px solid var(--line);background:var(--surface);border-radius:6px;padding:3px 8px;font-family:var(--f-display);font-weight:700;letter-spacing:.05em;font-size:13px;white-space:nowrap}
+.poschips button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.avail{overflow-y:auto;min-height:0;max-height:560px}
+@media (min-width:980px){.avail{max-height:none;flex:1}}
+.prow{display:grid;grid-template-columns:34px minmax(0,1fr) auto;gap:8px;align-items:center;padding:8px 12px;border-bottom:1px solid var(--line)}
+.prow:last-child{border-bottom:0}
+.prow .rk{font-family:var(--f-mono);font-weight:600;color:var(--ink-3);font-size:13px;text-align:right}
+.prow .nm{font-weight:600}
+.prow .meta{font-size:12.5px;color:var(--ink-2)}
+.nmb{all:unset;cursor:pointer;font-weight:600;border-radius:3px}
+.nmb:hover .nmt{text-decoration:underline}
+.nmb:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.nmb .caret{font-size:11px;color:var(--ink-3);margin-left:2px}
+.bio{padding:10px 12px 12px 54px;border-bottom:1px solid var(--line);background:var(--surface-2);display:grid;gap:8px;font-size:13.5px}
+.bio .tags{display:flex;flex-wrap:wrap;gap:5px}
+.bio dl{margin:0;display:grid;grid-template-columns:auto minmax(0,1fr);gap:4px 10px}
+.bio dt{font-family:var(--f-display);font-weight:700;letter-spacing:.08em;text-transform:uppercase;font-size:12px;color:var(--ink-3);padding-top:2px}
+.bio dd{margin:0;min-width:0}
+.bio .fitline{font-weight:600}
+@media (max-width:520px){.bio{padding-left:12px}}
+.hint{padding:10px 12px;font-size:13px;background:var(--surface-2);border-bottom:1px solid var(--line)}
+
+/* order editor */
+.orderlist{display:grid;gap:4px;margin-top:8px}
+.orow{display:grid;grid-template-columns:30px minmax(0,1fr) auto;gap:8px;align-items:center;padding:5px 8px;border:1px solid var(--line);border-radius:6px;background:var(--surface)}
+.orow .tm{display:flex;gap:6px;align-items:center;font-size:14px;font-weight:600}
+
+/* needs */
+.needs-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));gap:12px}
+.ncard{padding:14px;display:grid;gap:10px;align-content:start}
+.nhead{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.nhead h3{font-size:22px;font-weight:700;line-height:1.05}
+.rec{font-family:var(--f-mono);font-size:13px;font-weight:600}
+.slots{display:flex;flex-wrap:wrap;gap:4px}
+.holes{margin:0;padding:0;list-style:none;display:grid;gap:6px}
+.holes li{display:grid;grid-template-columns:22px minmax(0,1fr);gap:6px;font-size:13.5px}
+.holes li .n{font-family:var(--f-display);font-weight:800;font-size:18px;line-height:1.1;color:var(--accent)}
+.qb{font-size:13px;background:var(--surface-2);border-radius:6px;padding:6px 8px}
+.fit{font-size:13px;border-top:1px dashed var(--line);padding-top:8px}
+.needsel{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px}
+.needsel select{padding:4px;font-size:12.5px;font-family:var(--f-display);font-weight:700;letter-spacing:.04em}
+.toolbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:12px}
+
+/* prospects */
+.leaps{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px;margin-bottom:22px}
+.leap{padding:12px;display:grid;gap:4px}
+.leap .big{font-family:var(--f-display);font-weight:700;font-size:20px;line-height:1.05}
+.leap p{margin:0;font-size:13px;color:var(--ink-2)}
+.plist{display:grid;gap:8px}
+.pcard{padding:12px 14px;display:grid;grid-template-columns:46px minmax(0,1fr);gap:12px}
+.pcard .rank{font-family:var(--f-display);font-weight:800;font-size:30px;line-height:1;color:var(--ink-3)}
+.pcard .top{display:flex;flex-wrap:wrap;gap:6px 8px;align-items:baseline}
+.pcard .top b{font-size:17px}
+.pcard dl{margin:6px 0 0;display:grid;grid-template-columns:auto minmax(0,1fr);gap:3px 10px;font-size:13.5px}
+.pcard dt{font-family:var(--f-display);font-weight:700;letter-spacing:.08em;text-transform:uppercase;font-size:12px;color:var(--ink-3);padding-top:2px}
+.pcard dd{margin:0;min-width:0}
+.slip.plain{grid-template-columns:44px minmax(0,1fr)}
+.basenote{font-size:13px;color:var(--ink-2);background:var(--surface-2);border:1px solid var(--line);border-radius:8px;padding:10px 12px;margin-bottom:4px}
+.posgroup h2{font-size:26px;text-transform:uppercase;font-weight:800;margin:20px 0 8px;display:flex;align-items:baseline;gap:10px}
+
+/* saved */
+.savegrid{display:grid;grid-template-columns:minmax(0,1fr);gap:16px}
+@media (min-width:860px){.savegrid{grid-template-columns:340px minmax(0,1fr)}}
+.folder{margin-bottom:14px}
+.folder h3{font-size:20px;text-transform:uppercase;font-weight:700;margin-bottom:6px;display:flex;gap:8px;align-items:baseline}
+.mockrow{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:center;padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:var(--surface);margin-bottom:6px}
+.mockrow .t{font-weight:600}
+.mockrow .s{font-size:12.5px;color:var(--ink-2)}
+
+/* sheet / modal */
+.scrim{position:fixed;inset:0;background:rgba(10,15,12,.45);z-index:20;display:flex;align-items:flex-end;justify-content:center}
+@media (min-width:720px){.scrim{align-items:center}}
+.sheet{background:var(--surface);color:var(--ink);width:min(720px,100%);max-height:88vh;overflow:auto;border-radius:14px 14px 0 0;padding:16px max(16px,env(safe-area-inset-right,0px)) calc(16px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
+@media (min-width:720px){.sheet{border-radius:14px}}
+.sheet h2{font-size:26px;text-transform:uppercase;font-weight:800}
+.tradecols{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;margin-top:12px}
+.tside{border:1px solid var(--line);border-radius:10px;padding:10px;display:grid;gap:6px;align-content:start}
+.tpick{display:flex;align-items:center;gap:8px;font-size:14px;padding:4px 2px}
+.tpick .num{margin-left:auto;color:var(--ink-3);font-size:12px}
+.meter{height:8px;border-radius:99px;background:var(--surface-2);overflow:hidden;display:flex}
+.meter i{display:block;height:100%}
+.verdict{font-weight:600;font-size:14px}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(18px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--bg);padding:9px 16px;border-radius:999px;font-size:14px;font-weight:600;z-index:30;box-shadow:var(--shadow)}
+.bv{position:fixed;inset:0;z-index:25;background:var(--bg);overflow:auto;padding-top:calc(14px + env(safe-area-inset-top,0px));padding-bottom:calc(20px + env(safe-area-inset-bottom,0px));padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.bv-head{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;gap:8px 16px;margin-bottom:10px}
+.bv-head h2{font-size:clamp(26px,4vw,38px);text-transform:uppercase;font-weight:800;line-height:1}
+.bv-round{display:flex;align-items:baseline;gap:10px;margin:10px 0 6px}
+.bv-round h3{font-size:18px;text-transform:uppercase;font-weight:800;letter-spacing:.06em}
+.bv-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px}
+@media (min-width:640px){.bv-grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
+@media (min-width:1000px){.bv-grid{grid-template-columns:repeat(8,minmax(0,1fr))}}
+.bv-cell{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:5px 7px 6px;min-width:0;display:grid;gap:1px;border-top:3px solid var(--tc)}
+.bv-cell .h{display:flex;justify-content:space-between;align-items:baseline;gap:4px;font-size:11.5px}
+.bv-cell .h .n{font-family:var(--f-display);font-weight:800;font-size:16px;line-height:1}
+.bv-cell .h .t{font-family:var(--f-mono);font-weight:600;color:var(--ink-2)}
+.bv-cell .pl{font-weight:600;font-size:13px;line-height:1.2;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bv-cell .ps{font-size:11.5px;color:var(--ink-2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bv-cell.empty .pl{color:var(--ink-3);font-weight:500}
+.bv-copy{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.bv-fallback{margin:10px 0;padding:10px;border:1px dashed var(--line);border-radius:8px;background:var(--surface);display:grid;gap:8px}
+.bv-fallback textarea{width:100%;min-height:140px;font-family:var(--f-mono);font-size:12px;background:var(--surface-2);color:var(--ink);border:1px solid var(--line);border-radius:6px;padding:8px}
+.bv-fallback img{max-width:100%;border:1px solid var(--line);border-radius:6px}
+.bv-trades{font-size:12.5px;color:var(--ink-2);margin-top:12px}
+.mockrow .t button{all:unset;cursor:pointer;font-weight:600}
+.mockrow .t button:hover{text-decoration:underline}
+.mockrow .t button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.foot{margin-top:36px;font-size:12.5px;color:var(--ink-3);border-top:1px solid var(--line);padding-top:14px}
+.foot a{color:var(--ink-2)}
+.empty{padding:22px;text-align:center;color:var(--ink-2);font-size:14px}
+@media (max-width:520px){.slip{grid-template-columns:36px minmax(0,1fr)}.slip .btns{grid-column:2;flex-direction:row;justify-content:flex-start}.slip .no{font-size:22px}}
+@media (prefers-reduced-motion:no-preference){.slip.new{animation:drop .35s ease-out}@keyframes drop{from{transform:translateY(-4px);opacity:.3}to{transform:none;opacity:1}}}
+</style>
+
+<div class="wrap">
+  <header class="mast">
+    <div>
+      <div class="eyebrow">2027 NFL Draft · Washington, D.C. · Apr 29 – May 1</div>
+      <h1>War Room <span>’27</span></h1>
+      <p>Run a two-round mock, trade picks, rewrite any team’s needs, and save your boards. Order reflects records through Week 8 (Nov 2); tiebreakers are approximate.</p>
+    </div>
+    <div class="asof">Data as of Nov 3, 2026<br>College stats through Oct 31</div>
+  </header>
+
+  <nav class="tabs" role="tablist" id="tabs">
+    <button role="tab" data-tab="mock" aria-selected="true">Mock Draft</button>
+    <button role="tab" data-tab="needs" aria-selected="false">Team Needs</button>
+    <button role="tab" data-tab="prospects" aria-selected="false">Prospects</button>
+    <button role="tab" data-tab="saved" aria-selected="false">Saved Mocks</button>
+  </nav>
+
+  <!-- MOCK -->
+  <section class="panel" id="p-mock">
+    <div class="mock">
+      <div style="min-width:0">
+        <div class="card controls">
+          <div class="actions">
+            <button class="btn primary" id="simUser">Sim to my pick</button>
+            <button class="btn" id="simAll">Sim full draft</button>
+            <button class="btn" id="simOne">Next pick</button>
+            <button class="btn" id="clearPicks">Clear picks</button>
+            <button class="btn" id="boardView">Full board view</button>
+            <button class="btn ghost" id="copyMock">Copy results</button>
+          </div>
+          <div>
+            <div class="eyebrow" style="margin-bottom:6px">Teams you control <span class="faint" style="letter-spacing:0;text-transform:none;font-family:var(--f-body)">· the sim stops on their picks</span></div>
+            <div class="teampick" id="userTeams"></div>
+          </div>
+          <div class="ctl-row">
+            <label class="field" for="needW">Draft philosophy: <span id="needWLbl"></span>
+              <input type="range" id="needW" min="0" max="100" step="5">
+              <span class="faint" style="font-weight:500">Best player available ← → Team need</span>
+            </label>
+            <label class="field" for="rnd">Chaos: <span id="rndLbl"></span>
+              <input type="range" id="rnd" min="0" max="100" step="5">
+              <span class="faint" style="font-weight:500">Chalk ← → Surprises</span>
+            </label>
+            <label class="field" for="rounds">Rounds
+              <select id="rounds"><option value="1">Round 1 (32 picks)</option><option value="2">Rounds 1–2 (64 picks)</option></select>
+            </label>
+          </div>
+          <details class="more" id="orderBox">
+            <summary>Edit draft order & trades</summary>
+            <div style="display:grid;gap:10px;margin-top:10px">
+              <div class="actions">
+                <button class="btn sm" id="openTrade">New trade</button>
+                <button class="btn sm" id="resetOrder">Reset order to standings</button>
+                <button class="btn sm danger" id="resetTrades">Undo all trades</button>
+              </div>
+              <div id="tradeLog" class="muted" style="font-size:13px"></div>
+              <div class="faint" style="font-size:13px">Move teams up or down to set the Round 1 order. Round 2 follows the same order. Changing the order clears the picks made so far.</div>
+              <div class="orderlist" id="orderList"></div>
+            </div>
+          </details>
+        </div>
+        <div id="boardWrap"></div>
+      </div>
+      <aside class="side">
+        <div class="card">
+          <div class="availhead">
+            <div style="display:flex;justify-content:space-between;align-items:baseline;gap:8px">
+              <h2 style="font-size:22px;text-transform:uppercase;font-weight:800">Best available</h2>
+              <span class="faint num" id="availCount" style="font-size:12px"></span>
+            </div>
+            <input type="search" id="availSearch" placeholder="Search players or schools">
+            <div class="poschips" id="availPos"></div>
+          </div>
+          <div id="availHint"></div>
+          <div class="avail" id="availList"></div>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <!-- NEEDS -->
+  <section class="panel" id="p-needs" hidden>
+    <div class="toolbar">
+      <input type="search" id="needSearch" placeholder="Find a team" style="max-width:220px">
+      <select id="needSort"><option value="order">Sort by draft slot</option><option value="alpha">Sort A–Z</option></select>
+      <button class="btn sm" id="resetNeeds">Reset all needs</button>
+      <span class="faint" style="font-size:13px">The four position slots drive the mock sim, most urgent first. Change them and the next sim follows.</span>
+    </div>
+    <div class="needs-grid" id="needsGrid"></div>
+  </section>
+
+  <!-- PROSPECTS -->
+  <section class="panel" id="p-prospects" hidden>
+    <div class="roundhead" style="margin-top:0"><h2>Biggest leaps of 2026</h2><span class="faint" style="font-size:13px">Players whose stock moved most this fall</span></div>
+    <div class="leaps" id="leaps"></div>
+    <div class="toolbar">
+      <input type="search" id="proSearch" placeholder="Search name or school" style="max-width:240px">
+      <div class="poschips" id="proPos" style="flex:1"></div>
+      <select id="proView"><option value="pos">Group by position</option><option value="rank">Overall big board</option><option value="base">Base mock draft (1–64)</option></select>
+    </div>
+    <div id="proList"></div>
+  </section>
+
+  <!-- SAVED -->
+  <section class="panel" id="p-saved" hidden>
+    <div class="savegrid">
+      <div class="card" style="padding:14px;display:grid;gap:10px;align-content:start">
+        <h2 style="font-size:22px;text-transform:uppercase;font-weight:800">Save this mock</h2>
+        <label class="field" for="saveName">Name<input type="text" id="saveName" placeholder="e.g. Jets take Mensah at 7"></label>
+        <label class="field" for="saveFolder">Folder<input type="text" id="saveFolder" list="folderList" placeholder="e.g. October scenarios"></label>
+        <datalist id="folderList"></datalist>
+        <button class="btn primary" id="saveBtn">Save mock</button>
+        <div class="faint" id="storeNote" style="font-size:12.5px"></div>
+      </div>
+      <div id="savedList" style="min-width:0"></div>
+    </div>
+  </section>
+
+  <footer class="foot" id="foot"></footer>
+</div>
+
+<div id="sheetHost"></div>
+<div id="toastHost"></div>
+
+<script>
+/* ---------------- DATA ---------------- */
+const POS=["QB","RB","WR","TE","OT","IOL","EDGE","DL","LB","CB","S"];
+const POSNAME={QB:"Quarterbacks",RB:"Running backs",WR:"Wide receivers",TE:"Tight ends",OT:"Offensive tackles",IOL:"Interior O-line",EDGE:"Edge rushers",DL:"Defensive tackles",LB:"Linebackers",CB:"Cornerbacks",S:"Safeties"};
+
+// Teams: record through Week 8 (Nov 2, 2026). needs = most urgent first.
+const TEAMS={
+ARI:{n:"Arizona Cardinals",c:"#97233F",r:"3-5",needs:["QB","WR","CB","OT"],qb:"Jacoby Brissett is starting; third-round rookie Carson Beck is waiting for a look.",holes:["No long-term quarterback. Brissett is averaging about 6 yards per attempt.","Receiver room got thinner after trading Marvin Harrison Jr. to Houston (Arizona received Houston’s 2027 2nd).","Corner and tackle depth on a roster still being rebuilt."]},
+ATL:{n:"Atlanta Falcons",c:"#A71930",r:"3-5",needs:["EDGE","CB","OT","LB"],qb:"The offense rises and falls with Bijan Robinson: 170 rushing yards a game in wins, 83 in losses.",holes:["Pass defense ranks among the league’s bottom six, with injuries in the secondary.","Pass rush still lacks a true No. 1 edge.","0-3 at home; offensive line and linebacker depth are thin."]},
+BAL:{n:"Baltimore Ravens",c:"#241773",r:"4-4",needs:["IOL","WR","EDGE","CB"],qb:"Lamar Jackson missed time; Tyler Huntley’s 5.6 yards per attempt exposed the passing game.",holes:["Interior line still hasn’t replaced Tyler Linderbaum.","Rashod Bateman isn’t enough as the WR2 behind Zay Flowers.","Edge group leans on Trey Hendrickson; succession plan needed."]},
+BUF:{n:"Buffalo Bills",c:"#00338D",r:"6-1",needs:["S","CB","WR","DL"],qb:"Josh Allen is on an MVP-level pace.",holes:["Safety hasn’t been solved since Poyer and Hyde left; Cole Bishop is an inconsistent tackler.","Defense overall is the weak side of a contender.","Corner and receiver depth for a Super Bowl push."]},
+CAR:{n:"Carolina Panthers",c:"#0085CA",r:"3-4",needs:["TE","OT","CB","EDGE"],qb:"Bryce Young leads a league-best 294 passing yards per game.",holes:["Tight ends are blockers; 34-year-old Darren Waller is the receiving option.","Offensive line still needs a long-term tackle.","Secondary and edge depth behind 2026 free-agent signings."]},
+CHI:{n:"Chicago Bears",c:"#0B162A",r:"6-2",needs:["OT","EDGE","LB","CB"],qb:"Caleb Williams is back; the offense averages 45 points in his two full games.",holes:["Left tackle is unanswered after rotating Braxton Jones, Ozzy Trapilo and Theo Benedet.","Edge rusher was skipped early in the 2026 draft.","Traded its 2027 first to Tennessee for DT Jeffery Simmons (Oct 29), filling the interior but leaving no first-rounder."]},
+CIN:{n:"Cincinnati Bengals",c:"#FB4F14",r:"5-2",needs:["OT","LB","CB","DL"],qb:"Joe Burrow leads the NFL with a 71.4% completion rate.",holes:["Orlando Brown Jr. turns 31 with an out in his deal; blind-side successor needed.","Linebacker play has lagged for two years.","Cincinnati had no 2026 first-rounder after the Dexter Lawrence trade, so youth is thin."]},
+CLE:{n:"Cleveland Browns",c:"#FF3C00",r:"5-3",needs:["QB","EDGE","OT","WR"],qb:"Deshaun Watson is unsigned past 2026; Shedeur Sanders is the backup.",holes:["Still no long-term quarterback.","Edge help opposite Jared Verse: Isaiah McGuire hits free agency, Alex Wright is coming off an Achilles tear.","Tackle and receiver upgrades. Cleveland also owns the Rams’ first."]},
+DAL:{n:"Dallas Cowboys",c:"#003594",r:"3-5",needs:["CB","EDGE","DL","S"],qb:"Dak Prescott’s 90.1 rating would be his lowest since 2022.",holes:["Defense ranks 31st overall; run defense is among the worst.","DaRon Bland is a likely cap cut; corner opposite Joey Porter Jr. is open.","Pass rush and safety need youth. Dallas owns Green Bay’s first; the Jets get the earlier of the two."]},
+DEN:{n:"Denver Broncos",c:"#FB4F14",r:"6-2",needs:["WR","TE","RB","LB"],qb:"Bo Nix ranks 26th in passer rating (79.4) at 5.6 yards per attempt.",holes:["Offense is sputtering; Sean Payton took over play-calling.","No reliable run game to take pressure off Nix.","Tight end and receiver separators are missing."]},
+DET:{n:"Detroit Lions",c:"#0076B6",r:"5-2",needs:["CB","S","IOL","DL"],qb:"Jared Goff and the No. 1 scoring offense are fine.",holes:["Pass defense ranked last in the NFL early in 2026, allowing nearly 300 yards a game.","Secondary needs a full reset at corner and safety.","Interior line depth after early-career extensions."]},
+GB:{n:"Green Bay Packers",c:"#203731",r:"5-3",needs:["CB","IOL","DL","S"],qb:"Jordan Love is throwing on 66% of plays with Matthew Golden breaking out.",holes:["Secondary depth, especially corner.","Interior offensive line consistency.","Green Bay’s first belongs to Dallas (Parsons trade), so Day 2 must fill holes."]},
+HOU:{n:"Houston Texans",c:"#03202F",r:"2-5",needs:["OT","IOL","DL","LB"],qb:"C.J. Stroud has a 100.9 rating and just got Marvin Harrison Jr.",holes:["Offensive line has been the sticking point since Stroud’s second year.","Defensive struggles have been shocking after an 0-4 start.","No second-round pick (sent to Arizona for Harrison)."]},
+IND:{n:"Indianapolis Colts",c:"#002C5F",r:"2-6",needs:["QB","IOL","DL","EDGE"],qb:"Daniel Jones took six sacks and threw two picks in the loss to Tennessee; fans want a change.",holes:["Quarterback is back to square one.","Pass rush lacks a closer.","Sold off G Quenton Nelson (to Seattle) and DL DeForest Buckner (to San Francisco) on Oct 27. No first-rounder (sent to the Jets for Sauce Gardner)."]},
+JAX:{n:"Jacksonville Jaguars",c:"#006778",r:"5-2",needs:["S","EDGE","IOL","RB"],qb:"Loaded offense under Liam Coen; Travis Hunter is now playing both ways.",holes:["Safety play is the weak spot of the secondary.","A third edge to pair with Hines-Allen and Walker in sub packages.","Interior line and back depth."]},
+KC:{n:"Kansas City Chiefs",c:"#E31837",r:"5-2",needs:["TE","WR","DL","OT"],qb:"Patrick Mahomes plus Kenneth Walker III (133 rushing yards a game).",holes:["Travis Kelce is 37; the tight end succession plan is now.","Receiver room needs a true No. 1.","Interior pass rush and tackle depth."]},
+LV:{n:"Las Vegas Raiders",c:"#A5ACAF",r:"4-4",needs:["DL","CB","IOL","WR"],qb:"The run game sits at a league-low 3.0 yards per carry despite Ashton Jeanty.",holes:["Run defense is bottom five; interior defenders are replacement level.","Cornerback depth.","Interior line isn’t creating rushing lanes."]},
+LAC:{n:"Los Angeles Chargers",c:"#0080C6",r:"0-7",needs:["WR","IOL","CB","EDGE"],qb:"Justin Herbert is at a 68.8 rating on pace for 27 interceptions and 60 sacks.",holes:["No real No. 1 receiver.","Interior line has been the Achilles’ heel for two seasons.","Donte Jackson is a free agent at corner; edge needs youth."]},
+LAR:{n:"Los Angeles Rams",c:"#003594",r:"4-4",needs:["IOL","LB","S","QB"],qb:"Matthew Stafford is efficient but there’s no successor behind him.",holes:["Interior line and linebacker depth after all-in trades.","Safety play.","Rams’ first belongs to Cleveland (Myles Garrett trade)."]},
+MIA:{n:"Miami Dolphins",c:"#008E97",r:"1-6",needs:["QB","EDGE","WR","CB"],qb:"Malik Willis is the QB1 on a provisional basis.",holes:["Possibly the least talented roster in the league; QB is the first domino.","Pass rush is thin.","Receiver and corner both need starters."]},
+MIN:{n:"Minnesota Vikings",c:"#4F2683",r:"6-1",needs:["QB","S","CB","TE"],qb:"Kyler Murray is playing well in a possible prove-it year.",holes:["Long-term QB plan beyond Murray.","Safety and corner depth behind a blitz-heavy defense.","Tight end for O’Connell’s scheme."]},
+NE:{n:"New England Patriots",c:"#002244",r:"5-3",needs:["TE","EDGE","LB","DL"],qb:"Drake Maye is out of his early slump behind a 131-yard rushing attack.",holes:["Tight end is the clearest offensive hole.","Edge pressure needs another young rusher.","Off-ball linebacker and interior line depth. The A.J. Brown trade has underwhelmed."]},
+NO:{n:"New Orleans Saints",c:"#D3BC8D",r:"2-5",needs:["DL","EDGE","CB","QB"],qb:"Tyler Shough is at 4.8 yards per attempt; no better short-term option.",holes:["Run defense ranks in the bottom three.","Cam Jordan needs an heir on the edge.","Corner depth, plus a real look at QB."]},
+NYG:{n:"New York Giants",c:"#0B2265",r:"4-2-1",needs:["DL","QB","CB","IOL"],qb:"J.J. McCarthy and Jameis Winston have both started; the position is unsettled.",holes:["Run defense is bottom eight after trading Dexter Lawrence.","Quarterback is unsettled.","Corner and interior line need starters."]},
+NYJ:{n:"New York Jets",c:"#125740",r:"2-6",needs:["QB","CB","EDGE","DL"],qb:"Geno Smith is the bridge; Cade Klubnik is behind him.",holes:["Franchise QB is the whole plan, and three first-rounders (own, IND, DAL/GB) can buy one.","Brandon Stephens turns 30 with no guaranteed money; CB1 needed.","David Bailey needs an edge partner; Will McDonald IV is in trade rumors."]},
+PHI:{n:"Philadelphia Eagles",c:"#004C54",r:"2-6",needs:["OT","IOL","QB","EDGE"],qb:"Jalen Hurts is on IR with blood clots; Tanner McKee is starting.",holes:["Lane Johnson retired and Cam Jurgens was traded; the line is rebuilding.","Quarterback question is open for the first time in years.","Edge rotation needs youth."]},
+PIT:{n:"Pittsburgh Steelers",c:"#FFB612",r:"6-2",needs:["QB","CB","OT","DL"],qb:"Aaron Rodgers is still producing; Drew Allar and Will Howard are the future candidates.",holes:["No established long-term quarterback.","Corner depth after trading Joey Porter Jr. to Dallas.","Tackle after trading Broderick Jones and losing Isaac Seumalo."]},
+SF:{n:"San Francisco 49ers",c:"#AA0000",r:"6-1",needs:["IOL","OT","EDGE","CB"],qb:"The offense leads the NFL in red-zone TD rate (87.5%).",holes:["Interior line: Jake Brendel is 34 in a contract year; left guard is open.","Tackle succession.","Added DL DeForest Buckner (Oct 27); edge depth is the remaining front-seven need."]},
+SEA:{n:"Seattle Seahawks",c:"#002244",r:"4-4",needs:["WR","QB","EDGE","IOL"],qb:"Sam Darnold has regressed: 60.4% completions, on pace for 22 interceptions.",holes:["Jaxon Smith-Njigba is drawing more targets than the next three receivers combined.","Added G Quenton Nelson from Indianapolis (Oct 27), easing the interior line need.","Quarterback could re-open if Darnold keeps sliding."]},
+TB:{n:"Tampa Bay Buccaneers",c:"#D50A0A",r:"3-5",needs:["EDGE","CB","LB","TE"],qb:"Baker Mayfield is expected back from injury.",holes:["2026 first-rounder Rueben Bain Jr. has been slow; Yaya Diaby is a free agent.","Corner play is a weakness.","Bottom-10 on third downs and in red-zone TD rate."]},
+TEN:{n:"Tennessee Titans",c:"#4B92DB",r:"1-7",needs:["OT","EDGE","DL","WR"],qb:"Cam Ward (2025 No. 1 pick) went 11-of-22 in the win over Indianapolis.",holes:["Dan Moore Jr. isn’t the answer at tackle; Ward needs protection.","Edge rush is thin.","Traded DT Jeffery Simmons to Chicago (Oct 29) for the Bears’ 2027 first and a 2028 first; now needs an interior anchor and owns two 2027 firsts."]},
+WAS:{n:"Washington Commanders",c:"#5A1414",r:"2-4-1",needs:["EDGE","WR","CB","LB"],qb:"Jayden Daniels needs weapons and protection to stay healthy.",holes:["Defense allows red-zone TDs at a league-worst 83.3% rate.","Edge rush lacks punch.","Terry McLaurin turns 32; Stefon Diggs is unsigned past 2026."]}
+};
+const DEFAULT_ORDER=["LAC","TEN","MIA","PHI","IND","NYJ","NO","HOU","WAS","ARI","ATL","DAL","TB","CAR","BAL","LV","SEA","LAR","CLE","GB","NE","NYG","DET","KC","CIN","JAX","DEN","PIT","CHI","MIN","BUF","SF"];
+
+// Prospects. s = 2026 stats (as reported), p = prior production, str = strengths, t = trend, n = note
+const P=[
+[1, "Jeremiah Smith", "WR", "Ohio State", "6-4, 222", "52 rec · 984 yds · 12 TD · 18.9 avg", "2025: 87-1,243-12", "Rare size with deep speed, burst off the line and twitch out of breaks; natural hands and contested-catch wins. Compared to Julio Jones.", "flat", "", "12-217-4 vs. Illinois"],
+[2, "Leonard Moore", "CB", "Notre Dame", "6-2, 197", "13 tkl · 5 PD", "2025: 31 tkl · 5 INT · 7 PD", "Size, speed and technique to play man or zone; improved as a tackler. Called the best corner prospect since Patrick Peterson by B/R scouts.", "flat", "Has missed games with injury; status week to week.", ""],
+[3, "Colin Simmons", "EDGE", "Texas", "6-3, 246", "25 tkl · 10.5 sacks · 2 FF", "2025: 43 tkl · 12 sacks", "Natural bend and speed with a new up-and-under counter; tied a Texas record with five sacks in one game.", "up", "Hurt his ankle vs. Florida (Oct 17) and missed the Ole Miss game.", "5 sacks vs. Tennessee"],
+[4, "Dylan Stewart", "EDGE", "South Carolina", "6-5, 250", "7 tkl · 2 sacks · 3 FF", "2025: 33 tkl · 4.5 sacks", "Best traits in the class: Garrett-like bend and glide around the edge, effective vs. the run.", "flat", "Missed early games (hip/back) and served a one-game team suspension for throwing a punch.", "Game-clinching strip-sack vs. Tennessee."],
+[5, "Charlie Becker", "WR", "Indiana", "6-4, 207", "42 rec · 726 yds · 8 TD", "2025: 30-614-5 (20.5 avg)", "Big receiver with true second-gear speed; separates vertically and tracks the deep ball. Alec Pierce comp.", "up", "", "Has not dropped a pass in college (PFF)."],
+[6, "Jadan Baugh", "RB", "Florida", "6-1, 225", "763 rush yds · 13 TD · 5.7 per carry · 59 rec yds", "2025: 1,170 yds · 8 TD", "Bell-cow build with vision, burst and a mean stiff-arm; gets stronger with volume.", "up", "", "26-162-3 vs. Auburn"],
+[7, "Darian Mensah", "QB", "Miami (FL)", "6-3, 205", "80.7% · 2,425 pass yds · 25 TD · 1 INT", "2025: led Duke to ACC title", "Elite accuracy and ball placement, poise in the pocket. 35 straight completions this year; 23 straight games with a TD pass.", "up", "Heisman frontrunner; soft schedule is the knock.", "92.5 PFF grade, the highest of any QB; Miami unbeaten in ACC play."],
+[8, "Trinidad Chambliss", "QB", "Ole Miss", "6-0, 210", "64% · 1,926 pass yds · 16 TD · 7 INT · 6 rush TD", "Led Ole Miss’s 2025 playoff run", "Dual-threat creator who throws well from the pocket and ad-libs big plays.", "up", "Older prospect with size questions.", "Led a big win over LSU; struggled vs. Texas."],
+[9, "Will Echoles", "DL", "Ole Miss", "6-3, 315", "21 tkl · 1.5 sacks · 3 batted passes", "2025: 68 tkl · 5 sacks", "Heavy-handed, explosive interior disruptor and the class’s best run defender at DT.", "flat", "Needs more week-to-week consistency as a rusher.", "1 sack + 2 PBU vs. Missouri"],
+[10, "Trevor Goosby", "OT", "Texas", "6-7, 325", "6 games played (no box-score stats for linemen)", "Took over at LT in 2025", "Massive length with the feet to cut off speed; a true road-grader in the run game. Looks like a franchise left tackle.", "down", "Season-ending left knee injury vs. Ole Miss (Oct 24), after a bone bruise in the same knee in August.", "Clean tape vs. Ohio State, Tennessee and Florida"],
+[11, "Drew Mestemaker", "QB", "Oklahoma State", "6-3, 211", "68% · 2,326 pass yds · 20 TD · 6 INT · 2 rush TD", "2025 (N. Texas): FBS-best 4,379 yds · 34 TD", "Strongest physical toolbox among the QBs: arm to attack the whole field plus real running ability.", "up", "Former walk-on who never started a varsity game in high school.", "317 pass + 109 rush in upset of No. 6 Oregon"],
+[12, "Xavier Gilliam", "DL", "Tennessee", "6-2, 305", "26 tkl · 11.5 TFL · 6 sacks · 2 FF", "", "Explosive first step, stout at the point of attack.", "up", "Breakout star this fall.", "Fast riser: quick, strong at the point of attack."],
+[13, "Ellis Robinson IV", "CB", "Georgia", "6-0, 180", "13 tkl · 1 INT · 5 PD", "2025: 4 INT · 7 PBU", "Best athlete among the top corners: recovery speed, zone instincts, takeaway knack.", "up", "Could add weight.", ""],
+[14, "Kelley Jones", "CB", "Mississippi State", "6-4, 195", "24 tkl · 7 PD", "2025: 34 tkl · 2 INT · 11 PBU", "Long, physical, fast; willing run defender. Team evaluators like him.", "up", "", ""],
+[15, "Jordan Seaton", "OT", "LSU", "6-5, 307", "7 games played (no box-score stats for linemen)", "Top portal tackle (from Colorado)", "Lateral range, active hands and recovery ability on an island; cornerstone pass-protection traits.", "flat", "", "Leading LSU’s rebuilt line"],
+[16, "Cam Coleman", "WR", "Texas", "6-3, 204", "21 rec · 348 yds · 6 TD", "2025 (Auburn): 56-708-5", "Vertical boundary playmaker with top-end speed and body control in the red zone.", "flat", "Shoulder injury vs. Ole Miss (Oct 24); no timeline announced.", "Hurt his shoulder on a diving catch vs. Ole Miss (Oct 24)."],
+[17, "Dante Moore", "QB", "Oregon", "6-3, 220", "926 pass yds · 9 TD · 0 INT · 178.3 rating", "2025: 73% · 3,280 yds · 28 TD", "Accurate, poised, beautiful deep ball.", "down", "Concussion vs. USC (Sep 26); pocket toughness vs. top competition questioned.", ""],
+[18, "Arch Manning", "QB", "Texas", "6-4, 225", "63% · 1,507 pass yds · 12 TD · 7 INT", "2025: 3,163 yds · 26 TD · 7 INT", "Prototype size, strong arm and running ability; led an epic 4th-quarter comeback over Ohio State.", "down", "Field vision and decisions under scrutiny; may return to school.", "43.4 PFF grade vs. Florida, a career low; 18 sacks taken."],
+[19, "Ryan Coleman-Williams", "WR", "Alabama", "6-0, 182", "23 rec · 415 yds · 4 TD · 18.0 avg", "", "Explosive after the catch with strong coverage recognition.", "up", "Past concentration drops appear cleaned up.", "Punt returns"],
+[20, "Trey’Dez Green", "TE", "LSU", "6-7, 237", "19 rec · 272 yds", "2025: 33-433-7", "Seam-stretching mismatch with fluid athleticism; improving as a blocker.", "flat", "Out since Sep 19; expected back around Week 10.", "Back from a month-long injury."],
+[21, "Ashton Hampton", "CB", "Clemson", "6-2, 200", "25 tkl · 1 INT · 9 PD", "2025: 45 tkl · 8 PBU", "Length and ball tracking at the catch point; carried Miami’s Malachi Toney well.", "up", "Aggressiveness can be exploited.", ""],
+[22, "Nick Marsh", "WR", "Indiana", "6-3, 213", "32 rec · 585 yds · 7 TD · 18.3 avg", "2025 (Michigan St.): 3 of 13 contested", "Dense, physical route runner who plays through the catch point; Kupp-like style.", "up", "Averaging ~7 more yards per catch than 2025.", "7 of 9 contested catches"],
+[23, "Tae (Brauntae) Johnson", "S", "Notre Dame", "6-2, 200", "1 tkl · 1 PD", "2025: 48 tkl · 4 INT", "Physical in the box with instinctive ball skills; strong leader.", "flat", "", "Hurt in the opener; expected back this season."],
+[24, "KJ Bolden", "S", "Georgia", "6-0, 195", "22 tkl · 0.5 sacks · 1 INT · 2 PD", "2025: 76 tkl · 2 INT", "Rangy, experienced starter in an elite secondary.", "flat", "Could add weight for tackling.", ""],
+[25, "Yhonzae Pierre", "EDGE", "Alabama", "6-4, 251", "25 tkl · 3.5 sacks · pick-six", "2025: 52 tkl · 8 sacks", "Speed and physicality off the edge; lines up in multiple spots.", "up", "", ""],
+[26, "CJ Carr", "QB", "Notre Dame", "6-2, 215", "1,639 pass yds · 16 TD · 1 INT · 164.5 rating", "2025: 2,741 yds · 24 TD · 6 INT", "Accurate, smart, great leader; Brock Purdy comps from team sources.", "down", "Struggled in his first tough road test.", "27/49 in loss at BYU"],
+[27, "David Stone", "DL", "Oklahoma", "6-3, 315", "22 tkl · 0.5 sacks", "", "Size, length and athleticism; still a traits rusher.", "flat", "Slow start to 2026.", "More active vs. the run in recent weeks"],
+[28, "KJ Duff", "WR", "Rutgers", "6-6, 225", "45 rec · 774 yds · 9 TD", "2025: 60-1,084-7", "Mismatch size with big-play ability.", "flat", "", ""],
+[29, "Greg Johnson", "IOL", "Minnesota", "6-6, 325", "6 games played (no box-score stats for linemen)", "", "Top guard on ESPN and Kiper boards; tough, steady.", "up", "", "Strong early-season grades"],
+[30, "Jamari Johnson", "TE", "Oregon", "6-5, 255", "17 rec · 224 yds · 2 TD · 13.2 avg", "", "Three-down body type, reliable hands, YAC explosiveness.", "down", "48.4 PFF grade in the loss to UCLA; missed early time.", ""],
+[31, "Kewan Lacy", "RB", "Ole Miss", "5-11, 205", "352 rush yds · 5 TD · 5.7 per carry · 27 rec yds", "2025: 1,567 yds · 24 TD", "Quick, shifty, tough between the tackles.", "down", "Injury vs. LSU.", ""],
+[32, "Reed Harris", "WR", "Arizona State", "6-5, 220", "41 rec · 653 yds · 8 TD · 15.9 avg", "", "Prototype X: physical, strong hands, wins contested balls.", "up", "Speed is limited.", ""],
+[33, "Sammy Brown", "LB", "Clemson", "6-2, 235", "41 tkl · 1 sack · 1 PD", "", "Downhill, physical linebacker.", "flat", "", ""],
+[34, "Ahmad Moten Sr.", "DL", "Miami (FL)", "6-3, 300", "6 tkl · 1 sack · 1 FF", "", "Powerful interior presence on a playoff defense.", "flat", "", ""],
+[35, "Kenyatta Jackson Jr.", "EDGE", "Ohio State", "6-6, 263", "22 tkl · 3 sacks · 1 FF", "", "Power-based rusher showing new athleticism.", "up", "", ""],
+[36, "Trevor Lauck", "OT", "Iowa", "6-5, 310", "6 games played (no box-score stats for linemen)", "", "Technically sound, strong anchor, run-game displacement; can kick inside.", "flat", "", ""],
+[37, "Kade Pieper", "IOL", "Iowa", "6-4, 290", "6 games played (no box-score stats for linemen)", "", "Explosive, quick laterally; guard/center flexibility for a zone scheme.", "flat", "Needs more mass.", ""],
+[38, "A’Mauri Washington", "DL", "Oregon", "6-3, 325", "20 tkl · 4 PD", "", "Run-stopping floor, multiple alignments, bats passes.", "down", "Hasn’t taken the next step as a rusher.", ""],
+[39, "Boubacar Traore", "EDGE", "Notre Dame", "6-5, 253", "18 tkl · 3.5 sacks · 1 INT · 1 PD · 2 FF", "", "Explosive upfield rusher with a nasty spin move.", "flat", "Run defense still developing.", ""],
+[40, "Will Heldt", "EDGE", "Clemson", "6-6, 260", "18 tkl · 4 sacks · 1 PD", "2025: 47 tkl · 7.5 sacks", "Size, surprising burst, high motor.", "flat", "", ""],
+[41, "Jelani McDonald", "S", "Texas", "6-2, 200", "42 tkl · 2 PD", "", "Well-rounded: deep help, middle of the field, tackling.", "flat", "", "Big open-field stops vs. Florida"],
+[42, "Chris Cole", "LB", "Georgia", "6-3, 235", "40 tkl · 2.5 sacks · 3 PD", "", "Modern LB: athletic in coverage, plays the run, real pass-rush upside.", "up", "Top LB in the class; lighter frame.", ""],
+[43, "Carter Smith", "OT", "Indiana", "6-5, 313", "7 games played (no box-score stats for linemen)", "", "Tough, versatile lineman; PFF’s board is highest on him.", "flat", "", ""],
+[44, "Zabien Brown", "CB", "Alabama", "6-0, 194", "19 tkl · 4 PD", "", "Ideal size and length; instinctive in zone, rises in big games.", "flat", "Uneven vs. Georgia.", ""],
+[45, "Luke Reynolds", "TE", "Virginia Tech", "6-4, 250", "50 rec · 499 yds", "2025 (Penn St.): 26-257", "Size plus speed; one of the most dangerous TEs in college football.", "up", "", "86.3 PFF grade, highest among 200+ tight ends."],
+[46, "Matayo Uiagalelei", "EDGE", "Oregon", "6-5, 265", "26 tkl · 6 sacks · 1 INT", "", "Big-bodied edge with ball skills.", "flat", "", "INT of Mestemaker vs. Oklahoma State"],
+[47, "Bear Alexander", "DL", "Oregon", "6-3, 316", "30 tkl · 2 sacks", "", "Heavy nose tackle with power.", "flat", "", ""],
+[48, "Damon Wilson II", "EDGE", "Miami (FL)", "6-4, 250", "5 tkl · 3.5 sacks · 2 PD", "", "Speed rusher on a top defense.", "flat", "", ""],
+[49, "Cayden Green", "OT", "Missouri", "6-5, 324", "6 games played (no box-score stats for linemen)", "", "Big, experienced lineman who has played tackle and guard.", "flat", "", ""],
+[50, "Devan Thompkins", "EDGE", "Alabama", "6-5, 285", "29 tkl · 3 sacks · 1 FF", "Average at USC", "Versatile front-seven piece, stout vs. double teams.", "up", "Will be 23 as a rookie.", "TFL in four straight games"],
+[51, "Deuce Alexander", "WR", "Ole Miss", "6-0, 180", "35 rec · 523 yds · 5 TD · 14.9 avg", "6 drops on 170 career targets", "Elite top speed, crisp routes vs. man and zone, dangerous after the catch.", "up", "Smaller frame.", ""],
+[52, "Zereoue Williams", "OT", "Utah", "6-8, 305", "6 games played (no box-score stats for linemen)", "", "Rising tackle per team sources.", "up", "", ""],
+[53, "Ezekiel Berry", "CB", "Michigan", "5-11, 188", "15 tkl · 2 PD", "", "Long corner on a strong defense.", "flat", "", ""],
+[54, "Austin Simmons", "QB", "Missouri", "6-4, 220", "1,773 pass yds · 14 TD · 2 INT · 154.6 rating", "", "Powerful left arm, beautiful deep ball; Penix-like.", "up", "First-year starter; may return for 2027.", "25/44 · 339 yds · 1 INT vs. Ole Miss"],
+[55, "Justin Scott", "DL", "Miami (FL)", "6-4, 303", "19 tkl", "", "Disruptive interior lineman.", "flat", "", ""],
+[56, "Melvin Siani", "OT", "Texas", "6-6, 317", "6 games played (no box-score stats for linemen)", "", "Physical right-side tackle.", "flat", "", ""],
+[57, "Anthonie Knapp", "IOL", "Notre Dame", "6-5, 305", "7 games played (no box-score stats for linemen)", "", "Play strength, heavy hands, movement in the run game; mobile enough in space.", "flat", "", ""],
+[58, "Lance Heard", "OT", "Kentucky", "6-6, 325", "7 games played (no box-score stats for linemen)", "", "Big, athletic tackle.", "flat", "", ""],
+[59, "Kyngstonn Viliamu-Asa", "LB", "Notre Dame", "6-3, 234", "15 tkl · 1 INT", "", "Reliable every-down LB who rarely has a bad game.", "up", "", "Consistently high grades"],
+[60, "Ty Benefield", "S", "LSU", "6-3, 208", "30 tkl · 1 sack · 1 INT · 2 PD", "", "Physical box safety.", "flat", "", ""],
+[61, "Kingston Lopa", "S", "California", "6-5, 210", "31 tkl · 5 INT · 1 PD", "", "Ball skills and range; plays box, nickel and free safety.", "up", "Tackling needs work.", ""],
+[62, "Duce Robinson", "WR", "Florida State", "6-6, 230", "22 rec · 407 yds · 4 TD · 18.5 avg", "", "Tall, long vertical target.", "flat", "", ""],
+[63, "Austin Siereveld", "IOL", "Ohio State", "6-5, 327", "5 games played (no box-score stats for linemen)", "", "Versatile starter at guard/tackle.", "flat", "", ""],
+[64, "Jordan Ross", "EDGE", "LSU", "6-5, 254", "8 sacks", "", "Length, quick upfield burst, collapses the pocket.", "up", "Needs a full pass-rush plan.", "3 sacks and 7 pressures vs. Week 7 opponent; 92.9 PFF grade."],
+[65, "Vicari Swain", "CB", "South Carolina", "6-0, 193", "16 tkl · 1 sack · 1 INT · 3 PD", "", "Twitchy corner with return value.", "flat", "", ""],
+[66, "Teitum Tuioti", "EDGE", "Oregon", "6-3, 263", "30 tkl · 3 sacks", "", "Active edge setter.", "flat", "", ""],
+[67, "Sam Leavitt", "QB", "LSU", "6-2, 216", "1,785 pass yds · 14 TD · 8 INT", "", "Mobile, aggressive playmaker.", "down", "Three-interception game in September.", ""],
+[68, "LaNorris Sellers", "QB", "South Carolina", "6-3, 238", "1,338 pass yds · 12 TD · 4 INT · 138.5 rating", "", "Huge skill set: arm and running power.", "flat", "Inconsistent passer.", "Beat Florida’s secondary"],
+[69, "Julian Sayin", "QB", "Ohio State", "6-1, 214", "2,007 pass yds · 19 TD · 4 INT", "", "Accurate, quick processor.", "down", "Shoulder injury; two straight PFF grades in the 40s before it.", "Injured vs. Indiana Oct 17; out several weeks."],
+[70, "Bray Hubbard", "S", "Alabama", "6-2, 217", "37 tkl · 2 INT · 2 PD · 1 FF", "", "Rangy in zone, active in run support.", "up", "", "10 tkl vs. Tennessee"],
+[71, "Rasheem Biles", "LB", "Texas", "6-1, 222", "49 tkl · 1 sack · 2 INT · 2 PD · 1 FF", "", "Active, rangy linebacker: 49 tackles and 2 INTs.", "up", "", ""],
+[72, "Luke Montgomery", "IOL", "Ohio State", "6-5, 312", "7 games played (no box-score stats for linemen)", "", "Powerful guard.", "flat", "", ""],
+[73, "Koi Perich", "S", "Oregon", "6-1, 202", "40 tkl · 2 INT · 1 PD", "", "Instinctive playmaker.", "down", "Rough early-season tape.", ""],
+[74, "Jayden Maiava", "QB", "USC", "6-4, 230", "2,045 pass yds · 18 TD · 3 INT · 168.4 rating", "", "Big-armed passer playing well this fall; 18 TD to 3 INT so far.", "up", "", ""],
+[75, "Jyaire Hill", "CB", "Michigan", "6-2, 190", "31 tkl · 1 INT", "", "Toolsy man/zone corner with size; a weapon on blitzes.", "flat", "", ""],
+[76, "Ryan Wingo", "WR", "Texas", "6-2, 214", "26 rec · 345 yds · 3 TD · 13.3 avg", "", "Size with elite speed on the boundary.", "up", "", ""],
+[77, "Princewill Umanmielen", "EDGE", "LSU", "6-4, 256", "27 tkl · 8 sacks", "", "Consistent, productive QB hunter.", "up", "Projects as Day 2.", ""],
+[78, "A.J. Holmes Jr.", "DL", "Texas Tech", "6-3, 300", "18 tkl · 4 sacks", "", "Interior rusher with 4 sacks on a strong Red Raiders front.", "up", "", ""],
+[79, "Mario Craver", "WR", "Texas A&M", "5-9, 165", "24 rec · 241 yds · 2 TD · 10.0 avg", "", "Shifty and dangerous with the ball in his hands.", "down", "Hasn’t caught a pass past the sticks in a month.", "50 yds over three games"],
+[80, "Ahmad Hardy", "RB", "Missouri", "5-10, 210", "Limited 2026 role while recovering (missed the opener)", "2025: 1,649 rush yds · 16 TD · 6.4 per carry", "All-America back in 2025: tough, decisive runner with breakaway speed.", "down", "Missed the 2026 opener while recovering from a gunshot wound suffered in May; Jamal Roberts has led the backfield.", ""],
+[81, "Benjamin Brahmer", "TE", "Penn State", "6-7, 250", "21 rec · 206 yds · 3 TD · 9.8 avg", "", "Big target with soft hands.", "flat", "", ""],
+[82, "Eliot Washington II", "CB", "Clemson", "5-11, 200", "18 tkl · 3 INT · 4 PD", "", "Smooth cover corner with ball skills.", "up", "", ""],
+[83, "Tony Rojas", "LB", "Penn State", "6-2, 236", "56 tkl · 5 sacks · 2 INT · 2 PD · 1 FF", "Tore ACL in 2025", "Range, coverage instincts, sure tackling; explosiveness is back.", "up", "", "12 tkl · 1 sack vs. Michigan"],
+[84, "Quincy Rhodes Jr.", "EDGE", "Arkansas", "6-6, 273", "13 tkl · 3 sacks", "", "Long, heavy edge at 6-6, 273.", "flat", "", ""],
+[85, "John Henry Daley", "EDGE", "Michigan", "6-5, 252", "19 tkl · 4 sacks", "", "High-effort edge.", "flat", "", ""],
+[86, "Isaac Brown", "RB", "Louisville", "5-9, 190", "568 rush yds · 4 TD · 6.8 per carry · 108 rec yds", "", "Home-run speed.", "flat", "", ""],
+[87, "Audavion Collins", "CB", "Penn State", "5-11, 183", "15 tkl · 8 PD", "", "Ball production: 8 passes defended in 2026.", "up", "", ""],
+[88, "Wyatt Young", "WR", "Oklahoma State", "6-0, 199", "32 rec · 561 yds · 5 TD · 17.5 avg", "2025 (N. Texas): 70-1,264-10", "Mestemaker’s go-to receiver since North Texas; vertical threat.", "flat", "", ""],
+[89, "Evan Tengesdahl", "IOL", "Cincinnati", "6-3, 323", "6 games played (no box-score stats for linemen)", "", "Athletic guard.", "flat", "", ""],
+[90, "Jaylen McClain", "S", "Ohio State", "6-0, 203", "32 tkl · 1 sack · 2 INT · 4 PD · 1 FF", "", "Versatile defender.", "flat", "", ""],
+[91, "Samson Okunlola", "OT", "Miami (FL)", "6-6, 360", "6 games played (no box-score stats for linemen)", "", "Big-framed tackle.", "flat", "", ""],
+[92, "Jamal Roberts", "RB", "Missouri", "6-0, 216", "828 rush yds · 8 TD · 5.6 per carry · 84 rec yds", "", "Vision and tackle-breaking.", "up", "Top-five RB claim.", "222 yds · 2 TD vs. Texas A&M"],
+[93, "Amare Thomas", "WR", "Houston", "6-0, 205", "36 rec · 487 yds · 6 TD · 13.5 avg", "", "Elusive after the catch; slot body.", "up", "", "126 yds vs. Oklahoma State"],
+[94, "Coleton Price", "IOL", "Kentucky", "6-3, 308", "7 games played (no box-score stats for linemen)", "", "Among the most consistent centers in the country.", "up", "", ""],
+[95, "Nyck Harbor", "WR", "South Carolina", "6-5, 239", "17 rec · 278 yds · 2 TD · 16.4 avg", "", "Track-star speed in a big frame.", "flat", "", ""],
+[96, "D.J. McKinney", "CB", "Notre Dame", "6-2, 180", "9 tkl · 1 INT · 2 PD", "", "Sticky in coverage.", "flat", "", ""],
+[97, "Xavier Atkins", "LB", "Auburn", "6-0, 210", "37 tkl · 3 sacks · 1 INT", "", "Rangy linebacker.", "flat", "", ""],
+[98, "Clev Lubin", "EDGE", "Louisville", "6-3, 260", "36 tkl · 4.5 sacks · 2 FF", "", "Productive edge.", "flat", "", ""],
+[99, "Que’Sean Brown", "WR", "Virginia Tech", "5-8, 175", "46 rec · 616 yds · 3 TD · 13.4 avg", "", "Makes plays every week; sharp routes, YAC.", "up", "Small frame.", "6-182-1 vs. Georgia Tech"],
+[100, "Tyree Weathersby", "EDGE", "Tennessee", "6-5, 268", "17 tkl · 6.5 sacks · 1 PD", "1 career sack before 2026", "Length and a strong long-arm.", "up", "", "5.5 sacks in last four games"]
+].map(a=>({rank:a[0],name:a[1],pos:a[2],school:a[3],size:a[4],s:a[5],prev:a[6],str:a[7],t:a[8],note:a[9],hl:a[10]||"",id:a[1].toLowerCase().replace(/’/g,"").replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"")}));
+const LEGACY_IDS={"p1": "jeremiah-smith", "p2": "leonard-moore", "p3": "colin-simmons", "p4": "trevor-goosby", "p5": "dylan-stewart", "p6": "drew-mestemaker", "p7": "charlie-becker", "p8": "jordan-seaton", "p9": "darian-mensah", "p10": "cam-coleman", "p11": "will-echoles", "p12": "arch-manning", "p13": "trinidad-chambliss", "p14": "ellis-robinson-iv", "p15": "jadan-baugh", "p16": "yhonzae-pierre", "p17": "dante-moore", "p18": "david-stone", "p19": "kelley-jones", "p20": "ashton-hampton", "p21": "nick-marsh", "p22": "xavier-gilliam", "p23": "cj-carr", "p24": "treydez-green", "p25": "chris-cole", "p26": "kj-bolden", "p27": "tae-brauntae-johnson", "p28": "ryan-coleman-williams", "p29": "kj-duff", "p30": "kade-pieper", "p31": "greg-johnson", "p32": "zabien-brown", "p33": "jamari-johnson", "p34": "kenyatta-jackson-jr", "p35": "trevor-lauck", "p36": "amauri-washington", "p37": "anthonie-knapp", "p38": "kingston-lopa", "p39": "deuce-alexander", "p40": "reed-harris", "p41": "devan-thompkins", "p42": "boubacar-traore", "p43": "austin-simmons", "p44": "sammy-brown", "p45": "kewan-lacy", "p46": "jyaire-hill", "p47": "will-heldt", "p48": "ahmad-moten-sr", "p49": "carter-smith", "p50": "justin-scott", "p51": "kyngstonn-viliamu-asa", "p52": "jelani-mcdonald", "p53": "matayo-uiagalelei", "p54": "damon-wilson-ii", "p55": "luke-reynolds", "p56": "melvin-siani", "p57": "ezekiel-berry", "p58": "bear-alexander", "p59": "tony-rojas", "p60": "jordan-ross", "p61": "lance-heard", "p62": "koi-perich", "p63": "ty-benefield", "p64": "vicari-swain", "p65": "duce-robinson", "p66": "ryan-wingo", "p67": "lanorris-sellers", "p68": "sam-leavitt", "p69": "julian-sayin", "p70": "austin-siereveld", "p71": "evan-tengesdahl", "p72": "luke-montgomery", "p73": "teitum-tuioti", "p74": "princewill-umanmielen", "p75": "bray-hubbard", "p76": "eliot-washington-ii", "p77": "benjamin-brahmer", "p78": "mario-craver", "p79": "jamal-roberts", "p80": "coleton-price", "p81": "drew-bobo", "p82": "isaac-brown", "p83": "xavier-atkins", "p84": "arion-carter", "p85": "zereoue-williams", "p86": "john-henry-daley", "p87": "jabril-rawls", "p88": "bo-mascoe", "p89": "adon-shuler", "p90": "jaylen-mcclain", "p91": "clev-lubin", "p92": "samson-okunlola", "p93": "rocky-beers", "p94": "quesean-brown", "p95": "tyree-weathersby", "p96": "nyck-harbor", "p97": "d-j-mckinney", "p98": "matt-rose", "p99": "jackson-bennee", "p100": "amare-thomas"};
+function migrate(st){if(st&&st.v!==2){const sel={};for(const k in (st.sel||{})){const id=LEGACY_IDS[st.sel[k].pid]||st.sel[k].pid;if(BYID[id])sel[k]=Object.assign({},st.sel[k],{pid:id})}st.sel=sel;st.v=2}return st}
+const BYID=Object.fromEntries(P.map(p=>[p.id,p]));
+
+const LEAPS=[
+["Darian Mensah","QB · Miami (FL)","Duke transfer has 22 TD passes to one interception and the highest PFF grade of any QB (92.5) and owns a 35-throw completion streak. Went from Day 2 talk to a likely first-rounder and Heisman favorite."],
+["Drew Mestemaker","QB · Oklahoma State","Walk-on who never started in high school led the FBS in passing at North Texas, then proved it at the Power Four level: three straight 89+ PFF games and an upset of No. 6 Oregon."],
+["Xavier Gilliam","DL · Tennessee","Off most boards in August, now a top-20 name: 5 sacks, 2 forced fumbles and a dominant day against Alabama’s interior."],
+["Charlie Becker","WR · Indiana","Caught 30 passes all of 2025. Has 39 for 694 yards by mid-October, including 9-165 against Ohio State. Now a top-10 talk."],
+["Kingston Lopa","S · California","Five interceptions in his first five games as a full-time starter. Moved from late-round to first-round conversation."],
+["Tyree Weathersby","EDGE · Tennessee","One career sack entering 2026; 5.5 sacks over the last four games."],
+["Nick Marsh","WR · Indiana","Converted 3 of 13 contested catches in 2025; 7 of 9 this year, with ~7 more yards per catch after leaving Michigan State."],
+["Luke Reynolds","TE · Virginia Tech","26 catches at Penn State last year; 41 for 431 already in Blacksburg."],
+["Chris Cole","LB · Georgia","Early Day 2 entering the year. 7.5 TFL and a fumble-return TD have made him LB1."],
+["Austin Simmons","QB · Missouri","Lost the Ole Miss job in 2025; breakout year in Columbia with a big left arm, though Ole Miss slowed him Oct 17."]
+];
+
+/* ---------------- STATE ---------------- */
+const FRESH=()=>({v:2,order:DEFAULT_ORDER.slice(),trades:{},fut:{},sel:{},needs:{},user:[],rounds:2,needW:60,chaos:30,log:[]});
+let S=FRESH();
+try{const raw=localStorage.getItem("wr27-current");if(raw){S=Object.assign(FRESH(),migrate(JSON.parse(raw)));}}catch(e){}
+function persist(){try{localStorage.setItem("wr27-current",JSON.stringify(S))}catch(e){}}
+
+const needsOf=t=>S.needs[t]||TEAMS[t].needs;
+
+/* picks */
+function defaultOwner(round,orig,order){
+  if(round===1){
+    if(orig==="IND")return"NYJ";
+    if(orig==="LAR")return"CLE";
+    if(orig==="CHI")return"TEN";
+    if(orig==="DAL"||orig==="GB"){
+      const iD=order.indexOf("DAL"),iG=order.indexOf("GB");
+      const earlier=iD<iG?"DAL":"GB";
+      return orig===earlier?"NYJ":"DAL";
+    }
+  }
+  if(round===2&&orig==="HOU")return"ARI";
+  return orig;
+}
+function viaNote(round,orig,order){
+  if(round===1&&(orig==="DAL"||orig==="GB")){return orig==="DAL"?"via DAL":"via GB";}
+  return "via "+orig;
+}
+function picks(){
+  const out=[];
+  for(let r=1;r<=S.rounds;r++){
+    S.order.forEach((orig,i)=>{
+      const id=r+"-"+orig;
+      const owner=S.trades[id]||defaultOwner(r,orig,S.order);
+      out.push({id,round:r,num:(r-1)*32+i+1,orig,owner,via:owner!==orig?viaNote(r,orig,S.order):""});
+    });
+  }
+  return out;
+}
+const FUT_DEFAULT={"2028-1-NE":"PHI","2028-2-LAR":"CLE"};
+function futOwner(id){return S.fut[id]||FUT_DEFAULT[id]||id.split("-")[2]}
+function futures(){
+  const out=[];
+  Object.keys(TEAMS).forEach(t=>[1,2].forEach(r=>{const id=`2028-${r}-${t}`;out.push({id,round:r,orig:t,owner:futOwner(id)})}));
+  return out;
+}
+/* trade value: exponential chart, pick 1 = 1000 */
+const pv=n=>Math.round(1000*Math.exp(-0.045*(n-1)));
+const futVal=r=>r===1?pv(22):pv(54);
+
+/* ---------------- SIM ---------------- */
+const POS_ADJ={QB:1,RB:.9,WR:1,TE:.93,OT:1,IOL:.95,EDGE:1.02,DL:.98,LB:.92,CB:1,S:.92};
+const NEED_MULT=[1.5,1.32,1.18,1.09];
+function takenIds(exceptId){const s=new Set();for(const k in S.sel){if(k!==exceptId)s.add(S.sel[k].pid)}return s}
+function teamTakenPos(team){const all=picks(),out=new Set();all.forEach(p=>{if(p.owner===team&&S.sel[p.id])out.add(BYID[S.sel[p.id].pid].pos)});return out}
+function scorePlayer(team,pl,num){
+  const needs=needsOf(team),w=S.needW/100;
+  const already=teamTakenPos(team);
+  let idx=needs.indexOf(pl.pos);
+  if(already.has(pl.pos))idx=-1;
+  let mult=idx>=0?NEED_MULT[idx]:1;
+  mult=1+w*(mult-1);
+  let adj=POS_ADJ[pl.pos];
+  if(pl.pos==="QB"&&!needs.includes("QB"))adj*=.4;
+  if(pl.pos==="QB"&&already.has("QB"))adj*=.2;
+  const base=100*Math.exp(-(pl.rank-1)/38);
+  const reachPenalty=pl.rank-num>40?.7:1;
+  const noise=1+(S.chaos/100)*(Math.random()-.5)*.9;
+  return base*mult*adj*noise*reachPenalty;
+}
+function aiChoose(team,num){
+  const taken=takenIds();
+  let best=null,bs=-1;
+  for(const pl of P){if(taken.has(pl.id))continue;const sc=scorePlayer(team,pl,num);if(sc>bs){bs=sc;best=pl}}
+  return best;
+}
+function nextOpen(){return picks().find(p=>!S.sel[p.id])}
+function simulate(mode){
+  let n=0,stopAt=null;
+  while(true){
+    const p=nextOpen(); if(!p)break;
+    if(mode!=="all"&&S.user.includes(p.owner)&&n>=0){ if(mode==="user"){stopAt=p;break;} if(mode==="one"&&n===0){stopAt=p;break;} }
+    const pl=aiChoose(p.owner,p.num); if(!pl)break;
+    S.sel[p.id]={pid:pl.id,auto:true}; justPicked.add(p.id); n++;
+    if(mode==="one")break;
+  }
+  persist(); render();
+  if(stopAt){toast(`${TEAMS[stopAt.owner].n} on the clock at No. ${stopAt.num}`);openPicker(stopAt.id);}
+  else if(n===0&&!nextOpen())toast("Draft complete. Clear picks to run another.");
+}
+let justPicked=new Set();
+
+/* ---------------- RENDER ---------------- */
+const $=s=>document.querySelector(s);
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const tdot=t=>`<span class="dot" style="background:${TEAMS[t].c}"></span>`;
+
+function valueTag(pl,num){
+  const d=num-pl.rank;
+  if(d>=8)return`<span class="val steal">Value +${d}</span>`;
+  if(d<=-10)return`<span class="val reach">Reach ${d}</span>`;
+  return`<span class="val par">Board #${pl.rank}</span>`;
+}
+function whyLine(team,pl){
+  const needs=needsOf(team),i=needs.indexOf(pl.pos);
+  if(i===0)return`Fills the top need (${pl.pos}).`;
+  if(i>0)return`Fills need #${i+1} (${pl.pos}).`;
+  return`Best player available.`;
+}
+function renderBoard(){
+  const all=picks(),clock=nextOpen();
+  let html="";
+  for(let r=1;r<=S.rounds;r++){
+    html+=`<div class="roundhead"><h2>Round ${r}</h2><span class="faint num" style="font-size:12px">Picks ${(r-1)*32+1}–${r*32}</span></div><div class="board">`;
+    all.filter(p=>p.round===r).forEach(p=>{
+      const sel=S.sel[p.id],pl=sel&&BYID[sel.pid],mine=S.user.includes(p.owner),isClock=clock&&clock.id===p.id;
+      html+=`<div class="slip${isClock?" clock":""}${mine?" mine":""}${justPicked.has(p.id)?" new":""}">
+        <div class="no">${p.num}</div>
+        <div style="min-width:0">
+          <div class="team">${tdot(p.owner)}${esc(TEAMS[p.owner].n)} <span class="via">${p.via}</span></div>
+          ${pl?`<div class="player"><span class="pos">${pl.pos}</span><b>${esc(pl.name)}</b><span class="sub">${esc(pl.school)}</span>${valueTag(pl,p.num)}</div><div class="why">${whyLine(p.owner,pl)}${sel.auto?"":" · your pick"}</div>`
+             :isClock?`<div class="clocktag">On the clock</div><div class="why">Needs: ${needsOf(p.owner).join(" · ")}</div>`
+             :`<div class="why faint">Needs: ${needsOf(p.owner).join(" · ")}</div>`}
+        </div>
+        <div class="btns">
+          <button class="btn sm" data-pick="${p.id}">${pl?"Change":"Pick"}</button>
+          ${pl?`<button class="btn sm ghost" data-clear="${p.id}">Clear</button>`:`<button class="btn sm ghost" data-trade="${p.id}">Trade</button>`}
+        </div>
+      </div>`;
+    });
+    html+=`</div>`;
+  }
+  $("#boardWrap").innerHTML=html;
+  justPicked=new Set();
+}
+let availPos="ALL",availBio=null;
+function bioHtml(p,team){
+  computeBase();const b=BASE_BY[p.id];
+  const tr=p.t==="up"?`<span class="chip trend-up">▲ Rising</span>`:p.t==="down"?`<span class="chip trend-down">▼ Falling</span>`:`<span class="chip">Steady</span>`;
+  let fit="";
+  if(team){const i=needsOf(team).indexOf(p.pos);fit=i>=0?`<div class="fitline">Fills ${esc(TEAMS[team].n)} need #${i+1} (${p.pos}).</div>`:`<div class="fitline faint">Not one of ${esc(TEAMS[team].n)}’s top four needs (${needsOf(team).join(", ")}).</div>`}
+  return`<div class="bio">
+    <div class="tags"><span class="chip num">Board #${p.rank}</span><span class="chip num">${esc(p.size.replace(", "," · ")+" lb")}</span>${tr}<span class="chip num">${b?`Base mock: No. ${b.num} · ${b.owner}`:"Base mock: after No. 64"}</span></div>
+    ${fit}
+    <dl><dt>2026</dt><dd>${esc(p.s)}</dd>${p.hl?`<dt>Notable</dt><dd>${esc(p.hl)}</dd>`:""}${p.prev?`<dt>Before</dt><dd>${esc(p.prev)}</dd>`:""}<dt>Strengths</dt><dd>${esc(p.str)}</dd>${p.note?`<dt>Watch</dt><dd>${esc(p.note)}</dd>`:""}</dl>
+  </div>`;
+}
+const nameBtn=(p,open)=>`<button class="nmb" data-bio="${p.id}" aria-expanded="${open}"><span class="pos">${p.pos}</span> <span class="nmt">${esc(p.name)}</span><span class="caret">${open?"▲":"▼"}</span></button>`;
+function renderAvail(){
+  const taken=takenIds(),q=$("#availSearch").value.trim().toLowerCase(),clock=nextOpen();
+  const list=P.filter(p=>!taken.has(p.id)&&(availPos==="ALL"||p.pos===availPos)&&(!q||(p.name+" "+p.school).toLowerCase().includes(q)));
+  $("#availCount").textContent=`${P.length-taken.size} left`;
+  $("#availHint").innerHTML=clock?`<div class="hint">${tdot(clock.owner)} <b>${esc(TEAMS[clock.owner].n)}</b> at No. ${clock.num}. Tap a name for his bio, or “Draft” to make this pick.</div>`:`<div class="hint">Every pick is in. Tap “Change” on any slot to swap a player.</div>`;
+  $("#availList").innerHTML=list.length?list.map(p=>`<div class="prow">
+    <div class="rk">${p.rank}</div>
+    <div style="min-width:0"><div class="nm">${nameBtn(p,availBio===p.id)}</div><div class="meta">${esc(p.school)}${p.s&&availBio!==p.id?" · "+esc(p.s):""}</div></div>
+    <button class="btn sm" data-draft="${p.id}" ${clock?"":"disabled"}>Draft</button></div>${availBio===p.id?bioHtml(p,clock&&clock.owner):""}`).join(""):`<div class="empty">No players match.</div>`;
+}
+function renderChips(host,cur,cb){
+  host.innerHTML=["ALL",...POS].map(p=>`<button aria-pressed="${p===cur}" data-p="${p}">${p==="ALL"?"All":p}</button>`).join("");
+  host.onclick=e=>{const b=e.target.closest("button[data-p]");if(b)cb(b.dataset.p)};
+}
+function renderUserTeams(){
+  $("#userTeams").innerHTML=Object.keys(TEAMS).sort().map(t=>`<button aria-pressed="${S.user.includes(t)}" data-ut="${t}">${tdot(t)}${t}</button>`).join("");
+}
+function renderOrder(){
+  $("#orderList").innerHTML=S.order.map((t,i)=>`<div class="orow"><span class="num faint">${i+1}</span>
+    <span class="tm">${tdot(t)}${esc(TEAMS[t].n)} <span class="rec faint">${TEAMS[t].r}</span></span>
+    <span style="display:flex;gap:4px"><button class="btn sm" data-up="${i}" ${i===0?"disabled":""} aria-label="Move ${t} up">▲</button><button class="btn sm" data-down="${i}" ${i===31?"disabled":""} aria-label="Move ${t} down">▼</button></span></div>`).join("");
+  $("#tradeLog").innerHTML=S.log.length?"<b>Trades:</b><br>"+S.log.map(l=>"• "+esc(l)).join("<br>"):"No trades yet.";
+}
+function renderControls(){
+  $("#needW").value=S.needW;$("#rnd").value=S.chaos;$("#rounds").value=S.rounds;
+  $("#needWLbl").textContent=S.needW<35?"Best available":S.needW>70?"Need-driven":"Balanced";
+  $("#rndLbl").textContent=S.chaos<25?"Low":S.chaos>65?"High":"Medium";
+}
+function render(){renderControls();renderBoard();renderAvail();renderUserTeams();renderOrder();if(!$("#p-needs").hidden)renderNeeds();}
+
+/* needs tab */
+function slotsFor(t){return picks().filter(p=>p.owner===t).map(p=>p.num)}
+function renderNeeds(){
+  const q=$("#needSearch").value.trim().toLowerCase(),sort=$("#needSort").value;
+  let teams=Object.keys(TEAMS);
+  const firstSlot=t=>{const s=slotsFor(t);return s.length?Math.min(...s):999};
+  teams.sort(sort==="alpha"?(a,b)=>TEAMS[a].n.localeCompare(TEAMS[b].n):(a,b)=>firstSlot(a)-firstSlot(b));
+  teams=teams.filter(t=>!q||TEAMS[t].n.toLowerCase().includes(q)||t.toLowerCase().includes(q));
+  const taken=takenIds();
+  $("#needsGrid").innerHTML=teams.map(t=>{
+    const T=TEAMS[t],needs=needsOf(t),sl=slotsFor(t),edited=!!S.needs[t];
+    const first=sl.length?Math.min(...sl):null;
+    const fits=needs.slice(0,3).map(pos=>{
+      const best=P.find(p=>p.pos===pos&&!taken.has(p.id)&&(!first||p.rank>=Math.max(1,first-14)))||P.find(p=>p.pos===pos&&!taken.has(p.id));
+      return best?`<b>${pos}</b>: ${esc(best.name)} <span class="faint">(${esc(best.school)}, #${best.rank})</span>`:"";
+    }).filter(Boolean).join("<br>");
+    return`<article class="card ncard">
+      <div class="nhead"><div><h3>${esc(T.n)}</h3><div class="slots" style="margin-top:6px">${sl.length?sl.map(n=>`<span class="chip num">#${n}</span>`).join(""):`<span class="chip">No pick in Rds 1–${S.rounds}</span>`}</div></div>
+      <div style="text-align:right">${tdot(t)}<div class="rec">${T.r}</div></div></div>
+      <div class="qb"><span class="eyebrow" style="font-size:11px">QB room</span><br>${esc(T.qb)}</div>
+      <div><div class="eyebrow" style="margin-bottom:6px">Biggest holes</div><ol class="holes">${T.holes.map((h,i)=>`<li><span class="n">${i+1}</span><span>${esc(h)}</span></li>`).join("")}</ol></div>
+      <div><div class="eyebrow" style="margin-bottom:6px">Needs that drive the sim${edited?` · <span style="color:var(--warn)">edited</span>`:""}</div>
+        <div class="needsel">${[0,1,2,3].map(i=>`<select data-nt="${t}" data-ni="${i}" aria-label="${T.n} need ${i+1}">${POS.map(p=>`<option ${p===needs[i]?"selected":""}>${p}</option>`).join("")}</select>`).join("")}</div></div>
+      <div class="fit"><span class="eyebrow" style="font-size:11px">Best fits${first?` near No. ${first}`:""}</span><br>${fits}</div>
+    </article>`;}).join("")||`<div class="empty">No team matches.</div>`;
+}
+
+/* prospects tab */
+let proPos="ALL",BASE=null,BASE_BY={};
+function computeBase(){
+  if(BASE)return BASE;
+  const keep=S;S=Object.assign(FRESH(),{chaos:0,rounds:2});
+  const out=[];
+  picks().forEach(p=>{const pl=aiChoose(p.owner,p.num);S.sel[p.id]={pid:pl.id,auto:true};out.push(Object.assign({},p,{pl}))});
+  S=keep;BASE=out;BASE_BY=Object.fromEntries(out.map(r=>[r.pl.id,r]));return out;
+}
+function renderBase(q){
+  const rows=computeBase().filter(r=>(proPos==="ALL"||r.pl.pos===proPos)&&(!q||(r.pl.name+" "+r.pl.school+" "+TEAMS[r.owner].n).toLowerCase().includes(q)));
+  let html=`<div class="basenote"><b>Base mock:</b> the draft with no changes from you. Current order (records through Week 8), known pick trades, default team needs, balanced philosophy, zero randomness. It only moves when the data is updated. Your own mocks live on the Mock Draft tab.</div>`;
+  [1,2].forEach(r=>{const g=rows.filter(x=>x.round===r);if(!g.length)return;
+    html+=`<div class="roundhead"><h2>Round ${r}</h2><span class="faint num" style="font-size:12px">${g.length} pick${g.length>1?"s":""}</span></div><div class="board">`+
+    g.map(p=>`<div class="slip plain"><div class="no">${p.num}</div><div style="min-width:0">
+      <div class="team">${tdot(p.owner)}${esc(TEAMS[p.owner].n)} <span class="via">${p.via}</span></div>
+      <div class="player"><span class="pos">${p.pl.pos}</span><b>${esc(p.pl.name)}</b><span class="sub">${esc(p.pl.school)}</span>${valueTag(p.pl,p.num)}</div>
+      <div class="why">${whyLine(p.owner,p.pl)}</div></div></div>`).join("")+`</div>`});
+  $("#proList").innerHTML=rows.length?html:html+`<div class="empty">No picks match.</div>`;
+}
+function pcard(p){
+  const tr=p.t==="up"?`<span class="chip trend-up">▲ Rising</span>`:p.t==="down"?`<span class="chip trend-down">▼ Falling</span>`:"";
+  computeBase();const b=BASE_BY[p.id];
+  const bm=b?`<span class="chip num">Base mock: No. ${b.num} · ${b.owner}</span>`:`<span class="chip faint">Base mock: after No. 64</span>`;
+  return`<article class="card pcard"><div class="rank">${p.rank}</div><div style="min-width:0">
+    <div class="top"><span class="pos">${p.pos}</span><b>${esc(p.name)}</b><span class="muted">${esc(p.school)}</span>${p.size?`<span class="faint num" style="font-size:12px">${esc(p.size)}</span>`:""}${tr}${bm}</div>
+    <dl>${p.s?`<dt>2026</dt><dd>${esc(p.s)}</dd>`:""}${p.hl?`<dt>Notable</dt><dd>${esc(p.hl)}</dd>`:""}${p.prev?`<dt>Before</dt><dd>${esc(p.prev)}</dd>`:""}<dt>Strengths</dt><dd>${esc(p.str)}</dd>${p.note?`<dt>Watch</dt><dd>${esc(p.note)}</dd>`:""}</dl>
+  </div></article>`;
+}
+function renderPros(){
+  $("#leaps").innerHTML=LEAPS.map(l=>`<div class="card leap"><span class="chip trend-up" style="justify-self:start">▲ Leap</span><div class="big">${esc(l[0])}</div><div class="eyebrow" style="font-size:11px">${esc(l[1])}</div><p>${esc(l[2])}</p></div>`).join("");
+  const q=$("#proSearch").value.trim().toLowerCase(),view=$("#proView").value;
+  if(view==="base"){renderBase(q);return}
+  const list=P.filter(p=>(proPos==="ALL"||p.pos===proPos)&&(!q||(p.name+" "+p.school).toLowerCase().includes(q)));
+  if(view==="rank"||proPos!=="ALL"){$("#proList").innerHTML=`<div class="plist">${list.map(pcard).join("")||'<div class="empty">No players match.</div>'}</div>`;return}
+  $("#proList").innerHTML=POS.map(pos=>{const g=list.filter(p=>p.pos===pos);if(!g.length)return"";
+    return`<section class="posgroup"><h2>${POSNAME[pos]} <span class="faint num" style="font-size:14px;font-weight:500">${g.length}</span></h2><div class="plist">${g.map(pcard).join("")}</div></section>`}).join("");
+}
+
+/* ---------------- SHEETS ---------------- */
+function closeSheet(){$("#sheetHost").innerHTML=""}
+function openPicker(pickId){
+  const p=picks().find(x=>x.id===pickId);if(!p)return;
+  let pos="ALL",openBio=null;
+  const draw=()=>{
+    const taken=takenIds(pickId),q=($("#pkq")?.value||"").toLowerCase();
+    const needs=needsOf(p.owner);
+    const list=P.filter(x=>!taken.has(x.id)&&(pos==="ALL"||pos==="NEED"?(pos==="ALL"||needs.includes(x.pos)):x.pos===pos)&&(!q||(x.name+" "+x.school).toLowerCase().includes(q))).slice(0,60);
+    $("#pkl").innerHTML=list.map(x=>`<div class="prow"><div class="rk">${x.rank}</div><div style="min-width:0"><div class="nm">${nameBtn(x,openBio===x.id)}${needs.includes(x.pos)?` <span class="chip" style="font-size:11px">need</span>`:""}</div><div class="meta">${esc(x.school)}${x.s&&openBio!==x.id?" · "+esc(x.s):""}</div></div><button class="btn sm primary" data-take="${x.id}">Draft</button></div>${openBio===x.id?bioHtml(x,p.owner):""}`).join("")||`<div class="empty">No players match.</div>`;
+  };
+  $("#sheetHost").innerHTML=`<div class="scrim" id="scrim"><div class="sheet" role="dialog" aria-modal="true" aria-label="Make a pick">
+    <div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start"><div><div class="eyebrow">Pick ${p.num} · Round ${p.round}</div><h2>${tdot(p.owner)} ${esc(TEAMS[p.owner].n)}</h2><div class="muted" style="font-size:13px">Needs: ${needsOf(p.owner).join(" · ")}</div></div><button class="btn sm" id="pkx">Close</button></div>
+    <div style="display:grid;gap:8px;margin-top:12px"><input type="search" id="pkq" placeholder="Search players or schools"><div class="poschips" id="pkpos"></div></div>
+    <div id="pkl" style="margin-top:8px;border:1px solid var(--line);border-radius:8px"></div>
+    <div class="actions" style="margin-top:12px"><button class="btn" id="pkauto">Let the AI pick</button><button class="btn ghost" data-trade="${p.id}">Trade this pick</button></div>
+  </div></div>`;
+  const chips=$("#pkpos");
+  const drawChips=()=>{chips.innerHTML=["ALL","NEED",...POS].map(x=>`<button aria-pressed="${x===pos}" data-p="${x}">${x==="ALL"?"All":x==="NEED"?"Needs":x}</button>`).join("")};
+  chips.onclick=e=>{const b=e.target.closest("button[data-p]");if(b){pos=b.dataset.p;drawChips();draw()}};
+  drawChips();draw();
+  $("#pkq").oninput=draw;
+  $("#pkx").onclick=closeSheet;
+  $("#scrim").onclick=e=>{if(e.target.id==="scrim")closeSheet()};
+  $("#pkauto").onclick=()=>{delete S.sel[p.id];const pl=aiChoose(p.owner,p.num);S.sel[p.id]={pid:pl.id,auto:true};justPicked.add(p.id);persist();closeSheet();render()};
+  $("#pkl").onclick=e=>{const bi=e.target.closest("[data-bio]");if(bi){openBio=openBio===bi.dataset.bio?null:bi.dataset.bio;draw();return}
+    const b=e.target.closest("[data-take]");if(!b)return;S.sel[p.id]={pid:b.dataset.take,auto:false};justPicked.add(p.id);persist();closeSheet();render();
+    const nx=nextOpen();if(nx&&!S.user.includes(nx.owner)&&S.user.length)toast("Pick is in. Tap “Sim to my pick” to continue.");};
+}
+
+function openTrade(fromPickId){
+  const all=picks().filter(p=>!S.sel[p.id]);
+  const fp=fromPickId?picks().find(p=>p.id===fromPickId):null;
+  let A=fp?fp.owner:(S.user[0]||nextOpen()?.owner||"NYJ"),B=null;
+  const teamsSorted=Object.keys(TEAMS).sort();
+  B=teamsSorted.find(t=>t!==A);
+  const chosen=new Set(fp?[fp.id]:[]);
+  const assets=t=>[...all.filter(p=>p.owner===t).map(p=>({id:p.id,label:`2027 Rd ${p.round} · No. ${p.num}${p.via?" ("+p.via+")":""}`,v:pv(p.num)})),
+    ...futures().filter(f=>f.owner===t).map(f=>({id:f.id,label:`2028 Rd ${f.round}${f.orig!==t?" (via "+f.orig+")":""}`,v:futVal(f.round)}))];
+  const draw=()=>{
+    const sa=assets(A),sb=assets(B);
+    const va=sa.filter(a=>chosen.has(a.id)).reduce((s,a)=>s+a.v,0),vb=sb.filter(a=>chosen.has(a.id)).reduce((s,a)=>s+a.v,0);
+    const tot=va+vb||1,diff=va&&vb?(vb-va)/Math.max(va,vb):0;
+    let verdict="Pick something from both sides.";
+    if(va&&vb){verdict=Math.abs(diff)<=.1?"Fair by the chart.":diff>0?`${A} wins by ${Math.round(diff*100)}% of value.`:`${B} wins by ${Math.round(-diff*100)}% of value.`}
+    const side=(t,list,key)=>`<div class="tside"><label class="field" for="ts${key}">${key==="A"?"Team A sends":"Team B sends"}<select id="ts${key}">${teamsSorted.map(x=>`<option value="${x}" ${x===t?"selected":""} ${(key==="A"?x===B:x===A)?"disabled":""}>${TEAMS[x].n}</option>`).join("")}</select></label>
+      ${list.length?list.map(a=>`<label class="tpick"><input type="checkbox" data-asset="${a.id}" ${chosen.has(a.id)?"checked":""}> ${esc(a.label)} <span class="num">${a.v}</span></label>`).join(""):`<div class="faint" style="font-size:13px">No tradable picks.</div>`}</div>`;
+    $("#trbody").innerHTML=`<div class="tradecols">${side(A,sa,"A")}${side(B,sb,"B")}</div>
+      <div style="margin-top:12px;display:grid;gap:6px"><div style="display:flex;justify-content:space-between;font-size:13px" class="num"><span>${A} sends ${va}</span><span>${B} sends ${vb}</span></div>
+      <div class="meter"><i style="width:${va/tot*100}%;background:${TEAMS[A].c}"></i><i style="width:${vb/tot*100}%;background:${TEAMS[B].c}"></i></div>
+      <div class="verdict">${verdict}</div></div>`;
+    $("#trgo").disabled=!(va&&vb);
+    $("#tsA").onchange=e=>{A=e.target.value;chosen.clear();draw()};
+    $("#tsB").onchange=e=>{B=e.target.value;chosen.clear();draw()};
+  };
+  $("#sheetHost").innerHTML=`<div class="scrim" id="scrim"><div class="sheet" role="dialog" aria-modal="true" aria-label="Trade picks">
+    <div style="display:flex;justify-content:space-between;gap:10px"><div><div class="eyebrow">Trade machine · values from an exponential pick chart (No. 1 = 1000)</div><h2>Trade picks</h2></div><button class="btn sm" id="trx">Close</button></div>
+    <div id="trbody"></div>
+    <div class="actions" style="margin-top:14px"><button class="btn primary" id="trgo">Make trade</button></div></div></div>`;
+  draw();
+  $("#trbody").onchange=e=>{const c=e.target.closest("[data-asset]");if(!c)return;c.checked?chosen.add(c.dataset.asset):chosen.delete(c.dataset.asset);draw()};
+  $("#trx").onclick=closeSheet;$("#scrim").onclick=e=>{if(e.target.id==="scrim")closeSheet()};
+  $("#trgo").onclick=()=>{
+    const sa=assets(A).filter(a=>chosen.has(a.id)),sb=assets(B).filter(a=>chosen.has(a.id));
+    sa.forEach(a=>a.id.startsWith("2028")?S.fut[a.id]=B:S.trades[a.id]=B);
+    sb.forEach(a=>a.id.startsWith("2028")?S.fut[a.id]=A:S.trades[a.id]=A);
+    S.log.push(`${A} sends ${sa.map(a=>a.label).join(", ")} to ${B} for ${sb.map(a=>a.label).join(", ")}`);
+    persist();closeSheet();render();toast("Trade done.");
+  };
+}
+
+/* ---------------- SAVED MOCKS ---------------- */
+let store={kind:"local",db:null,uid:null},saved=[];
+async function initStore(){
+  try{
+    const c=window.claude;if(!c||!c.use)throw 0;
+    const [db,user]=await Promise.all([c.use("db"),c.use("user")]);
+    if(!db||!user)throw 0;
+    const uid=await user.id();if(!uid)throw 0;
+    store={kind:"db",db,uid};
+    db.collection("data/users/"+uid+"/mocks").onSnapshot(snap=>{saved=snap.docs.map(d=>Object.assign({id:d.id},d.data()));renderSaved()},()=>{store.kind="local";loadLocal()});
+  }catch(e){loadLocal()}
+  renderSaved();
+}
+function loadLocal(){try{saved=JSON.parse(localStorage.getItem("wr27-saved")||"[]")}catch(e){saved=[]}renderSaved()}
+function saveLocal(){try{localStorage.setItem("wr27-saved",JSON.stringify(saved))}catch(e){}}
+function summary(st){
+  const pk=Object.keys(st.sel||{}).filter(k=>k.startsWith("1-"));
+  return `${Object.keys(st.sel||{}).length} picks made · ${(st.log||[]).length} trades`;
+}
+async function saveMock(){
+  const name=$("#saveName").value.trim()||"Untitled mock",folder=$("#saveFolder").value.trim()||"Unfiled";
+  const first=picks()[0],fs=S.sel[first.id];
+  const rec={name,folder,savedAt:new Date().toISOString(),state:JSON.stringify(S),headline:fs?`No. 1: ${BYID[fs.pid].name} to ${first.owner}`:"No picks yet"};
+  const id="m"+Date.now().toString(36);
+  if(store.kind==="db"){try{await store.db.collection("data/users/"+store.uid+"/mocks").doc(id).set(rec);toast("Saved to your folders.");}catch(e){saved.push(Object.assign({id},rec));saveLocal();toast("Saved in this browser.")}}
+  else{saved.push(Object.assign({id},rec));saveLocal();renderSaved();toast("Saved in this browser.")}
+  $("#saveName").value="";
+}
+async function deleteMock(id){
+  if(store.kind==="db"&&!saved.find(s=>s.id===id)?.local){try{await store.db.collection("data/users/"+store.uid+"/mocks").doc(id).delete();return}catch(e){}}
+  saved=saved.filter(s=>s.id!==id);saveLocal();renderSaved();
+}
+let pendingDelete=null;
+function renderSaved(){
+  $("#storeNote").textContent=store.kind==="db"?"Saved to your account. Your folders follow you to any device where you open this page.":"Saved in this browser only. Open the page signed in to keep mocks across devices.";
+  const folders=[...new Set(saved.map(s=>s.folder))].sort();
+  $("#folderList").innerHTML=folders.map(f=>`<option value="${esc(f)}">`).join("");
+  if(!saved.length){$("#savedList").innerHTML=`<div class="card empty">No saved mocks yet. Run a draft, name it, pick a folder, and save. Folders appear here.</div>`;return}
+  $("#savedList").innerHTML=folders.map(f=>{const items=saved.filter(s=>s.folder===f).sort((a,b)=>b.savedAt.localeCompare(a.savedAt));
+    return`<section class="folder"><h3>${esc(f)} <span class="faint num" style="font-size:13px;font-weight:500">${items.length}</span></h3>${items.map(s=>{let st={};try{st=migrate(JSON.parse(s.state))}catch(e){}
+      return`<div class="mockrow"><div style="min-width:0"><div class="t"><button data-view="${s.id}">${esc(s.name)}</button></div><div class="s">${esc(s.headline||"")} · ${summary(st)} · ${new Date(s.savedAt).toLocaleDateString()}</div></div>
+      <div class="actions">${pendingDelete===s.id?`<button class="btn sm danger" data-delyes="${s.id}">Delete</button><button class="btn sm" data-delno="1">Keep</button>`:`<button class="btn sm primary" data-view="${s.id}">View board</button><button class="btn sm" data-load="${s.id}">Load</button><button class="btn sm ghost" data-del="${s.id}">Delete</button>`}</div></div>`}).join("")}</section>`}).join("");
+}
+
+/* ---------------- FULL BOARD VIEW ---------------- */
+function withState(st,fn){const keep=S;S=Object.assign(FRESH(),st);try{return fn()}finally{S=keep}}
+function openBoardView(st,meta){
+  const rows=withState(st,()=>picks().map(p=>({...p,pl:S.sel[p.id]?BYID[S.sel[p.id].pid]:null})));
+  const rounds=[...new Set(rows.map(r=>r.round))];
+  const made=rows.filter(r=>r.pl).length;
+  const grid=rounds.map(r=>`<div class="bv-round"><h3>Round ${r}</h3><span class="faint num" style="font-size:12px">Picks ${(r-1)*32+1}–${r*32}</span></div><div class="bv-grid">`+
+    rows.filter(x=>x.round===r).map(p=>`<div class="bv-cell${p.pl?"":" empty"}" style="--tc:${TEAMS[p.owner].c}" title="${esc(TEAMS[p.owner].n)}${p.via?" ("+p.via+")":""}${p.pl?": "+esc(p.pl.name)+", "+p.pl.pos+", "+esc(p.pl.school):""}">
+      <div class="h"><span class="n">${p.num}</span><span class="t">${p.owner}${p.via?"*":""}</span></div>
+      <div class="pl">${p.pl?esc(p.pl.name):"Not picked"}</div>
+      <div class="ps">${p.pl?`${p.pl.pos} · ${esc(p.pl.school)}`:"&nbsp;"}</div></div>`).join("")+`</div>`).join("");
+  const log=(st.log||[]);
+  $("#sheetHost").innerHTML=`<div class="bv" role="dialog" aria-modal="true" aria-label="Full draft board">
+    <div class="bv-head"><div><div class="eyebrow">${esc(meta.eyebrow)}</div><h2>${esc(meta.title)}</h2>
+      <div class="muted" style="font-size:13px;margin-top:4px">${made} of ${rows.length} picks made · ${log.length} trade${log.length===1?"":"s"} · * = acquired pick</div></div>
+      <div class="actions">${meta.loadId?`<button class="btn sm" data-load="${meta.loadId}">Load into simulator</button>`:""}<button class="btn sm primary" id="bvx">Close</button></div></div>
+    <div class="bv-copy"><span class="eyebrow">Copy board</span><button class="btn sm" id="cpImg">As image</button><button class="btn sm" id="cpTxt">As text list</button><button class="btn sm" id="cpTsv">For a spreadsheet</button></div>
+    <div id="bvFallback"></div>
+    ${grid}
+    ${log.length?`<div class="bv-trades"><b>Trades:</b> ${log.map(esc).join(" · ")}</div>`:""}
+  </div>`;
+  $("#bvx").onclick=closeSheet;
+  $("#bvx").focus();
+  const textList=()=>[meta.title,...rounds.map(r=>`\nROUND ${r}\n`+rows.filter(x=>x.round===r).map(p=>`${p.num}. ${TEAMS[p.owner].n}${p.via?" ("+p.via+")":""}: ${p.pl?`${p.pl.name}, ${p.pl.pos}, ${p.pl.school}`:"Not picked"}`).join("\n")),...(log.length?["\nTRADES\n"+log.join("\n")]:[])].join("\n");
+  const tsv=()=>["Pick\tRound\tTeam\tVia\tPlayer\tPos\tSchool\tBoard rank",...rows.map(p=>[p.num,p.round,TEAMS[p.owner].n,p.via.replace("via ",""),p.pl?p.pl.name:"",p.pl?p.pl.pos:"",p.pl?p.pl.school:"",p.pl?p.pl.rank:""].join("\t"))].join("\n");
+  const copyText=async(t,label)=>{try{await navigator.clipboard.writeText(t);$("#bvFallback").innerHTML="";toast(label+" copied.")}
+    catch(e){$("#bvFallback").innerHTML=`<div class="bv-fallback"><div style="font-size:13px">Copying is blocked here. The text is selected below. Use your device’s Copy.</div><textarea id="bvTa" readonly></textarea></div>`;const ta=$("#bvTa");ta.value=t;ta.focus();ta.select();}};
+  $("#cpTxt").onclick=()=>copyText(textList(),"Board");
+  $("#cpTsv").onclick=()=>copyText(tsv(),"Spreadsheet rows");
+  $("#cpImg").onclick=async()=>{
+    const blobP=drawBoardImage(rows,rounds,meta,made,log);
+    try{await navigator.clipboard.write([new ClipboardItem({"image/png":blobP})]);$("#bvFallback").innerHTML="";toast("Board image copied.")}
+    catch(e){const b=await blobP;const url=URL.createObjectURL(b);$("#bvFallback").innerHTML=`<div class="bv-fallback"><div style="font-size:13px">Image copying is blocked here. Long-press (phone) or right-click (computer) the image and choose Copy.</div><img src="${url}" alt="Draft board image"></div>`;}
+  };
+}
+async function drawBoardImage(rows,rounds,meta,made,log){
+  try{await document.fonts.ready}catch(e){}
+  const cs=getComputedStyle(document.documentElement),v=n=>cs.getPropertyValue(n).trim();
+  const C={bg:v("--bg"),sf:v("--surface"),ln:v("--line"),ink:v("--ink"),ink2:v("--ink-2"),ink3:v("--ink-3"),acc:v("--accent")};
+  const W=1080,P=32,G=6,COLS=4,CH=74,cw=(W-2*P-(COLS-1)*G)/COLS;
+  const rowsPer=Math.ceil(32/COLS),H=P+104+rounds.length*(34+rowsPer*(CH+G))+28+P;
+  const sc=2,cv=document.createElement("canvas");cv.width=W*sc;cv.height=H*sc;const x=cv.getContext("2d");x.scale(sc,sc);
+  const D='"Barlow Condensed","Arial Narrow",Arial,sans-serif',B='"IBM Plex Sans",system-ui,sans-serif',M='"IBM Plex Mono",ui-monospace,monospace';
+  const fit=(t,max)=>{if(x.measureText(t).width<=max)return t;while(t.length>1&&x.measureText(t+"…").width>max)t=t.slice(0,-1);return t+"…"};
+  x.fillStyle=C.bg;x.fillRect(0,0,W,H);
+  x.fillStyle=C.ink3;x.font=`600 14px ${D}`;x.fillText("WAR ROOM ’27 · 2027 NFL MOCK DRAFT",P,P+12);
+  x.fillStyle=C.ink;x.font=`800 40px ${D}`;x.fillText(fit(meta.title.toUpperCase(),W-2*P),P,P+52);
+  x.fillStyle=C.ink2;x.font=`500 14px ${B}`;x.fillText(`${made} of ${rows.length} picks · ${log.length} trade${log.length===1?"":"s"} · * acquired pick`,P,P+78);
+  let y=P+104;
+  rounds.forEach(r=>{
+    x.fillStyle=C.acc;x.font=`800 20px ${D}`;x.fillText(`ROUND ${r}`,P,y+20);y+=34;
+    rows.filter(p=>p.round===r).forEach((p,i)=>{
+      const cx=P+(i%COLS)*(cw+G),cy=y+Math.floor(i/COLS)*(CH+G);
+      x.fillStyle=C.sf;x.strokeStyle=C.ln;x.lineWidth=1;x.beginPath();x.roundRect?x.roundRect(cx,cy,cw,CH,6):x.rect(cx,cy,cw,CH);x.fill();x.stroke();
+      x.fillStyle=TEAMS[p.owner].c;x.fillRect(cx,cy,cw,4);
+      x.fillStyle=C.ink;x.font=`800 20px ${D}`;x.fillText(String(p.num),cx+8,cy+26);
+      x.fillStyle=C.ink2;x.font=`600 13px ${M}`;x.textAlign="right";x.fillText(p.owner+(p.via?"*":""),cx+cw-8,cy+24);x.textAlign="left";
+      x.fillStyle=p.pl?C.ink:C.ink3;x.font=`600 15px ${B}`;x.fillText(fit(p.pl?p.pl.name:"Not picked",cw-16),cx+8,cy+47);
+      if(p.pl){x.fillStyle=C.ink2;x.font=`400 12.5px ${B}`;x.fillText(fit(`${p.pl.pos} · ${p.pl.school}`,cw-16),cx+8,cy+65)}
+    });
+    y+=rowsPer*(CH+G);
+  });
+  x.fillStyle=C.ink3;x.font=`400 12px ${B}`;x.fillText("Order and stats as of Nov 3, 2026",P,H-P);
+  return new Promise(res=>cv.toBlob(b=>res(b),"image/png"));
+}
+document.addEventListener("keydown",e=>{if(e.key==="Escape"&&$("#sheetHost").innerHTML)closeSheet()});
+
+/* ---------------- UTIL ---------------- */
+let toastT;
+function toast(msg){$("#toastHost").innerHTML=`<div class="toast" role="status">${esc(msg)}</div>`;clearTimeout(toastT);toastT=setTimeout(()=>$("#toastHost").innerHTML="",2600)}
+function resultsText(){
+  return picks().filter(p=>S.sel[p.id]).map(p=>{const pl=BYID[S.sel[p.id].pid];return`${p.num}. ${TEAMS[p.owner].n}${p.via?" ("+p.via+")":""}: ${pl.name}, ${pl.pos}, ${pl.school}`}).join("\n");
+}
+
+/* ---------------- EVENTS ---------------- */
+$("#tabs").onclick=e=>{const b=e.target.closest("[data-tab]");if(!b)return;
+  document.querySelectorAll("#tabs button").forEach(x=>x.setAttribute("aria-selected",x===b));
+  ["mock","needs","prospects","saved"].forEach(t=>$("#p-"+t).hidden=t!==b.dataset.tab);
+  if(b.dataset.tab==="needs")renderNeeds(); if(b.dataset.tab==="prospects")renderPros(); if(b.dataset.tab==="saved")renderSaved();
+  try{localStorage.setItem("wr27-tab",b.dataset.tab)}catch(e){}};
+$("#simUser").onclick=()=>{if(!S.user.length){toast("Pick a team to control first, or use Sim full draft.");return}simulate("user")};
+$("#simAll").onclick=()=>simulate("all");
+$("#simOne").onclick=()=>{const p=nextOpen();if(p&&S.user.includes(p.owner)){openPicker(p.id);return}simulate("one")};
+$("#clearPicks").onclick=()=>{S.sel={};persist();render();toast("Picks cleared. Trades and order kept.")};
+$("#copyMock").onclick=async()=>{const t=resultsText();if(!t){toast("No picks to copy yet.");return}try{await navigator.clipboard.writeText(t);toast("Mock copied.")}catch(e){toast("Copy blocked here. Long-press the board to select it.")}};
+$("#needW").oninput=e=>{S.needW=+e.target.value;persist();renderControls()};
+$("#rnd").oninput=e=>{S.chaos=+e.target.value;persist();renderControls()};
+$("#rounds").onchange=e=>{S.rounds=+e.target.value;if(S.rounds===1)Object.keys(S.sel).forEach(k=>{if(k.startsWith("2-"))delete S.sel[k]});persist();render()};
+$("#userTeams").onclick=e=>{const b=e.target.closest("[data-ut]");if(!b)return;const t=b.dataset.ut;S.user=S.user.includes(t)?S.user.filter(x=>x!==t):[...S.user,t];persist();render()};
+$("#orderList").onclick=e=>{const u=e.target.closest("[data-up]"),d=e.target.closest("[data-down]");if(!u&&!d)return;
+  const i=+(u?u.dataset.up:d.dataset.down),j=u?i-1:i+1;[S.order[i],S.order[j]]=[S.order[j],S.order[i]];
+  const had=Object.keys(S.sel).length;S.sel={};persist();render();if(had)toast("Order changed, picks cleared.")};
+$("#resetOrder").onclick=()=>{S.order=DEFAULT_ORDER.slice();S.sel={};persist();render();toast("Order reset to current standings.")};
+$("#resetTrades").onclick=()=>{S.trades={};S.fut={};S.log=[];S.sel={};persist();render();toast("Trades undone, picks cleared.")};
+$("#openTrade").onclick=()=>openTrade(null);
+document.addEventListener("click",e=>{
+  const ab=e.target.closest("#availList [data-bio]");if(ab){availBio=availBio===ab.dataset.bio?null:ab.dataset.bio;renderAvail();return}
+  const pk=e.target.closest("[data-pick]");if(pk){openPicker(pk.dataset.pick);return}
+  const cl=e.target.closest("[data-clear]");if(cl){delete S.sel[cl.dataset.clear];persist();render();return}
+  const tr=e.target.closest("[data-trade]");if(tr){openTrade(tr.dataset.trade);return}
+  const dr=e.target.closest("[data-draft]");if(dr){const p=nextOpen();if(!p)return;S.sel[p.id]={pid:dr.dataset.draft,auto:false};justPicked.add(p.id);persist();render();return}
+  const ld=e.target.closest("[data-load]");if(ld){const s=saved.find(x=>x.id===ld.dataset.load);if(s){try{S=Object.assign(FRESH(),migrate(JSON.parse(s.state)));closeSheet();persist();render();document.querySelector('[data-tab="mock"]').click();toast(`Loaded “${s.name}”.`)}catch(err){toast("That save couldn’t be read.")}}return}
+  const vw=e.target.closest("[data-view]");if(vw){const s=saved.find(x=>x.id===vw.dataset.view);if(s){let st;try{st=migrate(JSON.parse(s.state))}catch(err){toast("That save couldn’t be read.");return}
+    openBoardView(st,{eyebrow:`${s.folder} · saved ${new Date(s.savedAt).toLocaleDateString()}`,title:s.name,loadId:s.id})}return}
+  const dl=e.target.closest("[data-del]");if(dl){pendingDelete=dl.dataset.del;renderSaved();return}
+  const dy=e.target.closest("[data-delyes]");if(dy){pendingDelete=null;deleteMock(dy.dataset.delyes);toast("Mock deleted.");return}
+  if(e.target.closest("[data-delno]")){pendingDelete=null;renderSaved();return}
+});
+$("#needsGrid").onchange=e=>{const s=e.target.closest("[data-nt]");if(!s)return;const t=s.dataset.nt,i=+s.dataset.ni;
+  const n=needsOf(t).slice();const prev=n[i];const dup=n.indexOf(s.value);if(dup>-1&&dup!==i)n[dup]=prev;n[i]=s.value;
+  S.needs[t]=n;persist();renderNeeds();renderBoard()};
+$("#needSearch").oninput=renderNeeds;$("#needSort").onchange=renderNeeds;
+$("#resetNeeds").onclick=()=>{S.needs={};persist();renderNeeds();renderBoard();toast("Needs reset to defaults.")};
+$("#availSearch").oninput=renderAvail;
+function setProPos(p){proPos=p;renderChips($("#proPos"),proPos,setProPos);renderPros()}
+function setAvailPos(p){availPos=p;renderChips($("#availPos"),availPos,setAvailPos);renderAvail()}
+renderChips($("#availPos"),availPos,setAvailPos);
+renderChips($("#proPos"),proPos,setProPos);
+$("#proSearch").oninput=renderPros;$("#proView").onchange=renderPros;
+$("#saveBtn").onclick=saveMock;
+$("#boardView").onclick=()=>openBoardView(JSON.parse(JSON.stringify(S)),{eyebrow:"Current mock",title:"Draft board"});
+
+$("#foot").innerHTML=`<b>How the sim works.</b> Each AI pick scores every available player by board rank, multiplies by the team’s need slot (bigger for need #1), adjusts for positional value (QBs only go to QB-needy teams), then adds random variance set by the Chaos slider. Draft order uses records through Week 8 with approximate tiebreakers; known traded picks are applied: IND and the earlier of DAL/GB to the Jets, LAR to Cleveland, CHI to Tennessee (Jeffery Simmons trade), GB to Dallas, HOU’s 2nd to Arizona, NE’s 2028 1st to Philadelphia. Big board blends ESPN (Kiper, Reid), Draft Countdown, WalterFootball, PFF and NFL Mock Draft Database consensus. Heights, weights and 2026 stat lines come from Tankathon’s 2027 board, with StatSniper and Ourlads for a few players; most run through Oct 17, with WalterFootball and PFF updates through Oct 24 for players who moved.<br><br>
+Sources: <a href="https://en.wikipedia.org/wiki/2027_NFL_draft" target="_blank" rel="noopener">2027 draft pick trades</a> · <a href="https://github.com/nflverse/nflverse-data" target="_blank" rel="noopener">nflverse game results (records)</a> · <a href="https://www.espn.com/nfl/story/_/id/50043471/2026-trade-deadline-updates-latest-news-deals-terms" target="_blank" rel="noopener">ESPN trade tracker</a> · <a href="https://walterfootball.com/draft2027charlie.php" target="_blank" rel="noopener">WalterFootball mock (Oct 30)</a> · <a href="https://www.nfl.com/news/nfl-trade-deadline-track-every-move-since-start-of-2026-regular-season" target="_blank" rel="noopener">2026 trade tracker</a> · <a href="https://www.draftcountdown.com/2027-nfl-draft/2027-nfl-draft-big-board-top-75-prospect-rankings-updated-brian-lamb/" target="_blank" rel="noopener">Draft Countdown top 75 (Oct 26)</a> · <a href="https://www.pff.com/news/draft-stock-up-stock-down-after-week-8-college-football" target="_blank" rel="noopener">PFF Week 8 stock report</a> · <a href="https://walterfootball.com/nfldraftbigboard2027.php" target="_blank" rel="noopener">WalterFootball big board</a> · <a href="https://walterfootball.com/draft2027recap_07.php" target="_blank" rel="noopener">Week 7 recaps</a> · <a href="https://www.draftcountdown.com/rankings/2027-nfl-draft-big-board-top-50-prospect-rankings-brian-lamb/" target="_blank" rel="noopener">Draft Countdown top 50</a> · <a href="https://www.pff.com/news/draft-stock-up-stock-down-after-week-6-of-college-football" target="_blank" rel="noopener">PFF stock report</a> · <a href="https://bleacherreport.com/articles/25509567-br-nfl-scouting-depts-2027-nfl-mock-draft-1-month-trade-deadline" target="_blank" rel="noopener">B/R scouting mock</a> · <a href="https://www.tankathon.com/nfl/big_board" target="_blank" rel="noopener">Tankathon big board (sizes & stats)</a> · <a href="https://athlonsports.com/nfl/2027-nfl-draft-team-needs" target="_blank" rel="noopener">Athlon team needs</a> · <a href="https://sports.yahoo.com/articles/biggest-2027-nfl-draft-risers-130024799.html" target="_blank" rel="noopener">Yahoo risers</a>`;
+
+render();
+try{const t=localStorage.getItem("wr27-tab");if(t&&t!=="mock")document.querySelector(`[data-tab="${t}"]`)?.click()}catch(e){}
+initStore();
+</script>
