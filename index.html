@@ -224,6 +224,12 @@ details.more>summary::before{content:"▸ "} details.more[open]>summary::before{
 #pktabs{overflow-x:auto;flex-wrap:nowrap;scrollbar-width:none;max-width:100%}#pktabs::-webkit-scrollbar{display:none}#pktabs button{white-space:nowrap;flex-shrink:0}
 .bpnamerow{display:flex;justify-content:space-between;align-items:center;gap:10px}.bpnamerow .favbtn{width:40px;height:38px;font-size:20px}
 .availhead>div:first-child{flex-wrap:wrap;min-width:0}.side .subtabs{min-width:0;max-width:100%;overflow-x:auto;scrollbar-width:none}.sim3 .btn{white-space:nowrap;font-size:14px;padding-inline:10px}
+.seg button{white-space:nowrap}@media (max-width:480px){.seg button{font-size:12.5px;padding-inline:4px}}
+.inlinegrid{max-height:calc(100vh - 290px);min-height:320px;overflow:auto}.inlinegrid table.grid th{z-index:2}
+.inlinegrid table.grid td.r,.inlinegrid table.grid th.rh{position:sticky;left:0;background:var(--surface);z-index:1}.inlinegrid table.grid th.rh{z-index:3;color:var(--ink-3)}
+table.grid td.r .dir{display:block;font-size:10px;font-weight:600;color:var(--ink-3)}
+.gc[data-gbio]{cursor:pointer}.gc.mine{box-shadow:inset 0 0 0 1.5px var(--accent)}.gc.clock{background:var(--accent-soft);color:var(--accent);border-left-color:var(--accent);box-shadow:inset 0 0 0 1.5px var(--accent)}.gc.clock .n{font-weight:800}
+.gridhead{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:8px}.gridhead .actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 .teamchips{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;margin-top:10px;padding-bottom:2px}.teamchips::-webkit-scrollbar{display:none}
 .teamchips button{flex:none;border:1px solid var(--line);background:var(--bg);color:var(--ink-2);border-radius:999px;padding:6px 12px;font:inherit;font-weight:700;font-size:12.5px;white-space:nowrap;cursor:pointer}
 .teamchips button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:#fff}
@@ -386,7 +392,7 @@ table.grid td.r{font-family:var(--f-display);font-weight:800;font-size:15px;colo
   </section>
   <section class="panel" id="p-board" hidden>
     <div class="tabhead"><div><h2 class="ttl">Board</h2><div class="sub">Your full rankings · stats through Week 9 · updated Nov 13, 2026</div></div></div>
-    <div class="seg" role="tablist" id="bSeg"><button role="tab" data-v="list" aria-selected="true">List</button><button role="tab" data-v="stats" aria-selected="false">Stats</button><button role="tab" data-v="teams" aria-selected="false">Teams</button></div>
+    <div class="seg" role="tablist" id="bSeg"><button role="tab" data-v="list" aria-selected="true">List</button><button role="tab" data-v="stats" aria-selected="false">Stats</button><button role="tab" data-v="teams" aria-selected="false">Teams</button><button role="tab" data-v="grid" aria-selected="false">Draft board</button></div>
     <div id="bFilters"><div class="pkbar" style="margin-top:10px"><input type="search" id="bQ" placeholder="Search players or NFL teams"></div>
     <div class="poschips" id="bPos" style="margin-top:8px"></div></div>
     <div class="teamchips" id="bTeams" hidden></div>
@@ -1154,6 +1160,19 @@ let bView="list",bPos="ALL";
 const posFilter=(p,f)=>f==="ALL"||(f==="FAV"?FAVS.has(p.id):p.pos===f);
 const chipsHtml=(cur,attr)=>["ALL","QB","RB","WR","TE","FAV"].map(x=>`<button aria-pressed="${x===cur}" ${attr}="${x}">${x==="ALL"?"All":x==="FAV"?"♥ Favorites":x}</button>`).join("");
 let bTeam=null;
+function gridViewHtml(){
+  const T=S.teams,R=S.rounds,rows=picks(),made=rows.filter(r=>S.sel[r.num]).length,clock=nextOpen();
+  const cell=r=>{const pl=BYID[S.sel[r.num]];const mine=S.user.includes(r.owner);
+    if(pl)return`<div class="gc ${pl.pos}${mine?" mine":""}" data-gbio="${pl.id}" title="${esc(pl.name)}, ${pl.pos}, ${esc(pl.team)}"><div class="n">${esc(pl.name)}</div><div class="m"><span>${pl.pos} · ${esc(pl.team)}</span><span class="num">${r.label}</span></div></div>`;
+    const on=clock&&clock.num===r.num;return`<div class="gc e${on?" clock":""}${mine?" mine":""}"><div class="n">${on?"On the clock":"—"}</div><div class="m"><span>${mine?"Your pick":"Open"}</span><span class="num">${r.label}</span></div></div>`};
+  let tb=`<table class="grid"><thead><tr><th class="rh">Rd</th>${Array.from({length:T},(_,i)=>`<th class="${S.user.includes(i)?"me":""}">${S.user.includes(i)?"⭐ ":""}${esc(tshort(i))}</th>`).join("")}</tr></thead><tbody>`;
+  for(let r=1;r<=R;r++){tb+=`<tr><td class="r">${r}<span class="dir">${r%2?"→":"←"}</span></td>`;for(let t=0;t<T;t++){const rr=rows.filter(x=>x.round===r&&x.owner===t);tb+=`<td>${rr.length?rr.map(cell).join(""):`<div class="gc e"><div class="n">—</div><div class="m"><span>Traded away</span></div></div>`}</td>`}tb+=`</tr>`}
+  tb+=`</tbody></table>`;
+  return`<div class="gridhead"><div class="faint" style="font-size:12.5px">${T} teams · ${made} of ${rows.length} picks made${S.log.length?` · ${S.log.length} trade${S.log.length===1?"":"s"}`:""}${clock?` · ${esc(tname(clock.owner))} on the clock at ${clock.label}`:made?" · Draft complete":""}</div>
+    <div class="actions"><span class="legend">${POS.map(p=>posTag(p)).join("")}</span><button class="btn sm" data-boardview>⤢ Full screen &amp; copy</button></div></div>
+    ${made?"":`<div class="empty" style="margin:6px 0 10px">No picks yet. Start a mock on the Draft tab and the board fills in here pick by pick.</div>`}
+    <div class="bv-scroll inlinegrid">${tb}</div>`;
+}
 function teamsViewHtml(t){
   const T=S.teams,str=Array.from({length:T},(_,i)=>teamStrength(i)),made=Object.keys(S.sel).length;
   const order=str.map((x,i)=>({i,sc:x.score})).sort((a,b)=>b.sc-a.sc),place=order.findIndex(o=>o.i===t)+1;
@@ -1167,7 +1186,8 @@ function teamsViewHtml(t){
 function renderBoardTab(){
   $("#bPos").innerHTML=chipsHtml(bPos,"data-bp");
   document.querySelectorAll("#bSeg button").forEach(b=>b.setAttribute("aria-selected",b.dataset.v===bView));
-  $("#bFilters").hidden=bView==="teams";$("#bTeams").hidden=bView!=="teams";
+  $("#bFilters").hidden=bView==="teams"||bView==="grid";$("#bTeams").hidden=bView!=="teams";
+  if(bView==="grid"){$("#boardList").innerHTML=gridViewHtml();const oc=$("#boardList .gc.clock");if(oc)oc.scrollIntoView({block:"nearest",inline:"center"});return}
   if(bView==="teams"){
     if(bTeam==null||bTeam>=S.teams)bTeam=S.user.length?S.user[0]:0;
     const ids=[...S.user.slice().sort((a,b)=>a-b),...Array.from({length:S.teams},(_,i)=>i).filter(i=>!S.user.includes(i))];
@@ -1182,6 +1202,7 @@ function renderBoardTab(){
 }
 $("#bSeg").onclick=e=>{const b=e.target.closest("[data-v]");if(b){bView=b.dataset.v;renderBoardTab()}};
 $("#bPos").onclick=e=>{const b=e.target.closest("[data-bp]");if(b){bPos=b.dataset.bp;renderBoardTab()}};
+$("#boardList").addEventListener("click",e=>{const g=e.target.closest("[data-gbio]");if(g)openBioPage(g.dataset.gbio,{})});
 $("#bTeams").onclick=e=>{const b=e.target.closest("[data-bt]");if(b){bTeam=+b.dataset.bt;renderBoardTab()}};
 $("#boardList").addEventListener("click",e=>{const b=e.target.closest("[data-tstep]");if(!b)return;const ids=[...S.user.slice().sort((a,b)=>a-b),...Array.from({length:S.teams},(_,i)=>i).filter(i=>!S.user.includes(i))];const k=ids.indexOf(bTeam);bTeam=ids[(k+ +b.dataset.tstep+ids.length)%ids.length];renderBoardTab()});
 $("#bQ").oninput=renderBoardTab;
