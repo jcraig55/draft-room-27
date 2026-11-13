@@ -236,6 +236,9 @@ body.haspill .toast{bottom:calc(140px + env(safe-area-inset-bottom,0px))!importa
 .pkcrow{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;padding-bottom:8px}.pkct{font-size:13px;color:var(--ink-2)}.pkct b{font:800 22px var(--f-display);color:var(--ink);font-variant-numeric:tabular-nums;margin-right:4px}.pkcb{display:flex;gap:6px}
 .pkbarbg{height:5px;margin:0 -10px;background:rgba(0,0,0,.06)}.pkbarbg i{display:block;height:100%;background:var(--accent);transition:width .25s linear}
 .pkclock.hot{border-color:#E5484D;background:#FDECEC}.pkclock.hot b{color:#E5484D}.pkclock.hot .pkbarbg i{background:#E5484D}
+.simme{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(78px + env(safe-area-inset-bottom,0px));z-index:22;border:0;border-radius:999px;padding:11px 20px;background:var(--ink);color:#fff;font:inherit;font-weight:700;font-size:14px;box-shadow:0 6px 20px rgba(0,0,0,.22);cursor:pointer;white-space:nowrap}
+.simme span{font-variant-numeric:tabular-nums;opacity:.75;margin-left:4px;font-weight:600}
+body.hassim .toast{bottom:calc(140px + env(safe-area-inset-bottom,0px))!important}
 .clockpill{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(76px + env(safe-area-inset-bottom,0px));z-index:22;display:flex;align-items:center;gap:10px;border:0;border-radius:999px;padding:9px 16px;background:var(--accent);color:#fff;font:inherit;font-weight:700;font-size:13px;box-shadow:0 6px 20px rgba(0,0,0,.18);cursor:pointer;white-space:nowrap}
 .clockpill .cpt{font:800 20px var(--f-display);font-variant-numeric:tabular-nums}.clockpill.hot{background:#E5484D;animation:cpulse 1s ease-in-out infinite}.clockpill.paused{background:var(--ink-2)}
 @keyframes cpulse{50%{transform:translateX(-50%) scale(1.05)}}
@@ -480,6 +483,7 @@ table.grid td.r{font-family:var(--f-display);font-weight:800;font-size:15px;colo
 </div></div>
 <div id="sheetHost"></div>
 <div id="toastHost"></div>
+<button class="simme" id="simToMe" hidden>⏩ Sim to my pick</button>
 <button class="clockpill" id="clockPill" hidden><span class="cpt" data-clocktxt>0:00</span><span class="cpl" id="clockPillLbl">Your pick</span></button>
 
 <script>
@@ -1057,13 +1061,19 @@ function liveStep(){clearTimeout(live.t);live.t=null;if(!live.on)return;const p=
   liveBtnPaint();scrollToClock();
   live.t=setTimeout(()=>{if(!live.on)return;const q=nextOpen();if(!q||q.num!==p.num||S.user.includes(q.owner)){liveStep();return}
     if(!aiPickNow(q)){stopLive();return}persist();render();liveStep()},d)}
-function renderTicker(){const el=$("#liveTicker");if(!el)return;const p=nextOpen();
+function paintSimMe(){const b=$("#simToMe");if(!b)return;const p=nextOpen(),show=live.on&&p&&!S.user.includes(p.owner)&&!$("#sheetHost").children.length&&S.user.length;b.hidden=!show;document.body.classList.toggle("hassim",!!show);
+  if(show){const nx=picks().find(x=>x.num>=p.num&&S.user.includes(x.owner)&&!S.sel[x.num]);b.innerHTML=`⏩ Sim to my pick${nx?` <span>${nx.label}</span>`:""}`}}
+function simToMe(){if(!live.on)return;clearTimeout(live.t);live.t=null;let guard=0;
+  while(guard++<500){const q=nextOpen();if(!q||S.user.includes(q.owner))break;if(!aiPickNow(q)){stopLive();break}}
+  persist();render();scrollToClock();liveStep()}
+function renderTicker(){paintSimMe();const el=$("#liveTicker");if(!el)return;const p=nextOpen();
   if(!live.started||!p){el.innerHTML="";return}
   const lp=live.last!=null?picks().find(x=>x.num===live.last):null,lpl=lp?BYID[S.sel[lp.num]]:null,mine=S.user.includes(p.owner);
   const top=live.on?(mine?`<span class="ltag you">🔔 Your pick</span><b>${p.label}</b> · You’re on the clock<button class="btn sm primary" data-pick="${p.num}">Make pick</button>`
     :`<span class="ltag"><i class="ldot"></i>Live</span><b>${p.label}</b> · ${esc(tname(p.owner))} is picking<span class="ldots"><i></i><i></i><i></i></span>`)
     :`<span class="ltag paused">⏸ Paused</span><b>${p.label}</b> · ${esc(tname(p.owner))} is up next`;
   el.innerHTML=`<div class="ticker${live.on&&mine?" you":""}"><div class="trow">${top}</div>${lpl?`<div class="tlast">Last pick: ${lp.label} ${esc(tname(lp.owner))} took ${posTag(lpl.pos)}<b>${esc(lpl.name)}</b> <span class="faint">${esc(lpl.team)}</span></div>`:""}</div>`}
+$("#simToMe").onclick=simToMe;
 $("#paceSeg").onclick=e=>{const b=e.target.closest("[data-pace]");if(!b)return;TM.pace=b.dataset.pace;saveTM();renderTimerSettings();toast(`Computer pick speed: ${b.textContent}.`)};
 function renderTimerSettings(){document.querySelectorAll("#paceSeg button").forEach(b=>{b.setAttribute("aria-selected",b.dataset.pace===TM.pace);b.setAttribute("aria-checked",b.dataset.pace===TM.pace)});$("#tmOn").setAttribute("aria-checked",TM.on);$("#tmBody").classList.toggle("off",!TM.on);
   document.querySelectorAll("#tmSec button").forEach(b=>{b.setAttribute("aria-selected",+b.dataset.s===TM.sec);b.setAttribute("aria-checked",+b.dataset.s===TM.sec)});$("#tmEnd").value=TM.end;$("#tmBeep").value=TM.beep?"1":"0"}
@@ -1072,7 +1082,7 @@ $("#tmSec").onclick=e=>{const b=e.target.closest("[data-s]");if(!b)return;TM.sec
   if(clk.num!=null){clk.dl=Date.now()+TM.sec*1000;clk.left=TM.sec;clk.warned=false;clk.over=false;paintClock()}toast(`Pick timer: ${fmtT(TM.sec)} per pick.`)};
 $("#tmEnd").onchange=e=>{TM.end=e.target.value;saveTM();paintClock()};
 $("#tmBeep").onchange=e=>{TM.beep=e.target.value==="1";saveTM();if(TM.beep)beep()};
-function closeSheet(){$("#sheetHost").innerHTML="";pkRedraw=null;if(typeof paintClock==="function")paintClock()}
+function closeSheet(){$("#sheetHost").innerHTML="";pkRedraw=null;if(typeof paintClock==="function")paintClock();if(typeof paintSimMe==="function")paintSimMe()}
 function openPicker(num){
   const p=picks().find(x=>x.num===num);if(!p)return;
   setTimeout(()=>armClock(num),0);
