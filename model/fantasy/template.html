@@ -363,6 +363,25 @@ table.grid td.r{font-family:var(--f-display);font-weight:800;font-size:15px;colo
 
 .teampick button{min-width:34px;min-height:34px}
 
+
+/* ---------- press feel: push down (every button and tab) ---------- */
+:root{--edge:#86B9DE;--edge-p:#2F78AE;--edge-d:#D9A3A0;--edge-k:#000}
+.btn,.gear,.poschips button,.teamchips button,.teampick button,.favbtn,.mvbtn2,.bdinfo,.cmprow,.tswitch,.xbtn,.simme,.clockpill,.seg,.subtabs{box-shadow:0 3px 0 var(--edge)}
+.btn.primary,.poschips button[aria-pressed="true"],.teamchips button[aria-pressed="true"],.teampick button[aria-pressed="true"],.clockpill,.tswitch[aria-checked="true"],.seg button[aria-selected="true"]{box-shadow:0 3px 0 var(--edge-p)}
+.btn.danger{box-shadow:0 3px 0 var(--edge-d)}.btn.danger.confirm{box-shadow:0 3px 0 #9E2F2A}
+.xbtn,.simme,#simUser.live{box-shadow:0 3px 0 var(--edge-k),0 6px 18px rgba(0,0,0,.2)}
+.clockpill.hot{box-shadow:0 3px 0 #A32D2D,0 6px 18px rgba(0,0,0,.2)}.clockpill.paused{box-shadow:0 3px 0 #2C2C2A,0 6px 18px rgba(0,0,0,.2)}
+.subtabs button[aria-selected="true"]{box-shadow:0 2px 0 var(--edge)}
+.seg button[aria-selected="true"]{box-shadow:0 2px 0 var(--edge-p)}
+button,.gear,summary,th[data-sort]{transition:transform .07s ease-out,box-shadow .07s ease-out,background-color .12s,color .12s;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+:is(button,.gear,summary,th[data-sort]):is(:active,.pressed){transform:translateY(3px);box-shadow:0 0 0 transparent!important}
+:is(.seg,.subtabs,.bnav,#pktabs,.tabs) button:is(:active,.pressed){transform:translateY(2px)}
+.bnav button:is(:active,.pressed) i{transform:scale(.88)}.bnav button i{transition:transform .07s}
+:is(.linkbtn,.nm,.nmb,.pkfx,th[data-sort],summary):is(:active,.pressed){transform:translateY(1px)}
+.clockpill:is(:active,.pressed),.simme:is(:active,.pressed){transform:translateX(-50%) translateY(3px)}
+.clockpill.hot:is(:active,.pressed){animation:none}
+.xon>.xdock .xbtn:is(:active,.pressed){transform:translateY(3px)}
+.btns,.rowbtns,.actions,.pkcb,.teamnav{padding-bottom:3px}
 </style>
 
 <div class="wrap">
@@ -1107,6 +1126,13 @@ function renderTicker(){paintSimMe();const el=$("#liveTicker");if(!el)return;con
   el.innerHTML=`<div class="ticker${live.on&&mine?" you":""}"><div class="trow">${top}</div>${lpl?`<div class="tlast">Last pick: ${lp.label} ${esc(tname(lp.owner))} took ${posTag(lpl.pos)}<b>${esc(lpl.name)}</b> <span class="faint">${esc(lpl.team)}</span></div>`:""}</div>`}
 $("#simToMe").onclick=simToMe;
 $("#paceSeg").onclick=e=>{const b=e.target.closest("[data-pace]");if(!b)return;TM.pace=b.dataset.pace;saveTM();renderTimerSettings();toast(`Computer pick speed: ${b.textContent}.`)};
+/* press feel: keep the pushed-down state visible for quick taps */
+(()=>{const SEL="button,.gear,summary,th[data-sort]";let cur=null,t0=0;
+ const up=()=>{if(!cur)return;const el=cur;cur=null;setTimeout(()=>el.classList.remove("pressed"),Math.max(0,90-(Date.now()-t0)))};
+ document.addEventListener("pointerdown",e=>{const el=e.target.closest(SEL);if(!el||el.disabled)return;cur=el;t0=Date.now();el.classList.add("pressed")},{passive:true,capture:true});
+ ["pointerup","pointercancel","dragstart"].forEach(ev=>document.addEventListener(ev,up,{passive:true,capture:true}));
+ document.addEventListener("touchstart",()=>{},{passive:true});
+ document.addEventListener("scroll",up,{passive:true,capture:true});})();
 /* ---------- floating Close on scrolled overlays ---------- */
 const XC=".sheet,.bv,.setsheet,.mover";
 function xCloseBtn(c){return c.querySelector("#pkx,#trx,#bvx,#closeSettings,[data-gclose],[data-cmpclose]")||[...c.querySelectorAll("button")].find(b=>!b.classList.contains("xbtn")&&/^(Close|Cancel|Done|Got it)$/i.test(b.textContent.trim()))}
