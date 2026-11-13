@@ -216,6 +216,13 @@ details.more>summary::before{content:"▸ "} details.more[open]>summary::before{
 .gtab td{padding:8px 10px;border-bottom:1px solid var(--line)}.gtab tr:last-child td{border-bottom:0}.gtab tr.me td{background:var(--accent-soft)}
 .grade{display:inline-block;min-width:34px;text-align:center;font:800 15px var(--f-display);border-radius:8px;padding:2px 6px;color:#fff}.grade.gA{background:#16A34A}.grade.gB{background:#4B9CD3}.grade.gC{background:#C9A227}.grade.gD,.grade.gF{background:#E5484D}
 .bpact .mvbtn2{padding:11px 14px}
+.favbtn{border:1px solid var(--line);background:var(--bg);color:#E5484D;border-radius:999px;width:32px;height:30px;font-size:16px;line-height:1;cursor:pointer;flex-shrink:0;padding:0}
+.favbtn[aria-pressed="true"]{background:#FDECEC;border-color:#F3B8B8}
+.favbox{border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.favhd{font-family:var(--f-display);font-weight:700;font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:#1F6FA8;background:var(--accent-soft);padding:6px 12px;border-bottom:1px solid var(--line)}
+.favgone{opacity:.6}
+#pktabs{overflow-x:auto;flex-wrap:nowrap;scrollbar-width:none;max-width:100%}#pktabs::-webkit-scrollbar{display:none}#pktabs button{white-space:nowrap;flex-shrink:0}
+.bpnamerow{display:flex;justify-content:space-between;align-items:center;gap:10px}.bpnamerow .favbtn{width:40px;height:38px;font-size:20px}
 .rowbtns{display:flex;gap:6px;align-items:center;flex-shrink:0}
 .mvbtn{min-width:34px;padding-inline:8px;font-size:15px;line-height:1}
 .mvmark{display:block;font-size:10px;font-weight:700;line-height:1.1;margin-top:2px}.mvmark.up{color:#16a34a}.mvmark.dn{color:#dc2626}
@@ -290,6 +297,7 @@ table.grid td.r{font-family:var(--f-display);font-weight:800;font-size:15px;colo
     <button role="tab" data-tab="mock" aria-selected="true">Mock Draft</button>
     <button role="tab" data-tab="teams" aria-selected="false">Drafters</button>
     <button role="tab" data-tab="players" aria-selected="false">Players</button>
+    <button role="tab" data-tab="favs" aria-selected="false">♥ Favorites</button>
     <button role="tab" data-tab="saved" aria-selected="false">Saved Mocks</button>
     <a class="tablink" href="top125.html">Top 125 ›</a>
   </nav>
@@ -382,6 +390,14 @@ table.grid td.r{font-family:var(--f-display);font-weight:800;font-size:15px;colo
     <div id="proList"></div>
   </section>
 
+  <section class="panel" id="p-favs" hidden>
+    <div class="card" style="padding:14px">
+      <div class="eyebrow">Your favorites</div>
+      <h2 style="font-size:24px;text-transform:uppercase;font-weight:800;margin:2px 0 4px">Players you’re targeting</h2>
+      <p class="muted" style="font-size:13px;margin:0 0 10px">Tap ♡ on any player here, in the pick window, in a bio or on the Top 125 board to save him. During a mock, favorites show who’s still available and who got taken.</p>
+      <div id="favList"></div>
+    </div>
+  </section>
   <section class="panel" id="p-saved" hidden>
     <div class="savegrid">
       <div class="card" style="padding:14px;display:grid;gap:10px;align-content:start">
@@ -609,7 +625,7 @@ function renderAvail(){
   $("#availHint").innerHTML=(clock?runAlert(clock.num):"")+boardNote()+(clock?`<div class="hint"><b>${esc(tname(clock.owner))}</b> at ${clock.label}. Tap a name for his bio, or “Draft”.</div>`:`<div class="hint">Every pick is in. Tap “Change” on any slot to swap a player.</div>`);
   $("#availList").innerHTML=list.length?list.map(p=>`<div class="prow"><div class="rk">${p.rank}${mvMark(p)}</div>
     <div style="min-width:0"><div>${nameBtn(p,availBio===p.id)}</div><div class="meta">${esc(p.team)} · ${p.proj} proj ${projLbl()}${p.ts!=null&&p.pos!=="QB"?` · ${p.ts}% tgt share`:""} ${tierChip(p)}</div>${badgeRow(p)}</div>
-    <span class="rowbtns"><button class="btn sm ghost mvbtn" data-move="${p.id}" aria-label="Move ${esc(p.name)} in the rankings" title="Move in rankings">⇅</button><button class="btn sm" data-draft="${p.id}" ${clock?"":"disabled"}>Draft</button></span></div>`).join(""):`<div class="empty">No players match.</div>`;
+    <span class="rowbtns">${favBtn(p.id)}<button class="btn sm ghost mvbtn" data-move="${p.id}" aria-label="Move ${esc(p.name)} in the rankings" title="Move in rankings">⇅</button><button class="btn sm" data-draft="${p.id}" ${clock?"":"disabled"}>Draft</button></span></div>`).join(""):`<div class="empty">No players match.</div>`;
 }
 function renderUserTeams(){$("#userTeams").innerHTML=Array.from({length:S.teams},(_,i)=>`<button aria-pressed="${S.user.includes(i)}" data-ut="${i}">${i+1}${S.names[i]?" · "+esc(S.names[i].slice(0,8)):""}</button>`).join("")}
 function renderControls(){
@@ -619,7 +635,7 @@ function renderControls(){
   $("#rndLbl").textContent=S.chaos<25?"Low":S.chaos>65?"High":"Medium";
   $("#tradeLog").innerHTML=S.log.length?S.log.map(l=>"• "+esc(l)).join("<br>"):"No trades yet.";
 }
-function render(){renderControls();renderUserTeams();renderBoard();renderAvail();if(!$("#p-teams").hidden)renderTeams()}
+function render(){renderControls();renderUserTeams();renderBoard();renderAvail();if(!$("#p-teams").hidden)renderTeams();if(!$("#p-favs").hidden)renderFavs()}
 
 /* ---------- drafters ---------- */
 function renderTeams(){
@@ -643,7 +659,7 @@ let proPos="ALL";
 function pcard(p,rk){
   const tr=p.t==="up"?`<span class="chip trend-up">▲ Up</span>`:p.t==="down"?`<span class="chip trend-down">▼ Down</span>`:"";
   return`<article class="card pcard"><div class="rank">${rk??p.rank}</div><div style="min-width:0">
-    <div class="top"><button class="nmb" data-bio="${p.id}">${posTag(p.pos)} <b class="nmt">${esc(p.name)}</b><span class="caret">›</span></button><span class="muted">${esc(p.team)}</span><span class="faint num" style="font-size:12px">${esc(p.ht)} · ${p.wt||"—"} lb · age ${p.age??"—"}</span><span class="chip num">${p.pos}${p.prank} · #${p.rank}</span>${tr}</div>${badgeRow(p,7)}
+    <div class="top"><button class="nmb" data-bio="${p.id}">${posTag(p.pos)} <b class="nmt">${esc(p.name)}</b><span class="caret">›</span></button><span class="muted">${esc(p.team)}</span>${favBtn(p.id)}<span class="faint num" style="font-size:12px">${esc(p.ht)} · ${p.wt||"—"} lb · age ${p.age??"—"}</span><span class="chip num">${p.pos}${p.prank} · #${p.rank}</span>${tr}</div>${badgeRow(p,7)}
     <dl><dt>2026</dt><dd>${esc(p.line)}${p.g?` · <b class="num">${p.ppg}</b> PPR/G`:""}</dd>
     ${p.pos!=="QB"&&p.ts!=null?`<dt>Tgt share</dt><dd>${tsMeter(p.ts)}${p.snap!=null?` <span class="faint">· ${p.snap}% snaps</span>`:""}</dd>`:p.snap!=null&&p.pos!=="QB"?`<dt>Snaps</dt><dd>${p.snap}%</dd>`:""}
     ${p.prev?`<dt>2025</dt><dd>${esc(p.prev)}</dd>`:""}
@@ -700,7 +716,7 @@ function bioPageHtml(p,ctx){
   return`<div class="bpbar"><button class="linkbtn bpback" data-bioclose>‹ Back</button>${clock?`<span class="bpclk num">${S.user.includes(clock.owner)?"You":esc(tshort(clock.owner))} · Pick ${clock.label}</span>`:""}</div>
   <div class="bpwrap">
     <div class="bptop">${posTag(p.pos)}<span class="chip num">Overall #${p.rank}</span><span class="chip num">${p.pos}${p.prank}</span>${tierChip(p)}${tr}</div>
-    <h2 class="bpname">${esc(p.name)}</h2>
+    <div class="bpnamerow"><h2 class="bpname">${esc(p.name)}</h2>${favBtn(p.id)}</div>
     <div class="muted" style="font-size:13px">${esc(p.team)} · Age ${p.age??"—"} in Sept. 2027 · ${esc(p.ht)}, ${p.wt||"—"} lb</div>
     ${B.b.length?`<div class="bds bpbds">${B.b.map(bdPill).join("")}</div>`:""}
     ${taken?`<div class="bfit bench">Already drafted.</div>`:fit}${team!=null&&!taken?(()=>{const lc=linkChips(p,team);return lc?`<div class="bds" style="margin-top:8px">${lc}</div>`:""})():""}
@@ -789,6 +805,7 @@ function assistHtml(p){
   const L=assistPicks(p);if(!L.length)return"";const me=S.user.includes(p.owner);
   return`<div class="assist"><div class="eyebrow">✨ Best picks for ${me?"you":esc(tname(p.owner))}</div><div class="asl">${L.map(({x,fill,drop,fall,nxt,tk,nd})=>{
     const why=[];if(nd.includes(x.pos))why.push(`Fills ${me?"your":"their"} ${x.pos} spot`);else if(fitsSlot(x.pos,nd))why.push(`Fits ${nd.includes("FLEX")&&x.pos!=="QB"?"FLEX":"Superflex"}`);else why.push("Depth pick");
+    if(FAVS.has(x.id))why.unshift("♥ Favorite");
     if(lastInTier(x,tk))why.push(`Last ${x.pos} in Tier ${x.tier}`);
     if(drop>=1&&nxt)why.push(`Next ${x.pos} at ${nxt.label}: ~${drop.toFixed(1)} pts/G worse`);
     if(fall>=Math.max(4,S.teams/2))why.push(`Falling: ranked #${x.rank}`);
@@ -856,6 +873,28 @@ function gradesHtml(){
 function openGrades(){bioCtx=null;let host=$("#bioHost");if(!host){host=document.createElement("div");host.id="bioHost";document.body.appendChild(host)}
   host.innerHTML=`<div class="biopg" role="dialog" aria-modal="true" aria-label="Grades and standings">${gradesHtml()}</div>`;requestAnimationFrame(()=>host.firstElementChild.classList.add("open"))}
 
+/* ---------- favorites (shared with the Top 125 board through localStorage) ---------- */
+let FAVS=new Set();
+const loadFavs=()=>{try{FAVS=new Set(JSON.parse(localStorage.getItem("dr27-favs")||"[]").filter(id=>BYID[id]))}catch(e){FAVS=new Set()}};loadFavs();
+const saveFavs=()=>{try{localStorage.setItem("dr27-favs",JSON.stringify([...FAVS]))}catch(e){}};
+const favBtn=id=>`<button class="favbtn" data-fav="${id}" aria-pressed="${FAVS.has(id)}" aria-label="${FAVS.has(id)?"Remove from":"Add to"} favorites" title="Favorite">${FAVS.has(id)?"♥":"♡"}</button>`;
+function favListHtml(num){
+  const tk=new Map();for(const k in S.sel)if(num==null||+k<num)tk.set(S.sel[k],+k);
+  const L=P.filter(p=>FAVS.has(p.id));
+  if(!L.length)return`<div class="empty">No favorites yet. Tap ♡ next to a player to add him.</div>`;
+  const av=L.filter(p=>!tk.has(p.id)),gone=L.filter(p=>tk.has(p.id));
+  const row=(x,taken)=>{const pk=taken?picks().find(q=>q.num===tk.get(x.id)):null;
+    return`<div class="prow${taken?" favgone":""}"><div class="rk">${x.rank}</div><div style="min-width:0"><div>${nameBtn(x,false)}</div><div class="meta">${esc(x.team)} · ${x.proj} proj ${projLbl()} · ${x.pos}${x.prank} ${tierChip(x)}</div>${taken?`<div class="meta" style="color:var(--down)">Taken at ${pk.label} by ${esc(tname(pk.owner))}</div>`:badgeRow(x,2)}</div><span class="rowbtns">${favBtn(x.id)}${!taken&&num!=null?`<button class="btn sm primary" data-take="${x.id}">Draft</button>`:""}</span></div>`};
+  return`${av.length?`<div class="favhd">Available · ${av.length}</div>${av.map(x=>row(x,false)).join("")}`:""}${gone.length?`<div class="favhd">Already drafted · ${gone.length}</div>${gone.map(x=>row(x,true)).join("")}`:""}`;
+}
+function renderFavs(){const h=$("#favList");if(!h)return;h.innerHTML=`<div class="favbox">${favListHtml(null)}</div>`}
+function toggleFav(id){if(FAVS.has(id))FAVS.delete(id);else FAVS.add(id);saveFavs();
+  document.querySelectorAll(`[data-fav="${id}"]`).forEach(b=>{const on=FAVS.has(id);b.setAttribute("aria-pressed",on);b.textContent=on?"♥":"♡";b.setAttribute("aria-label",(on?"Remove from":"Add to")+" favorites")});
+  if(!$("#p-favs").hidden)renderFavs();const pf=$("#pkFav");if(pf)pf.innerHTML=favListHtml(+pf.dataset.upto);
+  toast(FAVS.has(id)?`${BYID[id].name} added to favorites.`:`${BYID[id].name} removed from favorites.`)}
+window.addEventListener("storage",e=>{if(e.key==="dr27-favs"){loadFavs();render()}});
+window.addEventListener("pageshow",()=>{loadFavs();render()});
+
 /* ---------- move-a-player panel ---------- */
 let pkRedraw=null,bdFilter=null,bdHide=false;
 const bdPass=x=>{const b=bdOf(x);return(!bdFilter||b.includes(bdFilter))&&(!bdHide||!(b.includes("under")||b.includes("floor")))};
@@ -901,15 +940,16 @@ function openPicker(num){
     const list=P.filter(x=>!tk.has(x.id)&&(pos==="ALL"||(pos==="NEED"?fitsSlot(x.pos,nd):pos==="FLEX"?x.pos!=="QB":x.pos===pos))&&matchQ(x,q)&&bdPass(x)).slice(0,60);
     $("#pkBoardNote").innerHTML=runAlert(num)+(q||bdFilter||bdHide||pos!=="ALL"?"":assistHtml(p))+boardNote();
     const single=["QB","RB","WR","TE"].includes(pos);let lastT=null;
-    $("#pkl").innerHTML=list.map(x=>{const div=single&&x.tier!==lastT?`<div class="tierdiv">${x.pos} Tier ${x.tier}</div>`:"";lastT=x.tier;return div+`<div class="prow"><div class="rk">${x.rank}${mvMark(x)}</div><div style="min-width:0"><div>${nameBtn(x,openBio===x.id)}${nd.includes(x.pos)?` <span class="chip" style="font-size:11px">fills ${x.pos}</span>`:""}</div><div class="meta">${esc(x.team)} · ${x.proj} proj ${projLbl()}${x.ts!=null&&x.pos!=="QB"?` · ${x.ts}% tgt share`:""} ${tierChip(x)}</div>${badgeRow(x)}${(()=>{const lc=linkChips(x,p.owner),lt=lastInTier(x,tk)&&x.tier<=8?`<span class="lnk lastt">⚠️ Last ${x.pos} in Tier ${x.tier}</span>`:"";return lc||lt?`<div class="bds">${lt}${lc}</div>`:""})()}</div><span class="rowbtns"><button class="btn sm ghost mvbtn" data-move="${x.id}" aria-label="Move ${esc(x.name)} in the rankings" title="Move in rankings">⇅</button><button class="btn sm primary" data-take="${x.id}">Draft</button></span></div>`}).join("")||`<div class="empty">No players match.</div>`;
+    $("#pkl").innerHTML=list.map(x=>{const div=single&&x.tier!==lastT?`<div class="tierdiv">${x.pos} Tier ${x.tier}</div>`:"";lastT=x.tier;return div+`<div class="prow"><div class="rk">${x.rank}${mvMark(x)}</div><div style="min-width:0"><div>${nameBtn(x,openBio===x.id)}${nd.includes(x.pos)?` <span class="chip" style="font-size:11px">fills ${x.pos}</span>`:""}</div><div class="meta">${esc(x.team)} · ${x.proj} proj ${projLbl()}${x.ts!=null&&x.pos!=="QB"?` · ${x.ts}% tgt share`:""} ${tierChip(x)}</div>${badgeRow(x)}${(()=>{const lc=linkChips(x,p.owner),lt=lastInTier(x,tk)&&x.tier<=8?`<span class="lnk lastt">⚠️ Last ${x.pos} in Tier ${x.tier}</span>`:"";return lc||lt?`<div class="bds">${lt}${lc}</div>`:""})()}</div><span class="rowbtns">${favBtn(x.id)}<button class="btn sm ghost mvbtn" data-move="${x.id}" aria-label="Move ${esc(x.name)} in the rankings" title="Move in rankings">⇅</button><button class="btn sm primary" data-take="${x.id}">Draft</button></span></div>`}).join("")||`<div class="empty">No players match.</div>`;
   };
   $("#sheetHost").innerHTML=`<div class="scrim" id="scrim"><div class="sheet" role="dialog" aria-modal="true" aria-label="Make a pick">
     <div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start"><div><div class="eyebrow">Pick ${p.label} · No. ${p.num} overall</div><h2>${esc(tname(p.owner))}</h2><div class="muted" style="font-size:13px">Open spots: ${openNeeds(p.owner).join(" · ")||"bench"}</div></div><button class="btn sm" id="pkx">Close</button></div>
-    <div class="subtabs" role="tablist" id="pktabs" style="margin-top:12px"><button role="tab" data-pt="players" aria-selected="true">Players</button><button role="tab" data-pt="team" aria-selected="false">My team</button><button role="tab" data-pt="prev" aria-selected="false">Previous picks</button></div>
+    <div class="subtabs" role="tablist" id="pktabs" style="margin-top:12px"><button role="tab" data-pt="players" aria-selected="true">Players</button><button role="tab" data-pt="team" aria-selected="false">My team</button><button role="tab" data-pt="prev" aria-selected="false">Previous picks</button><button role="tab" data-pt="fav" aria-selected="false">♥ Favorites</button></div>
     <div id="pkPlayers"><div style="display:grid;gap:8px;margin-top:10px"><input type="search" id="pkq" placeholder="Search players or NFL teams"><div class="poschips" id="pkpos"></div><div class="poschips bdchips" id="pkbd"></div></div>
     <div id="pkBoardNote"></div><div id="pkl" style="margin-top:8px;border:1px solid var(--line);border-radius:14px;overflow:hidden"></div></div>
     <div id="pkTeam" hidden style="margin-top:8px;border:1px solid var(--line);border-radius:14px;overflow:hidden"></div>
     <div id="pkPrev" hidden style="margin-top:8px;border:1px solid var(--line);border-radius:14px;overflow:hidden;max-height:56vh;overflow:auto"></div>
+    <div id="pkFav" hidden class="favbox" style="margin-top:8px"></div>
     <div class="actions" style="margin-top:12px"><button class="btn" id="pkauto">Let the AI pick</button><button class="btn ghost" data-trade="${p.num}">Trade this pick</button></div></div></div>`;
   const chips=$("#pkpos");const dc=()=>{chips.innerHTML=["ALL","NEED","FLEX",...POS].map(x=>`<button aria-pressed="${x===pos}" data-p="${x}">${x==="ALL"?"All":x==="NEED"?"Fills a need":x}</button>`).join("")};
   chips.onclick=e=>{const b=e.target.closest("button[data-p]");if(b){pos=b.dataset.p;dc();draw()}};dc();
@@ -917,8 +957,10 @@ function openPicker(num){
   $("#pkbd").onclick=e=>{const b=e.target.closest("[data-bf]");if(b){bdFilter=bdFilter===b.dataset.bf?null:b.dataset.bf;bdc();draw();return}if(e.target.closest("[data-bh]")){bdHide=!bdHide;bdc();draw()}};bdc();draw();
   $("#pkTeam").innerHTML=myTeamHtml(p.owner);
   $("#pkPrev").dataset.upto=num;$("#pkPrev").innerHTML=prevPicksHtml(num);
+  $("#pkFav").dataset.upto=num;$("#pkFav").innerHTML=favListHtml(num);
+  $("#pkFav").onclick=e=>{if(e.target.closest("[data-fav]"))return;$("#pkl").onclick(e)};
   $("#pktabs").onclick=e=>{const b=e.target.closest("[data-pt]");if(!b)return;const t=b.dataset.pt;
-    document.querySelectorAll("#pktabs button").forEach(x=>x.setAttribute("aria-selected",x===b));$("#pkPlayers").hidden=t!=="players";$("#pkTeam").hidden=t!=="team";$("#pkPrev").hidden=t!=="prev"};
+    document.querySelectorAll("#pktabs button").forEach(x=>x.setAttribute("aria-selected",x===b));$("#pkPlayers").hidden=t!=="players";$("#pkTeam").hidden=t!=="team";$("#pkPrev").hidden=t!=="prev";$("#pkFav").hidden=t!=="fav";if(t==="fav")$("#pkFav").innerHTML=favListHtml(num)};
   pkRedraw=draw;
   $("#pkq").oninput=draw;$("#pkx").onclick=closeSheet;$("#scrim").onclick=e=>{if(e.target.id==="scrim")closeSheet()};
   $("#pkauto").onclick=()=>{delete S.sel[num];const pl=aiChoose(p.owner,p.num,p.round);S.sel[num]=pl.id;justPicked.add(num);persist();closeSheet();render()};
@@ -1035,7 +1077,7 @@ function renderSaved(){
 /* ---------- util + events ---------- */
 let toastT;function toast(m){$("#toastHost").innerHTML=`<div class="toast" role="status">${esc(m)}</div>`;clearTimeout(toastT);toastT=setTimeout(()=>$("#toastHost").innerHTML="",2600)}
 $("#tabs").onclick=e=>{const b=e.target.closest("[data-tab]");if(!b)return;document.querySelectorAll("#tabs button").forEach(x=>x.setAttribute("aria-selected",x===b));
-  ["mock","teams","players","saved"].forEach(t=>$("#p-"+t).hidden=t!==b.dataset.tab);
+  ["mock","teams","players","favs","saved"].forEach(t=>$("#p-"+t).hidden=t!==b.dataset.tab);if(b.dataset.tab==="favs")renderFavs();
   if(b.dataset.tab==="teams")renderTeams();if(b.dataset.tab==="players")renderPlayers();if(b.dataset.tab==="saved")renderSaved();try{localStorage.setItem("dr27-tab",b.dataset.tab)}catch(e){}};
 $("#simUser").onclick=()=>{if(!S.user.length){toast("Pick your draft slot first, or use Sim full draft.");return}simulate("user")};
 $("#simAll").onclick=()=>simulate("all");
@@ -1071,6 +1113,8 @@ document.addEventListener("click",e=>{
   if(e.target.closest("[data-bguide]")){openGuide();return}
   const cmp=e.target.closest("[data-compare]");if(cmp){openCompareChooser(cmp.dataset.compare);return}
   if(e.target.closest("[data-cmpback]")){if(bioCtx){delete bioCtx.cmp;redrawBio()}return}
+  const fv=e.target.closest("[data-fav]");if(fv){toggleFav(fv.dataset.fav);return}
+  const fl=e.target.closest("#favList [data-bio]");if(fl){openBioPage(fl.dataset.bio,{});return}
   const mv=e.target.closest("[data-move]");if(mv){openMover(mv.dataset.move);return}
   const rb=e.target.closest("[data-resetboard]");if(rb){resetBoard();toast("Rankings reset to the default board.");afterMove();return}
   const pk=e.target.closest("[data-pick]");if(pk){openPicker(+pk.dataset.pick);return}

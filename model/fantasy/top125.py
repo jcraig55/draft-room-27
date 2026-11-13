@@ -12,7 +12,7 @@ _pj={x['name']:x for x in json.load(open('/home/claude/fantasy/proj.json'))}
 d=[]
 for i,r in enumerate(json.load(open('/home/claude/fantasy/players.json'))[:125]):
     x=_pj.get(r[1],{}); mv=0
-    d.append([r[1],r[2],r[3],mv])
+    d.append([r[1],r[2],r[3],mv,r[0]])
 SUB=f"2027 redraft  ·  Full PPR  ·  16 teams  ·  QB / RB / 2 WR / TE / 2 FLEX  ·  Updated {DATE}"
 W,H=letter
 c=canvas.Canvas(f'/home/claude/downloads/draft-room-27-top-125 ({datetime.date.today().strftime("%b %-d")}).pdf',pagesize=letter)
@@ -26,7 +26,7 @@ c.setFont('Helvetica',9.5); c.setFillColor(mute); c.drawString(m,H-m-30,SUB)
 c.setStrokeColor(rule); c.line(m,H-m-40,W-m,H-m-40)
 cols=3; gap=14; cw=(W-2*m-gap*(cols-1))/cols; top=H-m-58; rh=15.6; per=42
 UPB,UPT,DNB,DNT=HexColor('#dcfce7'),HexColor('#15803d'),HexColor('#fee2e2'),HexColor('#b91c1c')
-for i,(n,p,t,mv) in enumerate(d):
+for i,(n,p,t,mv,_id) in enumerate(d):
     x=m+(i//per)*(cw+gap); y=top-(i%per)*rh
     if mv>0: c.setFillColor(UPB); c.rect(x,y-4.5,cw,rh,stroke=0,fill=1)
     elif mv<0: c.setFillColor(DNB); c.rect(x,y-4.5,cw,rh,stroke=0,fill=1)
@@ -52,7 +52,7 @@ c.save()
 pg=open('/home/claude/fantasy/top125.html',encoding='utf-8').read()
 def _mv(mv): return '' if not mv else f'<span class="mv">{"▲" if mv>0 else "▼"}{abs(mv)}</span>'
 def _cl(mv): return ' class="up"' if mv>0 else (' class="dn"' if mv<0 else '')
-rows=''.join(f'<li{_cl(mv)} data-p="{p}"><span class="rk">{i+1}</span><span class="pos {p}">{p}</span><span class="nm">{html.escape(n)}</span>{_mv(mv)}<span class="tm">{t}</span></li>' for i,(n,p,t,mv) in enumerate(d))
+rows=''.join(f'<li{_cl(mv)} data-p="{p}" data-id="{_id}"><span class="rk">{i+1}</span><span class="pos {p}">{p}</span><span class="nm">{html.escape(n)}</span>{_mv(mv)}<span class="tm">{t}</span><button class="fav" data-fav="{_id}" aria-pressed="false" aria-label="Add {html.escape(n)} to favorites">♡</button></li>' for i,(n,p,t,mv,_id) in enumerate(d))
 a=pg.index('<ol>')+4; b=pg.index('</ol>')
 pg=pg[:a]+rows+pg[b:]
 import re
