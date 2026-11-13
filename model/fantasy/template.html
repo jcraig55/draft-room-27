@@ -223,7 +223,12 @@ table.grid td.r .dir{display:block;font-size:10px;font-weight:600;color:var(--in
 .pickcard small{font-size:11px;color:var(--ink-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .pickcard.me .pct{border-color:var(--accent);background:var(--accent-soft)}.pickcard.me b{color:var(--ink)}
 .ticker{border:1.5px solid var(--accent);background:var(--accent-soft);border-radius:16px;padding:10px 12px;margin:10px 0 2px;display:grid;gap:4px;box-shadow:0 4px 14px rgba(0,0,0,.08)}
-#liveTicker{position:sticky;top:calc(env(safe-area-inset-top,0px) + 6px);z-index:6}
+.dock{position:sticky;top:0;z-index:6;padding-top:calc(6px + env(safe-area-inset-top,0px));margin-top:-6px;background:linear-gradient(var(--bg) 70%,transparent)}
+.dock .controls{padding:8px;box-shadow:0 4px 14px rgba(0,0,0,.06)}.dock .ticker{margin-top:6px}
+.xdock{position:sticky;top:0;height:0;z-index:8;display:flex;justify-content:flex-end;align-items:flex-start;pointer-events:none}
+.xbtn{pointer-events:none;opacity:0;transform:translateY(-6px);transition:opacity .15s,transform .15s;margin-top:4px;border:0;border-radius:999px;background:var(--ink);color:#fff;font:inherit;font-weight:700;font-size:13px;padding:8px 14px;box-shadow:0 4px 14px rgba(0,0,0,.25);cursor:pointer;white-space:nowrap}
+.xon>.xdock .xbtn{opacity:1;transform:none;pointer-events:auto}
+.mover{max-height:90vh;overflow:auto}
 body.haspill .toast{bottom:calc(140px + env(safe-area-inset-bottom,0px))!important}
 .ticker.you{border-color:#16A34A;background:#E9F8EE}
 .trow{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:14px}.trow .btn{margin-left:auto}
@@ -359,7 +364,7 @@ table.grid td.r{font-family:var(--f-display);font-weight:800;font-size:15px;colo
   <section class="panel" id="p-mock">
     <div class="mock">
       <div style="min-width:0">
-        <div class="card controls">
+        <div class="dock"><div class="card controls">
           <div class="actions sim3">
             <button class="btn primary" id="simUser">▶ Start draft</button>
             <button class="btn" id="simOne">Next pick</button>
@@ -367,7 +372,7 @@ table.grid td.r{font-family:var(--f-display);font-weight:800;font-size:15px;colo
             <button class="btn danger" id="clearPicks">Clear picks</button>
           </div>
         </div>
-        <div id="liveTicker"></div>
+        <div id="liveTicker"></div></div>
         <div id="boardWrap"></div>
       </div>
       <aside class="side">
@@ -1086,6 +1091,13 @@ function renderTicker(){paintSimMe();const el=$("#liveTicker");if(!el)return;con
   el.innerHTML=`<div class="ticker${live.on&&mine?" you":""}"><div class="trow">${top}</div>${lpl?`<div class="tlast">Last pick: ${lp.label} ${esc(tname(lp.owner))} took ${posTag(lpl.pos)}<b>${esc(lpl.name)}</b> <span class="faint">${esc(lpl.team)}</span></div>`:""}</div>`}
 $("#simToMe").onclick=simToMe;
 $("#paceSeg").onclick=e=>{const b=e.target.closest("[data-pace]");if(!b)return;TM.pace=b.dataset.pace;saveTM();renderTimerSettings();toast(`Computer pick speed: ${b.textContent}.`)};
+/* ---------- floating Close on scrolled overlays ---------- */
+const XC=".sheet,.bv,.setsheet,.mover";
+function xCloseBtn(c){return c.querySelector("#pkx,#trx,#bvx,#closeSettings,[data-gclose],[data-cmpclose]")||[...c.querySelectorAll("button")].find(b=>!b.classList.contains("xbtn")&&/^(Close|Cancel|Done|Got it)$/i.test(b.textContent.trim()))}
+document.addEventListener("scroll",e=>{const c=e.target;if(!(c instanceof Element)||!c.matches(XC))return;
+  if(!c.querySelector(":scope>.xdock")){const d=document.createElement("div");d.className="xdock";d.innerHTML='<button type="button" class="xbtn" aria-label="Close">✕ Close</button>';c.prepend(d)}
+  c.classList.toggle("xon",c.scrollTop>80)},true);
+document.addEventListener("click",e=>{const b=e.target.closest(".xbtn");if(!b)return;e.stopPropagation();const c=b.closest(XC);if(!c)return;const t=xCloseBtn(c);if(t)t.click();else if(c.parentElement)c.parentElement.click()},true);
 function renderTimerSettings(){document.querySelectorAll("#paceSeg button").forEach(b=>{b.setAttribute("aria-selected",b.dataset.pace===TM.pace);b.setAttribute("aria-checked",b.dataset.pace===TM.pace)});$("#tmOn").setAttribute("aria-checked",TM.on);$("#tmBody").classList.toggle("off",!TM.on);
   document.querySelectorAll("#tmSec button").forEach(b=>{b.setAttribute("aria-selected",+b.dataset.s===TM.sec);b.setAttribute("aria-checked",+b.dataset.s===TM.sec)});$("#tmEnd").value=TM.end;$("#tmBeep").value=TM.beep?"1":"0"}
 $("#tmOn").onclick=()=>{TM.on=!TM.on;saveTM();renderTimerSettings();if(!TM.on)stopClock();toast(TM.on?`Pick timer on: ${fmtT(TM.sec)} per pick.`:"Pick timer off.")};
