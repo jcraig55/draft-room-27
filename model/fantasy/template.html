@@ -209,13 +209,18 @@ details.more>summary::before{content:"▸ "} details.more[open]>summary::before{
 .favgone{opacity:.6}
 #pktabs{overflow-x:auto;flex-wrap:nowrap;scrollbar-width:none;max-width:100%}#pktabs::-webkit-scrollbar{display:none}#pktabs button{white-space:nowrap;flex-shrink:0}
 .bpnamerow{display:flex;justify-content:space-between;align-items:center;gap:10px}.bpnamerow .favbtn{width:40px;height:38px;font-size:20px}
-.availhead>div:first-child{flex-wrap:wrap;min-width:0}.side .subtabs{min-width:0;max-width:100%;overflow-x:auto;scrollbar-width:none}.sim3 .btn{white-space:nowrap;font-size:14px;padding-inline:10px}
+.availhead>div:first-child{flex-wrap:wrap;min-width:0}.side .subtabs{min-width:0;max-width:100%;overflow-x:auto;scrollbar-width:none}.sim3 .btn{min-width:0;font-size:14px;padding-inline:8px;line-height:1.15}@media (max-width:480px){.sim3 .btn{font-size:13px;padding-inline:5px}}
 .seg button{white-space:nowrap}@media (max-width:480px){.seg button{font-size:12.5px;padding-inline:4px}}
 .inlinegrid{max-height:calc(100vh - 290px);min-height:320px;overflow:auto}.inlinegrid table.grid th{z-index:2}
 .inlinegrid table.grid td.r,.inlinegrid table.grid th.rh{position:sticky;left:0;background:var(--surface);z-index:1}.inlinegrid table.grid th.rh{z-index:3;color:var(--ink-3)}
 table.grid td.r .dir{display:block;font-size:10px;font-weight:600;color:var(--ink-3)}
 .gc[data-gbio]{cursor:pointer}.gc.mine{box-shadow:inset 0 0 0 1.5px var(--accent)}.gc.clock{background:var(--accent-soft);color:var(--accent);border-left-color:var(--accent);box-shadow:inset 0 0 0 1.5px var(--accent)}.gc.clock .n{font-weight:800}
 .gridhead{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:8px}.gridhead .actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.tmhead{display:flex;justify-content:space-between;align-items:center}
+.tswitch{width:50px;height:30px;border-radius:999px;border:0;background:#C9CED6;position:relative;cursor:pointer;flex:none;transition:background .15s}.tswitch i{position:absolute;top:3px;left:3px;width:24px;height:24px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.25);transition:left .15s}
+.tswitch[aria-checked="true"]{background:var(--accent)}.tswitch[aria-checked="true"] i{left:23px}
+#tmBody.off{opacity:.45}
+.btn.danger.confirm{background:#E5484D;color:#fff;border-color:#E5484D}
 .pkclock{margin-top:10px;border:1.5px solid var(--accent);background:var(--accent-soft);border-radius:14px;padding:8px 10px 0;overflow:hidden}
 .pkcrow{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;padding-bottom:8px}.pkct{font-size:13px;color:var(--ink-2)}.pkct b{font:800 22px var(--f-display);color:var(--ink);font-variant-numeric:tabular-nums;margin-right:4px}.pkcb{display:flex;gap:6px}
 .pkbarbg{height:5px;margin:0 -10px;background:rgba(0,0,0,.06)}.pkbarbg i{display:block;height:100%;background:var(--accent);transition:width .25s linear}
@@ -235,7 +240,7 @@ table.grid td.r .dir{display:block;font-size:10px;font-weight:600;color:var(--in
 .appbar .sub,.tabhead .sub{font-size:12.5px;color:var(--ink-2);margin-top:3px}
 .gear{border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:999px;padding:8px 14px;font:inherit;font-weight:700;font-size:13px;white-space:nowrap;cursor:pointer;text-decoration:none}
 .tabhead{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:12px}
-.sim3{display:grid!important;grid-template-columns:1.3fr 1fr 1fr;gap:8px}.sim3 .btn{justify-content:center;text-align:center}
+.sim3{display:grid!important;grid-template-columns:1.35fr 1fr .9fr 1.05fr;gap:6px}.sim3 .btn{justify-content:center;text-align:center}
 .bnav{position:fixed;left:0;right:0;bottom:0;z-index:20;display:flex;justify-content:space-around;background:var(--bg);border-top:1px solid var(--line);padding:6px max(8px,env(safe-area-inset-left,0px)) calc(6px + env(safe-area-inset-bottom,0px))}
 .bnav button{flex:1;max-width:120px;border:0;background:none;font:inherit;font-size:11px;font-weight:700;color:var(--ink-3);display:grid;justify-items:center;gap:1px;padding:4px 0;cursor:pointer}
 .bnav button i{font-style:normal;font-size:21px;line-height:1.15;filter:grayscale(1);opacity:.7}.bnav button[aria-selected="true"]{color:var(--accent)}.bnav button[aria-selected="true"] i{filter:none;opacity:1}
@@ -335,6 +340,7 @@ table.grid td.r{font-family:var(--f-display);font-weight:800;font-size:15px;colo
             <button class="btn primary" id="simUser">Sim to my pick</button>
             <button class="btn" id="simOne">Next pick</button>
             <button class="btn" id="simAll">Sim all</button>
+            <button class="btn danger" id="clearPicks">Clear picks</button>
           </div>
         </div>
         <div id="boardWrap"></div>
@@ -445,19 +451,17 @@ table.grid td.r{font-family:var(--f-display);font-weight:800;font-size:15px;colo
     </div>
     <div class="dgrid" id="teamsGrid"></div>
 </div></details></section>
-  <section class="sgrp"><div class="eyebrow">⏱ Pick timer</div><div class="sgrid">
-    <label class="field" for="tmSec">Time per pick<select id="tmSec"><option value="0">Off</option><option value="30">30 seconds</option><option value="45">45 seconds</option><option value="60">1 minute</option><option value="90">1 min 30 sec</option><option value="120">2 minutes</option><option value="180">3 minutes</option><option value="300">5 minutes</option><option value="custom">Custom…</option></select></label>
-    <label class="field" for="tmCustom" id="tmCustomWrap" hidden>Custom time (seconds)<input type="number" id="tmCustom" min="5" max="900" step="5" inputmode="numeric"></label>
-    <label class="field" for="tmEnd">When time runs out<select id="tmEnd"><option value="best">Auto-draft ✨ best pick</option><option value="rank">Auto-draft top ranked</option><option value="warn">Just alert me</option></select></label>
-    <label class="field" for="tmBeep">Warning<select id="tmBeep"><option value="1">Beep + buzz at 0:10</option><option value="0">Silent</option></select></label>
-  </div><div class="faint" style="font-size:12.5px">The clock starts when your pick window opens and keeps running if you close it. Pause or add 30 seconds from the pick window.</div></section>
+  <section class="sgrp"><div class="tmhead"><div class="eyebrow" style="margin:0">⏱ Pick timer</div><button class="tswitch" id="tmOn" role="switch" aria-checked="true" aria-label="Pick timer"><i></i></button></div>
+    <div id="tmBody"><div class="field">Time per pick<div class="seg" id="tmSec" role="radiogroup"><button data-s="30" role="radio">30 sec</button><button data-s="60" role="radio">1 min</button><button data-s="90" role="radio">1.5 min</button></div></div>
+    <div class="sgrid" style="margin-top:8px"><label class="field" for="tmEnd">When time runs out<select id="tmEnd"><option value="best">Auto-draft ✨ best</option><option value="rank">Auto-draft top rank</option><option value="warn">Just alert me</option></select></label>
+    <label class="field" for="tmBeep">Warning<select id="tmBeep"><option value="1">Beep at 0:10</option><option value="0">Silent</option></select></label></div>
+    <div class="faint" style="font-size:12.5px;margin-top:6px">The clock starts when your pick window opens. Pause or add 30 seconds anytime from the pick window.</div></div></section>
   <section class="sgrp"><div class="eyebrow">Trades</div>
             <div style="display:grid;gap:10px;margin-top:10px">
               <div class="actions"><button class="btn sm" id="openTrade">New trade</button><button class="btn sm danger" id="resetTrades">Undo all trades</button></div>
               <div id="tradeLog" class="muted" style="font-size:13px"></div>
             </div>
           </section>
-  <section class="sgrp"><div class="eyebrow">This mock</div><div class="actions"><button class="btn danger" id="clearPicks">Clear all picks</button><span class="faint" style="font-size:12.5px;align-self:center">Trades are kept.</span></div></section>
 </div></div>
 <div id="sheetHost"></div>
 <div id="toastHost"></div>
@@ -977,17 +981,18 @@ function openMover(id){
 
 /* ---------- sheets ---------- */
 /* ---------- pick timer ---------- */
-const TM=Object.assign({sec:90,end:"best",beep:true},(()=>{try{return JSON.parse(localStorage.getItem("dr27-timer"))||{}}catch(e){return{}}})());
+const TM=Object.assign({on:true,sec:90,end:"best",beep:true},(()=>{try{return JSON.parse(localStorage.getItem("dr27-timer"))||{}}catch(e){return{}}})());
+if(![30,60,90].includes(TM.sec)){if(!TM.sec)TM.on=false;TM.sec=90}
 const saveTM=()=>{try{localStorage.setItem("dr27-timer",JSON.stringify(TM))}catch(e){}};
 const clk={num:null,dl:0,left:0,paused:false,warned:false,over:false,iv:null};
 const fmtT=s=>{s=Math.max(0,Math.ceil(s));return`${Math.floor(s/60)}:${String(s%60).padStart(2,"0")}`};
 function clockLeft(){return clk.paused?clk.left:(clk.dl-Date.now())/1000}
 function armClock(num){const n=nextOpen();
-  if(!TM.sec||!n||n.num!==num||!S.user.includes(n.owner)){if(clk.num!==num)stopClock();paintClock();return}
+  if(!TM.on||!n||n.num!==num||!S.user.includes(n.owner)){if(clk.num!==num)stopClock();paintClock();return}
   if(clk.num!==num){clk.num=num;clk.dl=Date.now()+TM.sec*1000;clk.left=TM.sec;clk.paused=false;clk.warned=false;clk.over=false}
   if(!clk.iv)clk.iv=setInterval(tickClock,250);paintClock()}
 function stopClock(){clk.num=null;clk.over=false;if(clk.iv){clearInterval(clk.iv);clk.iv=null}paintClock()}
-function syncClock(){if(clk.num==null)return;const n=nextOpen();if(!n||n.num!==clk.num||!S.user.includes(n.owner)||!TM.sec)stopClock()}
+function syncClock(){if(clk.num==null)return;const n=nextOpen();if(!n||n.num!==clk.num||!S.user.includes(n.owner)||!TM.on)stopClock()}
 let actx=null;function beep(){try{actx=actx||new (window.AudioContext||window.webkitAudioContext)();[0,.22].forEach(t=>{const o=actx.createOscillator(),g=actx.createGain();o.frequency.value=880;g.gain.setValueAtTime(.0001,actx.currentTime+t);g.gain.exponentialRampToValueAtTime(.25,actx.currentTime+t+.02);g.gain.exponentialRampToValueAtTime(.0001,actx.currentTime+t+.16);o.connect(g).connect(actx.destination);o.start(actx.currentTime+t);o.stop(actx.currentTime+t+.18)})}catch(e){}try{navigator.vibrate&&navigator.vibrate([120,80,120])}catch(e){}}
 function tickClock(){if(clk.num==null||clk.paused||clk.over)return;const l=clockLeft();
   if(l<=10&&!clk.warned){clk.warned=true;if(TM.beep&&TM.sec>10)beep()}
@@ -1015,9 +1020,11 @@ document.addEventListener("click",e=>{
   if(e.target.closest("[data-clockadd]")){if(clk.num==null)return;if(clk.over){clk.over=false;clk.warned=false;clk.dl=Date.now()+30000;clk.left=30;clk.paused=false}else if(clk.paused)clk.left+=30;else clk.dl+=30000;if(clockLeft()>10)clk.warned=false;paintClock();return}
 });
 $("#clockPill").onclick=()=>{if(clk.num!=null)openPicker(clk.num)};
-function renderTimerSettings(){const preset=["0","30","45","60","90","120","180","300"].includes(String(TM.sec));$("#tmSec").value=preset?String(TM.sec):"custom";$("#tmCustomWrap").hidden=preset;$("#tmCustom").value=TM.sec||"";$("#tmEnd").value=TM.end;$("#tmBeep").value=TM.beep?"1":"0"}
-$("#tmSec").onchange=e=>{const v=e.target.value;if(v==="custom"){$("#tmCustomWrap").hidden=false;$("#tmCustom").value=TM.sec||75;TM.sec=+$("#tmCustom").value;$("#tmCustom").focus()}else{$("#tmCustomWrap").hidden=true;TM.sec=+v}saveTM();if(!TM.sec)stopClock();else if(clk.num!=null){clk.dl=Date.now()+TM.sec*1000;clk.left=TM.sec;clk.warned=false;clk.over=false}toast(TM.sec?`Pick timer: ${fmtT(TM.sec)} per pick.`:"Pick timer off.")};
-$("#tmCustom").onchange=e=>{let v=Math.round(+e.target.value||0);v=Math.max(5,Math.min(900,v));e.target.value=v;TM.sec=v;saveTM();toast(`Pick timer: ${fmtT(v)} per pick.`)};
+function renderTimerSettings(){$("#tmOn").setAttribute("aria-checked",TM.on);$("#tmBody").classList.toggle("off",!TM.on);
+  document.querySelectorAll("#tmSec button").forEach(b=>{b.setAttribute("aria-selected",+b.dataset.s===TM.sec);b.setAttribute("aria-checked",+b.dataset.s===TM.sec)});$("#tmEnd").value=TM.end;$("#tmBeep").value=TM.beep?"1":"0"}
+$("#tmOn").onclick=()=>{TM.on=!TM.on;saveTM();renderTimerSettings();if(!TM.on)stopClock();toast(TM.on?`Pick timer on: ${fmtT(TM.sec)} per pick.`:"Pick timer off.")};
+$("#tmSec").onclick=e=>{const b=e.target.closest("[data-s]");if(!b)return;TM.sec=+b.dataset.s;if(!TM.on)TM.on=true;saveTM();renderTimerSettings();
+  if(clk.num!=null){clk.dl=Date.now()+TM.sec*1000;clk.left=TM.sec;clk.warned=false;clk.over=false;paintClock()}toast(`Pick timer: ${fmtT(TM.sec)} per pick.`)};
 $("#tmEnd").onchange=e=>{TM.end=e.target.value;saveTM();paintClock()};
 $("#tmBeep").onchange=e=>{TM.beep=e.target.value==="1";saveTM();if(TM.beep)beep()};
 function closeSheet(){$("#sheetHost").innerHTML="";pkRedraw=null;if(typeof paintClock==="function")paintClock()}
@@ -1285,7 +1292,9 @@ $("#tabs").onclick=e=>{const b=e.target.closest("[data-tab]");if(!b)return;docum
 $("#simUser").onclick=()=>{if(!S.user.length){toast("Pick your draft slot first, or use Sim full draft.");return}simulate("user")};
 $("#simAll").onclick=()=>simulate("all");
 $("#simOne").onclick=()=>{const p=nextOpen();if(p&&S.user.includes(p.owner)){openPicker(p.num);return}simulate("one")};
-$("#clearPicks").onclick=()=>{S.sel={};persist();render();toast("Picks cleared. Trades kept.")};
+let clrT=null;$("#clearPicks").onclick=()=>{const b=$("#clearPicks");if(!Object.keys(S.sel).length){toast("No picks to clear.");return}
+  if(!b.classList.contains("confirm")){b.classList.add("confirm");b.textContent="Tap to clear";clearTimeout(clrT);clrT=setTimeout(()=>{b.classList.remove("confirm");b.textContent="Clear picks"},3000);return}
+  clearTimeout(clrT);b.classList.remove("confirm");b.textContent="Clear picks";S.sel={};persist();render();toast("Picks cleared. Trades kept.")};
 
 $("#needW").oninput=e=>{S.needW=+e.target.value;persist();renderControls()};
 $("#rnd").oninput=e=>{S.chaos=+e.target.value;persist();renderControls()};
