@@ -559,7 +559,11 @@ const TOPORDER=__TOPORDER__;
 {const ti={};TOPORDER.ids.forEach((id,i)=>ti[id]=i);const L=P.slice().sort((a,b)=>((a.id in ti)?ti[a.id]:1e4+a.trank)-((b.id in ti)?ti[b.id]:1e4+b.trank));L.forEach((p,i)=>p.trank=i+1)}
 const TOP=P.slice().sort((a,b)=>a.trank-b.trank);
 /* Weekly-updated numbers, used ONLY on the Top 125 Player stats page: [games, 2026 PPG, 2025 PPG, 2027 proj, pos rank] */
-const LIVE=__LIVE__;const liveOf=p=>LIVE.id[p.id]||LIVE.name[p.name]||null;
+const LIVE=__LIVE__;
+/* Player stats page: its own ranking by 2026 points per game (4+ games), separate from the Top 125 and draft board. */
+const STATMIN=4;
+const SROWS=LIVE.rows.map(a=>({id:a[0],name:a[1],pos:a[2],team:a[3],g:a[4],ppg:a[5],p25:a[6],proj:a[7],pr:a[8]})).filter(x=>x.g>=STATMIN).sort((a,b)=>b.ppg-a.ppg);
+SROWS.forEach((x,i)=>x.sr=i+1);
 /* Your Top 125 order: weekly ranks + your in-app Top 125 moves. Separate from the draft board (MOVES). */
 let TMOVES=[];try{TMOVES=JSON.parse(localStorage.getItem("dr27-topboard")||"[]").filter(m=>BYID[m[0]])}catch(e){}
 let TOPL=[];
@@ -1348,13 +1352,13 @@ $("#setScrim").addEventListener("click",e=>{if(e.target.id==="setScrim")closeSet
 const sortState={};
 function statsTable(key,list){
   const st=sortState[key]||(sortState[key]={k:key==="top"?"ppg":"rank",d:key==="top"?-1:1});
-  const rk=p=>key==="top"?p.tr:p.rank;
-  const S5=p=>{const b=BADGES[p.id]||{},l=key==="top"?liveOf(p):null;return l?{g:l[0],ppg:l[1],p25:l[2],proj:l[3],pr:l[4]}:{g:p.g,ppg:p.ppg,p25:b.p25,proj:p.proj,pr:b.pr}};
+  const rk=p=>key==="top"?p.sr:p.rank;
+  const S5=p=>{if(key==="top")return p;const b=BADGES[p.id]||{};return{g:p.g,ppg:p.ppg,p25:b.p25,proj:p.proj,pr:b.pr}};
   const v=(p,k)=>{const q=S5(p);return k==="rank"?rk(p):k==="pr"?(q.pr??999):k==="ppg"?(q.g?q.ppg:-1):k==="p25"?(q.p25??-1):k==="proj"?q.proj:k==="name"?p.name.toLowerCase():0};
   const L=list.slice().sort((a,b)=>{const x=v(a,st.k),y=v(b,st.k);return(x<y?-1:x>y?1:0)*st.d});
   const th=(k,l,n)=>`<th class="${n?"n":""}" data-sort="${k}" data-tbl="${key}" aria-sort="${st.k===k?(st.d>0?"ascending":"descending"):"none"}">${l}</th>`;
   return`<div class="swrap"><table class="stab"><thead><tr>${th("rank","Rk",1)}${th("pr","Pos")}${th("name","Player")}${th("ppg","’26 <br>PPG",1)}${th("p25","’25 <br>PPG",1)}${th("proj","’27 <br>proj",1)}</tr></thead><tbody>
-  ${L.map(p=>{const q=S5(p);return`<tr data-row="${p.id}"><td class="n rkc">${rk(p)}</td><td class="pc"><span class="pos ${p.pos} posrk">${q.pr?p.pos+q.pr:p.pos}</span></td><td class="pl"><button class="linkbtn" data-bio="${p.id}" style="text-decoration:none;color:var(--ink);font-weight:600">${esc(p.name)}</button><small>${esc(p.team)}</small></td><td class="n">${q.g?(+q.ppg).toFixed(1):"—"}</td><td class="n">${q.p25!=null?(+q.p25).toFixed(1):"—"}</td><td class="n">${q.proj}</td></tr>`}).join("")}</tbody></table></div>
+  ${L.map(p=>{const q=S5(p);return`<tr data-row="${p.id}"><td class="n rkc">${rk(p)}</td><td class="pc"><span class="pos ${p.pos} posrk">${q.pr?p.pos+q.pr:p.pos}</span></td><td class="pl">${BYID[p.id]?`<button class="linkbtn" data-bio="${p.id}" style="text-decoration:none;color:var(--ink);font-weight:600">${esc(p.name)}</button>`:`<b style="font-size:13.5px">${esc(p.name)}</b>`}<small>${esc(p.team)}</small></td><td class="n">${q.g?(+q.ppg).toFixed(1):"—"}</td><td class="n">${q.p25!=null?(+q.p25).toFixed(1):"—"}</td><td class="n">${q.proj}</td></tr>`}).join("")}</tbody></table></div>
   <p class="faint" style="font-size:12px;margin:8px 2px">Tap a column to sort. Pos ranks 2026 points per game at each position (4+ games).</p>`;
 }
 document.addEventListener("click",e=>{const t=e.target.closest("th[data-sort]");if(!t)return;const st=sortState[t.dataset.tbl];const k=t.dataset.sort;
@@ -1415,13 +1419,14 @@ $("#bQ").oninput=renderBoardTab;
 /* ---------- Top 125 tab ---------- */
 let tView="list",tPos="ALL";
 function renderTop(){
-  $("#topSub").textContent=tView==="stats"?`Full PPR · stats through Week __WEEK__ · updated __DATE__ · rankings set ${TOPORDER.set}`:`Full PPR · rankings set ${TOPORDER.set}, change only when you move players`;
+  $("#topSub").textContent=tView==="stats"?`Ranked by 2026 PPR points per game (4+ games) · stats through Week __WEEK__ · updated __DATE__ · separate from your Top 125 and draft board`:`Full PPR · rankings set ${TOPORDER.set}, change only when you move players`;
   $("#tPos").innerHTML=chipsHtml(tPos,"data-tp");
   document.querySelectorAll("#tSeg button").forEach(b=>b.setAttribute("aria-selected",b.dataset.v===tView));
   const L=TOPL.slice(0,125).filter(p=>posFilter(p,tPos));
   $("#topNote").innerHTML=TMOVES.length?`<div class="boardnote"><span>Your Top 125: ${TMOVES.length} player${TMOVES.length>1?"s":""} moved</span><button class="linkbtn" data-resettop>Reset to weekly ranks</button></div>`:"";
+  if(tView==="stats"){const SL=SROWS.filter(p=>posFilter(p,tPos)).slice(0,tPos==="ALL"?125:60);
+    $("#topList").innerHTML=SL.length?statsTable("top",SL):`<div class="empty">${tPos==="FAV"?"None of your favorites have 4+ games yet.":"No players match."}</div>`;return}
   if(!L.length){$("#topList").innerHTML=`<div class="empty">${tPos==="FAV"?"No favorites in the Top 125 yet. Tap ♡ to save a player.":"No players match."}</div>`;return}
-  if(tView==="stats"){$("#topList").innerHTML=statsTable("top",L);return}
   const tm=p=>(!TMOVES.some(m=>m[0]===p.id)||p.tr===p.trank)?"":`<span class="mvmark ${p.tr<p.trank?"up":"dn"}" title="Weekly rank #${p.trank}">${p.tr<p.trank?"▲":"▼"}${Math.abs(p.trank-p.tr)}</span>`;
   const row=p=>`<li data-row="${p.id}"><span class="n num">${p.tr}${tm(p)}</span><span class="pos ${p.pos} posrk">${p.pos}${p.tprank}</span><span class="nmc"><button class="nm" data-bio="${p.id}">${esc(p.name)}</button><small class="tm">${esc(p.team)}</small></span><button class="btn sm ghost mvbtn tmv" data-movetop="${p.id}" aria-label="Move ${esc(p.name)} in your Top 125" title="Move in your Top 125">⇅</button>${favBtn(p.id)}</li>`;
   if(POS.includes(tPos)){const G=[];let top=null,cm=null,t=0;L.forEach(p=>{const pj=p.proj0;if(top==null){top=cm=pj;t=1}else{cm=Math.min(cm,pj);if(top-cm>=TGAP[p.pos]){t++;top=cm}}const g=G[G.length-1];if(g&&g.t===t)g.L.push(p);else G.push({t,L:[p]})});

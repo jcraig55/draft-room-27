@@ -27,3 +27,4 @@ WEEKLY UPDATE RULE (set Nov 16, 2026): weekly stat updates change ONLY the Top 1
 - Frozen and never touched by weekly runs: `fantasy/draft_order.json` (draft board), `fantasy/top_order.json` (Top 125 rankings), and `fantasy/frozen/` (players, badges, breakouts used everywhere else in the app: draft side, bios, badges, pick window).
 - The app gets this week's numbers through __LIVE__ (built from the live players.json/badges.json), used only by the Top 125 stats table.
 - Orders change only via `move.py --top|--draft|--both` (when the user asks) or the user's in-app moves.
+- The Player stats page has its OWN ranking: top 125 players by live 2026 PPR points per game (4+ games), rebuilt weekly from __LIVE__ rows. It is independent of the Top 125 board and the draft board.

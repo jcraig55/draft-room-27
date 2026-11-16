@@ -17,13 +17,10 @@ def _order(fn):
         out.append(i)
     return {'set':D['set'],'ids':out}
 def _live():
-    # Weekly-updated numbers for the Top 125 Player stats page ONLY: id -> [games, 2026 PPG, 2025 PPG, 2027 proj, pos rank by PPG]
-    B=json.load(open('/home/claude/fantasy/badges.json'));out={}
-    for r in json.load(open('/home/claude/fantasy/players.json')):
-        b=B.get(r[0],{});out[r[0]]=[r[9],r[11],b.get('p25'),r[16],b.get('pr')]
-    # also key by name so changed ids still match
-    byname={r[1]:out[r[0]] for r in json.load(open('/home/claude/fantasy/players.json'))}
-    return {'id':out,'name':byname}
+    # Weekly-updated Player stats page ONLY (independent of the Top 125 and draft board orders):
+    # rows of [id, name, pos, team, games, 2026 PPG, 2025 PPG, 2027 proj, pos rank by PPG]
+    B=json.load(open('/home/claude/fantasy/badges.json'))
+    return {'rows':[[r[0],r[1],r[2],r[3],r[9],r[11],B.get(r[0],{}).get('p25'),r[16],B.get(r[0],{}).get('pr')] for r in json.load(open('/home/claude/fantasy/players.json'))]}
 def _draft_ids():
     # Frozen draft order. If a player's NFL id changed (e.g. a rookie placeholder id), remap by name in memory; the order never changes.
     D=json.load(open('/home/claude/fantasy/draft_order.json'));pool={r[1]:r[0] for r in json.load(open('/home/claude/fantasy/players.json'))};ids=set(pool.values())
