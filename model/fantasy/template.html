@@ -373,6 +373,9 @@ table.grid td.r{font-family:var(--f-display);font-weight:800;font-size:15px;colo
 .stab td.pc{width:1%}.stab td.pc .posrk{min-width:36px;padding-inline:4px;text-align:center;display:inline-block}
 .stab td.pl{white-space:normal;line-height:1.2;width:auto}.stab td.pl .linkbtn{font-size:13.5px;text-align:left;padding:0}.stab td.pl small{display:block;font-size:11px;color:var(--ink-3);font-weight:500}
 .stab td.n:not(.rkc){width:1%;font-weight:600}
+.stab th.n:not(:first-child),.stab td.n:not(.rkc){text-align:center}
+@media (max-width:699px){.stab th.n:not(:first-child),.stab td.n:not(.rkc){width:54px!important;min-width:54px}.stab td.pl{max-width:120px}}
+@media (min-width:700px){.stab th.n:not(:first-child),.stab td.n:not(.rkc){min-width:72px}}
 .stab th{white-space:normal;line-height:1.15;vertical-align:bottom}
 @media (max-width:480px){.stab{font-size:12.5px;width:100%}.stab th{font-size:10px;letter-spacing:.04em}.stab th,.stab td{padding:7px 3px}.stab th:first-child,.stab td:first-child{padding-left:8px}.stab th:last-child,.stab td:last-child{padding-right:8px}}
 /* ---------- press feel: push down (every button and tab) ---------- */
@@ -1333,7 +1336,7 @@ function statsTable(key,list){
   const L=list.slice().sort((a,b)=>{const x=v(a,st.k),y=v(b,st.k);return(x<y?-1:x>y?1:0)*st.d});
   const th=(k,l,n)=>`<th class="${n?"n":""}" data-sort="${k}" data-tbl="${key}" aria-sort="${st.k===k?(st.d>0?"ascending":"descending"):"none"}">${l}</th>`;
   return`<div class="swrap"><table class="stab"><thead><tr>${th("rank","Rk",1)}${th("pr","Pos")}${th("name","Player")}${th("ppg","’26 <br>PPG",1)}${th("p25","’25 <br>PPG",1)}${th("proj","’27 <br>proj",1)}</tr></thead><tbody>
-  ${L.map(p=>{const b=BADGES[p.id]||{};return`<tr data-row="${p.id}"><td class="n rkc">${rk(p)}</td><td class="pc"><span class="pos ${p.pos} posrk">${b.pr?p.pos+b.pr:p.pos}</span></td><td class="pl"><button class="linkbtn" data-bio="${p.id}" style="text-decoration:none;color:var(--ink);font-weight:600">${esc(p.name)}</button><small>${esc(p.team)}</small></td><td class="n">${p.g?p.ppg.toFixed(1):"—"}<small>${p.g||0} g</small></td><td class="n">${b.p25!=null?b.p25.toFixed(1):"—"}</td><td class="n">${p.proj}</td></tr>`}).join("")}</tbody></table></div>
+  ${L.map(p=>{const b=BADGES[p.id]||{};return`<tr data-row="${p.id}"><td class="n rkc">${rk(p)}</td><td class="pc"><span class="pos ${p.pos} posrk">${b.pr?p.pos+b.pr:p.pos}</span></td><td class="pl"><button class="linkbtn" data-bio="${p.id}" style="text-decoration:none;color:var(--ink);font-weight:600">${esc(p.name)}</button><small>${esc(p.team)}</small></td><td class="n">${p.g?p.ppg.toFixed(1):"—"}</td><td class="n">${b.p25!=null?b.p25.toFixed(1):"—"}</td><td class="n">${p.proj}</td></tr>`}).join("")}</tbody></table></div>
   <p class="faint" style="font-size:12px;margin:8px 2px">Tap a column to sort. Pos ranks 2026 points per game at each position (4+ games).</p>`;
 }
 document.addEventListener("click",e=>{const t=e.target.closest("th[data-sort]");if(!t)return;const st=sortState[t.dataset.tbl];const k=t.dataset.sort;
