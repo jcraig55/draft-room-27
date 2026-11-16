@@ -22,3 +22,8 @@ This folder backs up everything behind the app: projection code, Jared's manual 
 Badges (7): Safety pick, Volume machine, Breakout, High ceiling, Sleeper, Bust?, Volatile. badges.py guarantees every player gets at least one via fallback rules.
 
 Draft order vs Top 125: `fantasy/draft_order.json` is the FROZEN draft board order (set Nov 13, 2026). Weekly updates must never regenerate or edit it. The app's draft (Board tab, pick window, computer drafters) uses it; the Top 125 tab and PDF use the live weekly rank. The two lists are customized separately: `python3 move.py --top "Name=N"` changes only the Top 125 (pins in proj.py), `--draft` changes only the frozen draft board (draft_order.json), `--both` changes both. The user's in-app moves are also separate (Top 125 tab ⇅ = Top 125 only, saved as dr27-topboard; draft-side ⇅ = draft board only, dr27-myboard).
+
+WEEKLY UPDATE RULE (set Nov 16, 2026): weekly stat updates change ONLY the Top 125 "Player stats" page (and the stats columns in the Top 125 PDF).
+- Frozen and never touched by weekly runs: `fantasy/draft_order.json` (draft board), `fantasy/top_order.json` (Top 125 rankings), and `fantasy/frozen/` (players, badges, breakouts used everywhere else in the app: draft side, bios, badges, pick window).
+- The app gets this week's numbers through __LIVE__ (built from the live players.json/badges.json), used only by the Top 125 stats table.
+- Orders change only via `move.py --top|--draft|--both` (when the user asks) or the user's in-app moves.

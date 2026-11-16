@@ -9,8 +9,16 @@ DATE=datetime.date.today().strftime('%b %-d, %Y')
 import pandas as _pd
 WEEK=int(_pd.read_csv('/home/claude/nfldata/stats26.csv',usecols=['week']).week.max())
 _pj={x['name']:x for x in json.load(open('/home/claude/fantasy/proj.json'))}
+def _ordered():
+    # Top 125 order is frozen in top_order.json (changes only when the user moves a player); stats are this week's.
+    P=json.load(open('/home/claude/fantasy/players.json'));byid={r[0]:r for r in P};byn={r[1]:r for r in P}
+    T=json.load(open('/home/claude/fantasy/top_order.json'));out=[]
+    for k,i in enumerate(T['ids']):
+        r=byid.get(i) or byn.get(T.get('names',[''])[k] if k<len(T.get('names',[])) else '')
+        if r and r[1] in _pj: out.append(r)
+    return out
 d=[]
-for i,r in enumerate(json.load(open('/home/claude/fantasy/players.json'))[:125]):
+for i,r in enumerate(_ordered()[:125]):
     x=_pj.get(r[1],{}); mv=0
     d.append([r[1],r[2],r[3],mv,r[0]])
 SUB=f"2027 redraft  ·  Full PPR  ·  16 teams  ·  QB / RB / 2 WR / TE / 2 FLEX  ·  Updated {DATE}"
@@ -67,7 +75,7 @@ for _pos in ['QB','RB','WR','TE']:
     _L=sorted([y for y in _pj.values() if y['pos']==_pos and y['g']>=MING],key=lambda y:-y['ppg'])
     for _i,_y in enumerate(_L): _pr[_y['name']]=_i+1
 _rows=[]
-for i,r in enumerate(json.load(open('/home/claude/fantasy/players.json'))[:125]):
+for i,r in enumerate(_ordered()[:125]):
     x=_pj[r[1]]
     p26=round(x['ppg'],1) if x['g'] else None
     p25=round(x['ppr25']/x['g25'],1) if x.get('g25') else None

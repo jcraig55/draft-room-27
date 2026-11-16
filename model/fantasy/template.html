@@ -459,7 +459,7 @@ button,.gear,summary,th[data-sort]{transition:transform .07s ease-out,box-shadow
     </div>
   </section>
   <section class="panel" id="p-board" hidden>
-    <div class="tabhead"><div><h2 class="ttl">Board</h2><div class="sub">Your draft board · order set __DRAFTSET__, changes only when you move players · stats through Week __WEEK__</div></div></div>
+    <div class="tabhead"><div><h2 class="ttl">Board</h2><div class="sub">Your draft board · order set __DRAFTSET__, changes only when you move players · stats through Week __FWEEK__</div></div></div>
     <div class="seg" role="tablist" id="bSeg"><button role="tab" data-v="list" aria-selected="true">List</button><button role="tab" data-v="stats" aria-selected="false">Stats</button><button role="tab" data-v="teams" aria-selected="false">Teams</button><button role="tab" data-v="grid" aria-selected="false">Draft board</button></div>
     <div id="bFilters"><div class="pkbar" style="margin-top:10px"><input type="search" id="bQ" placeholder="Search players or NFL teams"></div>
     <div class="poschips" id="bPos" style="margin-top:8px"></div></div>
@@ -554,7 +554,12 @@ const DRAFT=__DRAFT__;
 P.forEach(p=>p.trank=p.rank);
 {const di={};DRAFT.ids.forEach((id,i)=>di[id]=i);P.sort((a,b)=>((a.id in di)?di[a.id]:1e4+a.trank)-((b.id in di)?di[b.id]:1e4+b.trank));
  const c={};P.forEach((p,i)=>{p.rank=i+1;c[p.pos]=(c[p.pos]||0)+1;p.prank=c[p.pos]})}
+/* Top 125 order is frozen (TOPORDER, set Nov 16): it changes only when you move players. */
+const TOPORDER=__TOPORDER__;
+{const ti={};TOPORDER.ids.forEach((id,i)=>ti[id]=i);const L=P.slice().sort((a,b)=>((a.id in ti)?ti[a.id]:1e4+a.trank)-((b.id in ti)?ti[b.id]:1e4+b.trank));L.forEach((p,i)=>p.trank=i+1)}
 const TOP=P.slice().sort((a,b)=>a.trank-b.trank);
+/* Weekly-updated numbers, used ONLY on the Top 125 Player stats page: [games, 2026 PPG, 2025 PPG, 2027 proj, pos rank] */
+const LIVE=__LIVE__;const liveOf=p=>LIVE.id[p.id]||LIVE.name[p.name]||null;
 /* Your Top 125 order: weekly ranks + your in-app Top 125 moves. Separate from the draft board (MOVES). */
 let TMOVES=[];try{TMOVES=JSON.parse(localStorage.getItem("dr27-topboard")||"[]").filter(m=>BYID[m[0]])}catch(e){}
 let TOPL=[];
@@ -1296,7 +1301,7 @@ async function drawImage(D,meta,made){
       if(r.pl){x.fillStyle=C[r.pl.pos];x.fillRect(cx+50,yy-10,4,13);x.fillStyle=C.ink;x.font=`500 13px ${Bf}`;x.fillText(fit(r.pl.name,cw-104),cx+60,yy);x.fillStyle=CT[r.pl.pos];x.font=`700 12px ${Df}`;x.textAlign="right";x.fillText(`${r.pl.pos} ${r.pl.team}`,cx+cw-10,yy);x.textAlign="left"}
       else{x.fillStyle=C.ink3;x.font=`400 13px ${Bf}`;x.fillText("Not picked",cx+60,yy)}});
   }
-  x.fillStyle=C.ink3;x.font=`400 12px ${Bf}`;x.fillText("Projections use 2026 stats through Week __WEEK__",P0,H-P0);
+  x.fillStyle=C.ink3;x.font=`400 12px ${Bf}`;x.fillText("Projections use 2026 stats through Week __FWEEK__",P0,H-P0);
   return new Promise(r=>cv.toBlob(b=>r(b),"image/png"));
 }
 
@@ -1344,11 +1349,12 @@ const sortState={};
 function statsTable(key,list){
   const st=sortState[key]||(sortState[key]={k:key==="top"?"ppg":"rank",d:key==="top"?-1:1});
   const rk=p=>key==="top"?p.tr:p.rank;
-  const v=(p,k)=>{const b=BADGES[p.id]||{};return k==="rank"?rk(p):k==="pr"?(b.pr??999):k==="ppg"?(p.g?p.ppg:-1):k==="p25"?(b.p25??-1):k==="proj"?p.proj:k==="name"?p.name.toLowerCase():0};
+  const S5=p=>{const b=BADGES[p.id]||{},l=key==="top"?liveOf(p):null;return l?{g:l[0],ppg:l[1],p25:l[2],proj:l[3],pr:l[4]}:{g:p.g,ppg:p.ppg,p25:b.p25,proj:p.proj,pr:b.pr}};
+  const v=(p,k)=>{const q=S5(p);return k==="rank"?rk(p):k==="pr"?(q.pr??999):k==="ppg"?(q.g?q.ppg:-1):k==="p25"?(q.p25??-1):k==="proj"?q.proj:k==="name"?p.name.toLowerCase():0};
   const L=list.slice().sort((a,b)=>{const x=v(a,st.k),y=v(b,st.k);return(x<y?-1:x>y?1:0)*st.d});
   const th=(k,l,n)=>`<th class="${n?"n":""}" data-sort="${k}" data-tbl="${key}" aria-sort="${st.k===k?(st.d>0?"ascending":"descending"):"none"}">${l}</th>`;
   return`<div class="swrap"><table class="stab"><thead><tr>${th("rank","Rk",1)}${th("pr","Pos")}${th("name","Player")}${th("ppg","’26 <br>PPG",1)}${th("p25","’25 <br>PPG",1)}${th("proj","’27 <br>proj",1)}</tr></thead><tbody>
-  ${L.map(p=>{const b=BADGES[p.id]||{};return`<tr data-row="${p.id}"><td class="n rkc">${rk(p)}</td><td class="pc"><span class="pos ${p.pos} posrk">${b.pr?p.pos+b.pr:p.pos}</span></td><td class="pl"><button class="linkbtn" data-bio="${p.id}" style="text-decoration:none;color:var(--ink);font-weight:600">${esc(p.name)}</button><small>${esc(p.team)}</small></td><td class="n">${p.g?p.ppg.toFixed(1):"—"}</td><td class="n">${b.p25!=null?b.p25.toFixed(1):"—"}</td><td class="n">${p.proj}</td></tr>`}).join("")}</tbody></table></div>
+  ${L.map(p=>{const q=S5(p);return`<tr data-row="${p.id}"><td class="n rkc">${rk(p)}</td><td class="pc"><span class="pos ${p.pos} posrk">${q.pr?p.pos+q.pr:p.pos}</span></td><td class="pl"><button class="linkbtn" data-bio="${p.id}" style="text-decoration:none;color:var(--ink);font-weight:600">${esc(p.name)}</button><small>${esc(p.team)}</small></td><td class="n">${q.g?(+q.ppg).toFixed(1):"—"}</td><td class="n">${q.p25!=null?(+q.p25).toFixed(1):"—"}</td><td class="n">${q.proj}</td></tr>`}).join("")}</tbody></table></div>
   <p class="faint" style="font-size:12px;margin:8px 2px">Tap a column to sort. Pos ranks 2026 points per game at each position (4+ games).</p>`;
 }
 document.addEventListener("click",e=>{const t=e.target.closest("th[data-sort]");if(!t)return;const st=sortState[t.dataset.tbl];const k=t.dataset.sort;
@@ -1409,7 +1415,7 @@ $("#bQ").oninput=renderBoardTab;
 /* ---------- Top 125 tab ---------- */
 let tView="list",tPos="ALL";
 function renderTop(){
-  $("#topSub").textContent=`Full PPR · re-ranked weekly · stats through Week __WEEK__ · updated __DATE__`;
+  $("#topSub").textContent=tView==="stats"?`Full PPR · stats through Week __WEEK__ · updated __DATE__ · rankings set ${TOPORDER.set}`:`Full PPR · rankings set ${TOPORDER.set}, change only when you move players`;
   $("#tPos").innerHTML=chipsHtml(tPos,"data-tp");
   document.querySelectorAll("#tSeg button").forEach(b=>b.setAttribute("aria-selected",b.dataset.v===tView));
   const L=TOPL.slice(0,125).filter(p=>posFilter(p,tPos));
@@ -1499,7 +1505,7 @@ document.addEventListener("click",e=>{
   const dy=e.target.closest("[data-delyes]");if(dy){pendingDelete=null;deleteMock(dy.dataset.delyes);toast("Mock deleted.");return}
   if(e.target.closest("[data-delno]")){pendingDelete=null;renderSaved()}
 });
-$("#foot").innerHTML=`<b>How the rankings work.</b> Each player’s 2027 projection blends 2026 PPR points per game (through Week __WEEK__) with 2025, weighted by games played, pulls small samples toward the position average, then adjusts for age and second-year growth. A few situations get a manual nudge, listed under “Watch” in the bio. Overall rank is value over a replacement-level starter in a 16-team QB / RB / 2 WR / TE / 2 FLEX league. 2027 rookies use projected landing spots from the War Room ’27 base mock. Target share is the player’s targets divided by his team’s targets in the games he played.<br><br>
+$("#foot").innerHTML=`<b>How the rankings work.</b> Each player’s 2027 projection blends 2026 PPR points per game (through Week __FWEEK__) with 2025, weighted by games played, pulls small samples toward the position average, then adjusts for age and second-year growth. A few situations get a manual nudge, listed under “Watch” in the bio. Overall rank is value over a replacement-level starter in a 16-team QB / RB / 2 WR / TE / 2 FLEX league. 2027 rookies use projected landing spots from the War Room ’27 base mock. Target share is the player’s targets divided by his team’s targets in the games he played.<br><br>
 <b>How the sim works.</b> AI drafters score the top available players by rank, boost positions that fill an open lineup spot, follow their strategy from the Drafters tab, and avoid a second QB or TE until late. The Chaos slider adds randomness.<br><br>
 Sources: <a href="https://github.com/nflverse/nflverse-data" target="_blank" rel="noopener">nflverse player stats, snap counts and player info</a> · <a href="https://www.pro-football-reference.com/years/2026/fantasy.htm" target="_blank" rel="noopener">Pro Football Reference 2026 fantasy</a> · <a href="https://muffed.ai/stats/target-share" target="_blank" rel="noopener">muffed.ai target share</a> · <a href="https://www.newsbeep.com/au/933703/" target="_blank" rel="noopener">Week 8 power rankings</a> · <a href="https://fantasynerds.com/news/story/2026/08/30/packers-rb-josh-jacobs-to-start-2026-season-on-commissioners-exempt-list-1610930" target="_blank" rel="noopener">Josh Jacobs status</a> · <a href="https://www.ksl.com/article/51632200/eagles-rb-saquon-barkley-out-vs-rams-with-hamstring-injury" target="_blank" rel="noopener">Saquon Barkley injury</a>`;
 render();
