@@ -364,6 +364,17 @@ table.grid td.r{font-family:var(--f-display);font-weight:800;font-size:15px;colo
 .teampick button{min-width:34px;min-height:34px}
 
 
+
+.swrap{max-width:100%}@media (min-width:700px){.swrap{width:fit-content}.stab{width:auto!important}.stab td{width:auto!important}.stab td.pl{min-width:240px}.stab th,.stab td{padding:8px 10px}.stab th br{display:none}.stab th{white-space:nowrap}}
+.stab{min-width:0!important;table-layout:auto;font-size:13px}
+.stab th,.stab td{padding:7px 5px}
+.stab th:first-child,.stab td:first-child{padding-left:10px}.stab th:last-child,.stab td:last-child{padding-right:10px}
+.stab td.rkc{color:var(--ink-3);font-weight:600;width:1%}
+.stab td.pc{width:1%}.stab td.pc .posrk{min-width:36px;padding-inline:4px;text-align:center;display:inline-block}
+.stab td.pl{white-space:normal;line-height:1.2;width:auto}.stab td.pl .linkbtn{font-size:13.5px;text-align:left;padding:0}.stab td.pl small{display:block;font-size:11px;color:var(--ink-3);font-weight:500}
+.stab td.n:not(.rkc){width:1%;font-weight:600}
+.stab th{white-space:normal;line-height:1.15;vertical-align:bottom}
+@media (max-width:480px){.stab{font-size:12.5px;width:100%}.stab th{font-size:10px;letter-spacing:.04em}.stab th,.stab td{padding:7px 3px}.stab th:first-child,.stab td:first-child{padding-left:8px}.stab th:last-child,.stab td:last-child{padding-right:8px}}
 /* ---------- press feel: push down (every button and tab) ---------- */
 :root{--edge:#86B9DE;--edge-p:#2F78AE;--edge-d:#D9A3A0;--edge-k:#000}
 .btn,.gear,.poschips button,.teamchips button,.teampick button,.favbtn,.mvbtn2,.bdinfo,.cmprow,.tswitch,.xbtn,.simme,.clockpill,.seg,.subtabs{box-shadow:0 3px 0 var(--edge)}
@@ -1321,9 +1332,9 @@ function statsTable(key,list){
   const v=(p,k)=>{const b=BADGES[p.id]||{};return k==="rank"?rk(p):k==="pr"?(b.pr??999):k==="ppg"?(p.g?p.ppg:-1):k==="p25"?(b.p25??-1):k==="proj"?p.proj:k==="name"?p.name.toLowerCase():0};
   const L=list.slice().sort((a,b)=>{const x=v(a,st.k),y=v(b,st.k);return(x<y?-1:x>y?1:0)*st.d});
   const th=(k,l,n)=>`<th class="${n?"n":""}" data-sort="${k}" data-tbl="${key}" aria-sort="${st.k===k?(st.d>0?"ascending":"descending"):"none"}">${l}</th>`;
-  return`<div class="swrap"><table class="stab"><thead><tr>${th("rank","Rank",1)}${th("name","Player")}${th("pr","Pos rank (PPG)",1)}${th("ppg","2026 PPR/G",1)}${th("p25","2025 PPR/G",1)}${th("proj","2027 proj",1)}</tr></thead><tbody>
-  ${L.map(p=>{const b=BADGES[p.id]||{};return`<tr data-row="${p.id}"><td class="n">${rk(p)}</td><td class="pl">${posTag(p.pos)} <button class="linkbtn" data-bio="${p.id}" style="text-decoration:none;color:var(--ink);font-weight:600">${esc(p.name)}</button> <span class="faint">${esc(p.team)}</span></td><td class="n">${b.pr?p.pos+b.pr:"—"}</td><td class="n">${p.g?p.ppg.toFixed(1):"—"}<small>${p.g||0} g</small></td><td class="n">${b.p25!=null?b.p25.toFixed(1):"—"}</td><td class="n">${p.proj}</td></tr>`}).join("")}</tbody></table></div>
-  <p class="faint" style="font-size:12px;margin:8px 2px">Tap a column to sort. Pos rank ranks 2026 points per game among players with 4+ games.</p>`;
+  return`<div class="swrap"><table class="stab"><thead><tr>${th("rank","Rk",1)}${th("pr","Pos")}${th("name","Player")}${th("ppg","’26 <br>PPG",1)}${th("p25","’25 <br>PPG",1)}${th("proj","’27 <br>proj",1)}</tr></thead><tbody>
+  ${L.map(p=>{const b=BADGES[p.id]||{};return`<tr data-row="${p.id}"><td class="n rkc">${rk(p)}</td><td class="pc"><span class="pos ${p.pos} posrk">${b.pr?p.pos+b.pr:p.pos}</span></td><td class="pl"><button class="linkbtn" data-bio="${p.id}" style="text-decoration:none;color:var(--ink);font-weight:600">${esc(p.name)}</button><small>${esc(p.team)}</small></td><td class="n">${p.g?p.ppg.toFixed(1):"—"}<small>${p.g||0} g</small></td><td class="n">${b.p25!=null?b.p25.toFixed(1):"—"}</td><td class="n">${p.proj}</td></tr>`}).join("")}</tbody></table></div>
+  <p class="faint" style="font-size:12px;margin:8px 2px">Tap a column to sort. Pos ranks 2026 points per game at each position (4+ games).</p>`;
 }
 document.addEventListener("click",e=>{const t=e.target.closest("th[data-sort]");if(!t)return;const st=sortState[t.dataset.tbl];const k=t.dataset.sort;
   if(st.k===k)st.d*=-1;else{st.k=k;st.d=(k==="rank"||k==="pr"||k==="name")?1:-1}t.dataset.tbl==="top"?renderTop():renderBoardTab()});
