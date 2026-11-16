@@ -378,6 +378,10 @@ table.grid td.r{font-family:var(--f-display);font-weight:800;font-size:15px;colo
 @media (min-width:700px){.stab th.n:not(:first-child),.stab td.n:not(.rkc){min-width:72px}}
 .stab th{white-space:normal;line-height:1.15;vertical-align:bottom}
 @media (max-width:480px){.stab{font-size:12.5px;width:100%}.stab th{font-size:10px;letter-spacing:.04em}.stab th,.stab td{padding:7px 3px}.stab th:first-child,.stab td:first-child{padding-left:8px}.stab th:last-child,.stab td:last-child{padding-right:8px}}
+.wkhead{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:6px}
+.yrsel{width:auto;min-width:88px;padding:5px 28px 5px 12px;border-radius:999px;font-weight:700;font-size:13px}
+.yrone{font-size:12px;font-weight:700;color:var(--ink-3)}
+.wksum{font-size:12.5px;color:var(--ink-2);margin:0 0 4px}.wksum b{font-size:15px;color:var(--ink)}
 /* ---------- press feel: push down (every button and tab) ---------- */
 :root{--edge:#86B9DE;--edge-p:#2F78AE;--edge-d:#D9A3A0;--edge-k:#000}
 .btn,.gear,.poschips button,.teamchips button,.teampick button,.favbtn,.mvbtn2,.bdinfo,.cmprow,.tswitch,.xbtn,.simme,.clockpill,.seg,.subtabs{box-shadow:0 3px 0 var(--edge)}
@@ -842,14 +846,23 @@ const bdOf=p=>(BADGES[p.id]||{}).b||[];
 const bdPill=k=>`<span class="bd bd-${k}">${BD[k][0]} ${BD[k][1]}</span>`;
 function badgeRow(p,max=3){const b=bdOf(p);if(!b.length)return"";return`<div class="bds">${b.slice(0,max).map(bdPill).join("")}${b.length>max?`<span class="bd bd-more">+${b.length-max}</span>`:""}</div>`}
 const ordn=n=>n+(["th","st","nd","rd"][(n%100-20)%10]||["th","st","nd","rd"][n%100]||"th");
-function wkChart(p){
-  const wk=(BADGES[p.id]||{}).wk||[];if(!wk.length)return`<div class="faint" style="font-size:13px">No NFL games yet. Weekly scoring shows up once he plays.</div>`;
-  const [b,st,bm]=TH[p.pos],W=340,H=158,top=20,bot=34,mx=Math.max(bm+8,...wk.map(w=>w[2])),bw=(W-18)/wk.length,y=v=>top+(H-top-bot)*(1-Math.max(0,v)/mx);
+/* Week-by-week history: 2026 from the board data, earlier seasons from HIST (2015–2025, regular season). */
+const HIST=__HIST__;
+const yearsOf=p=>{const h=HIST[p.id]||{},ys=Object.keys(h).sort((a,b)=>b-a);return((BADGES[p.id]||{}).wk||[]).length?["2026",...ys]:ys};
+function wkData(p,yr){return yr==="2026"?((BADGES[p.id]||{}).wk||[]):((HIST[p.id]||{})[yr]||[])}
+function wkSection(p,label){const ys=yearsOf(p),yr=ys[0]||"2026";
+  return`<section class="bsec wksec"><div class="wkhead"><div class="eyebrow" style="margin:0">${label||"Week by week · PPR points"}</div>${ys.length>1?`<select class="yrsel" data-id="${p.id}" aria-label="Season">${ys.map(y=>`<option value="${y}">${y}</option>`).join("")}</select>`:ys.length?`<span class="yrone">${yr}</span>`:""}</div><div class="wkbox">${wkChart(p,yr)}</div></section>`}
+document.addEventListener("change",e=>{const s=e.target.closest(".yrsel");if(!s)return;const p=BYID[s.dataset.id];if(p)s.closest(".wksec").querySelector(".wkbox").innerHTML=wkChart(p,s.value)});
+function wkChart(p,yr){yr=yr||"2026";
+  const wk=wkData(p,yr);if(!wk.length)return`<div class="faint" style="font-size:13px">${yr==="2026"?"No NFL games yet. Weekly scoring shows up once he plays.":"No games in "+yr+"."}</div>`;
+  const tot=wk.reduce((a,w)=>a+w[2],0),tms=[...new Set(wk.map(w=>w[3]).filter(Boolean))];
+  const sum=`<div class="wksum"><b>${(tot/wk.length).toFixed(1)}</b> PPG · ${wk.length} game${wk.length===1?"":"s"} · ${tot.toFixed(1)} pts${tms.length?` · ${tms.join(", ")}`:""}</div>`;
+  const [b,st,bm]=TH[p.pos],W=340,H=158,top=20,bot=34,mx=Math.max(bm+8,...wk.map(w=>w[2])),bw=(W-18)/wk.length,y=v=>top+(H-top-bot)*(1-Math.max(0,v)/mx),fs=wk.length>13?8.5:10;
   let s=`<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="Weekly PPR points: ${wk.map(w=>"week "+w[0]+" "+w[2]).join(", ")}">`;
   for(const [v,l,c] of [[bm,"Boom "+bm,"var(--boom)"],[st,"Start "+st,"var(--accent)"]])s+=`<line x1="12" x2="${W}" y1="${y(v).toFixed(1)}" y2="${y(v).toFixed(1)}" stroke="${c}" stroke-dasharray="4 4" stroke-width="1.2"/>`;
   wk.forEach(([w,o,v],i)=>{const cx=16+i*bw,c=v>=bm?"var(--boom)":v>=st?"var(--accent)":"var(--bust)",yy=y(v);
-    s+=`<rect x="${(cx+3).toFixed(1)}" y="${yy.toFixed(1)}" width="${(bw-6).toFixed(1)}" height="${Math.max(2,H-bot-yy).toFixed(1)}" rx="5" fill="${c}"/><text x="${(cx+bw/2).toFixed(1)}" y="${(yy-4).toFixed(1)}" text-anchor="middle" font-size="10" font-weight="700" fill="var(--ink)">${v}</text><text x="${(cx+bw/2).toFixed(1)}" y="${H-19}" text-anchor="middle" font-size="9.5" fill="var(--ink-2)">W${w}</text><text x="${(cx+bw/2).toFixed(1)}" y="${H-7}" text-anchor="middle" font-size="9" fill="var(--ink-3)">${esc(o)}</text>`});
-  return s+`</svg><div class="ckey"><span><i style="background:var(--boom)"></i>Boom week (${bm}+)</span><span><i style="background:var(--accent)"></i>Average week (${st}–${bm})</span><span><i style="background:var(--bust)"></i>Underperformed (under ${st})</span></div>`;
+    s+=`<rect x="${(cx+3).toFixed(1)}" y="${yy.toFixed(1)}" width="${(bw-6).toFixed(1)}" height="${Math.max(2,H-bot-yy).toFixed(1)}" rx="5" fill="${c}"/><text x="${(cx+bw/2).toFixed(1)}" y="${(yy-4).toFixed(1)}" text-anchor="middle" font-size="${fs}" font-weight="700" fill="var(--ink)">${wk.length>13?Math.round(v):v}</text><text x="${(cx+bw/2).toFixed(1)}" y="${H-19}" text-anchor="middle" font-size="9.5" fill="var(--ink-2)">W${w}</text><text x="${(cx+bw/2).toFixed(1)}" y="${H-7}" text-anchor="middle" font-size="9" fill="var(--ink-3)">${esc(o)}</text>`});
+  return sum+s+`</svg><div class="ckey"><span><i style="background:var(--boom)"></i>Boom week (${bm}+)</span><span><i style="background:var(--accent)"></i>Average week (${st}–${bm})</span><span><i style="background:var(--bust)"></i>Underperformed (under ${st})</span></div>`;
 }
 let bioCtx=null;
 function bioPageHtml(p,ctx){
@@ -870,7 +883,7 @@ function bioPageHtml(p,ctx){
     ${taken?`<div class="bfit bench">Already drafted.</div>`:fit}${team!=null&&!taken?(()=>{const lc=linkChips(p,team);return lc?`<div class="bds" style="margin-top:8px">${lc}</div>`:""})():""}
     <div class="tiles"><div class="tile"><div class="k">2026 PPR/G</div><div class="v">${p.g?p.ppg:"—"}</div><div class="s">${p.g?(B.pr?p.pos+B.pr+" · ":"")+p.g+" game"+(p.g>1?"s":""):"No NFL games yet"}</div></div>
       <div class="tile"><div class="k">2027 projection</div><div class="v">${p.proj}</div><div class="s">${projLbl()} · ${p.pts} pts</div></div>${t3}${t4}</div>
-    <section class="bsec"><div class="eyebrow">Week by week · PPR points</div>${wkChart(p)}</section>
+    ${wkSection(p)}
     <section class="bsec"><div class="eyebrow bsech">Badges · why he has them <button class="linkbtn" data-bguide>Badge guide ⓘ</button></div>
       ${B.b.length?`<div class="bwhy">${B.b.map(k=>`<div>${bdPill(k)}<p>${esc(B.w[k]||"")}</p></div>`).join("")}</div>`:`<div class="faint" style="font-size:13px">${p.g>=4?"No badges: his weekly scoring doesn’t stand out in either direction.":"Badges need at least 4 NFL games this season."}</div>`}</section>
     <section class="bsec"><div class="eyebrow">Stats</div><dl class="bdl"><dt>2026</dt><dd>${esc(p.line)}${p.g?` <span class="faint">(${p.g} games)</span>`:""}</dd>${p.g?`<dt>PPR</dt><dd><b class="num">${p.ppg}</b> per game · ${p.ppr} total</dd>`:""}${p.prev?`<dt>2025</dt><dd>${esc(p.prev)}</dd>`:""}</dl></section>
@@ -977,8 +990,8 @@ function compareHtml(a,b,ctx){
   <tbody>${rows.map(([l,x,y,d,u])=>`<tr><th scope="row">${l}</th>${cell(x,y,d,u,1)}${cell(y,x,d,u,1)}</tr>`).join("")}
   <tr><th scope="row">Badges</th><td>${(Ba.b||[]).map(bdPill).join(" ")||'<span class="faint">—</span>'}</td><td>${(Bb.b||[]).map(bdPill).join(" ")||'<span class="faint">—</span>'}</td></tr></tbody></table>
   <p class="faint" style="font-size:12px;margin:6px 2px 0">Bold blue marks the better number in each row.</p>
-  <section class="bsec"><div class="eyebrow">${esc(a.name)} · week by week</div>${wkChart(a)}</section>
-  <section class="bsec"><div class="eyebrow">${esc(b.name)} · week by week</div>${wkChart(b)}</section></div>
+  ${wkSection(a,esc(a.name)+" · week by week")}
+  ${wkSection(b,esc(b.name)+" · week by week")}</div>
   <div class="bpact">${clock&&!tk.has(a.id)?`<button class="btn primary bpdraft" data-biodraft="${a.id}">Draft ${esc(lastName(a.name))}</button>`:""}${clock&&!tk.has(b.id)?`<button class="btn primary bpdraft" data-biodraft="${b.id}">Draft ${esc(lastName(b.name))}</button>`:""}</div>`;
 }
 function openCompareChooser(aId){

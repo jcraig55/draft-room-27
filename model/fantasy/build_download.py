@@ -29,7 +29,7 @@ def _draft_ids():
         if i not in ids and k<len(names) and names[k] in pool: i=pool[names[k]]
         out.append(i)
     return {'set':D['set'],'ids':out}
-t=t.replace('__PLAYERS__',open(FZ+'players.json').read()).replace('__BREAK__',open(FZ+'breakouts.json').read()).replace('__BADGES__',open(FZ+'badges.json').read()).replace('__TOPORDER__',json.dumps(_order('top_order.json'))).replace('__LIVE__',json.dumps(_live())).replace('__FWEEK__',str(FMETA['week'])).replace('__DRAFT__',json.dumps(_order('draft_order.json'))).replace('__DRAFTSET__',json.load(open('/home/claude/fantasy/draft_order.json'))['set']).replace('__WEEK__',WEEK).replace('__DATE__',DATE_LONG)
+t=t.replace('__PLAYERS__',open(FZ+'players.json').read()).replace('__BREAK__',open(FZ+'breakouts.json').read()).replace('__BADGES__',open(FZ+'badges.json').read()).replace('__TOPORDER__',json.dumps(_order('top_order.json'))).replace('__LIVE__',json.dumps(_live())).replace('__FWEEK__',str(FMETA['week'])).replace('__HIST__',open(FZ+'history.json').read()).replace('__DRAFT__',json.dumps(_order('draft_order.json'))).replace('__DRAFTSET__',json.load(open('/home/claude/fantasy/draft_order.json'))['set']).replace('__WEEK__',WEEK).replace('__DATE__',DATE_LONG)
 open('/home/claude/fantasy/draft-room-2027.html','w').write(t)
 for f in glob.glob('/home/claude/downloads/draft-room-2027*.html'): os.remove(f)
 i=t.index('</style>')+8
