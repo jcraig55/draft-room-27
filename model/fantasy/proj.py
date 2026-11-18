@@ -78,6 +78,10 @@ for x in P:
     if x['name'] in ADJ:
         m,n=ADJ[x['name']]; x['proj']*=m; x['note']=n
     else: x['note']=''
+# ---- Jared's manual 2027 projections (PPR/G); these win over the model. Set Nov 18, 2026.
+PROJ_SET={'Kenneth Walker III':20.0}
+for x in P:
+    if x['name'] in PROJ_SET: x['proj']=PROJ_SET[x['name']]
 # ---- 2027 rookies (projected landing spot from War Room base mock)
 ROOK=[
  ('Jeremiah Smith','WR','LAC',1,'Ohio State',76,222,'2007-02-08',15.0,'52 rec · 984 yds · 12 TD at Ohio State','Rare size with deep speed and twitch; compared to Julio Jones.'),
