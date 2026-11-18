@@ -407,6 +407,21 @@ table.grid td.r{font-family:var(--f-display);font-weight:800;font-size:15px;colo
 .trlist{display:grid;gap:5px;max-height:50vh;overflow:auto;margin-top:8px}
 .tritem{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:8px;align-items:center;text-align:left;border:1px solid var(--line);border-radius:12px;padding:8px 10px;background:var(--bg);font:inherit;color:var(--ink);cursor:pointer}
 .trtab td.pl b{font-size:13.5px}
+
+.trstyle{margin-bottom:10px}
+.trv{display:flex;align-items:center;gap:4px}.trboost{font-style:normal;font-family:var(--f-body,inherit);font-size:10.5px;font-weight:800;background:#FAEEDA;color:#854F0B;border-radius:5px;padding:1px 4px}
+.trmath{display:grid;gap:3px;font-size:12px;color:var(--ink-2);border-top:1px solid rgba(0,0,0,.08);padding-top:6px}.trmath div{display:flex;justify-content:space-between;gap:8px}
+.cfkey{display:flex;gap:14px;font-size:11.5px;color:var(--ink-2);margin:0 2px 6px}.cfkey i{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:4px;vertical-align:-1px}
+.cfkey .fl,.cfd.fl{background:#E5484D}.cfkey .av,.cfd.av{background:#4B9CD3}.cfkey .ce,.cfd.ce{background:#16A34A}
+.cfwrap{display:grid;gap:10px;border:1.5px solid var(--line);border-radius:16px;padding:12px}
+.cfr{display:grid;grid-template-columns:118px minmax(0,1fr);gap:10px;align-items:center}
+.cfn{font-size:13px;font-weight:700;line-height:1.15}.cfn small{display:block;font-size:11px;font-weight:500;color:var(--ink-3)}
+.cftrack{position:relative;height:34px}
+.cfrng{position:absolute;top:20px;height:5px;border-radius:3px;background:#C9DDF0}
+.cfd{position:absolute;top:17px;width:11px;height:11px;border-radius:50%;transform:translateX(-50%);border:2px solid var(--bg)}
+.cfl{position:absolute;top:0;font-size:10.5px;font-weight:700;transform:translateX(-50%);white-space:nowrap}
+.cfl.fl{color:#A32D2D}.cfl.ce{color:#0F6E3A}.cfl.av{color:#1F6FA8;top:auto;bottom:-14px}
+.cftrack{margin-bottom:10px}
 /* ---------- press feel: push down (every button and tab) ---------- */
 :root{--edge:#86B9DE;--edge-p:#2F78AE;--edge-d:#D9A3A0;--edge-k:#000}
 .btn,.gear,.poschips button,.teamchips button,.teampick button,.favbtn,.mvbtn2,.bdinfo,.cmprow,.tswitch,.xbtn,.simme,.clockpill,.seg,.subtabs{box-shadow:0 3px 0 var(--edge)}
@@ -1496,45 +1511,69 @@ function renderMocks(){
 const TRADE=__TRADE__;const TV={};TRADE.rows.forEach((x,i)=>{x.vr=i+1;TV[x.id]=x});
 let TR={give:[],get:[]};try{const t=JSON.parse(localStorage.getItem("dr27-trade")||"null");if(t)TR={give:(t.give||[]).filter(i=>TV[i]),get:(t.get||[]).filter(i=>TV[i])}}catch(e){}
 const saveTR=()=>{try{localStorage.setItem("dr27-trade",JSON.stringify(TR))}catch(e){}};
-const TW=[1,.8,.65,.52,.42,.34];
-const sideScore=ids=>ids.map(i=>TV[i].val).sort((a,b)=>b-a).reduce((a,v,k)=>a+v*(TW[k]??.3),0);
+let TSTY="bal";try{TSTY=localStorage.getItem("dr27-tradestyle")||"bal"}catch(e){}
+const tval=x=>TSTY==="safe"?x.vs:TSTY==="up"?x.vu:x.val;
+const TW=[1,.8,.55,.4,.3,.25];            /* depth: 2nd piece 80%, 3rd 55%, 4th 40% ... */
+const SPOT=6;                             /* cost of each extra roster spot the receiving side must clear */
+/* Score one side. The single best player in the whole trade gets a boost of up to 1.1×, scaled by how far ahead he is of the other side's best (full 1.1× at a 20+ point lead). */
+function tradeScore(ids,oth){const vs=ids.map(i=>({i,v:tval(TV[i])})).sort((a,b)=>b.v-a.v),ob=oth.length?Math.max(...oth.map(i=>tval(TV[i]))):null;
+  let boost=1;if(vs.length&&ob!=null&&vs[0].v>ob)boost=1+0.1*Math.min(1,(vs[0].v-ob)/20);
+  let s=0;vs.forEach((x,k)=>s+=x.v*(TW[k]??.2)*(k===0?boost:1));const spot=SPOT*Math.max(0,ids.length-oth.length);
+  return{s:s-spot,boost,spot,best:vs[0],gap:vs.length&&ob!=null?vs[0].v-ob:0}}
 const sosTag=x=>x.sos>=1.015?`<span class="sos easy">Easy</span>`:x.sos<=0.985?`<span class="sos tough">Tough</span>`:`<span class="sos">Neutral</span>`;
 const injTag=x=>x.inj?` · <span class="injt">${esc(x.inj[0])}${x.inj[1]?" ("+esc(x.inj[1])+")":""}</span>`:"";
-const trChip=(i,k)=>{const x=TV[i];return`<div class="trc"><span class="pos ${x.pos}">${x.pos}</span><div class="trn"><b>${esc(x.name)}</b><small>${esc(x.team)} · ${x.ros.toFixed(1)} PPG${injTag(x)}</small></div><span class="trv">${x.val}</span><button class="trx" data-trrm="${k}:${i}" aria-label="Remove ${esc(x.name)}">✕</button></div>`};
+const trChip=(i,k,boost)=>{const x=TV[i];return`<div class="trc"><span class="pos ${x.pos}">${x.pos}</span><div class="trn"><b>${esc(x.name)}</b><small>${esc(x.team)} · ${x.ros.toFixed(1)} PPG${injTag(x)}</small></div><span class="trv">${boost>1.005?`<em class="trboost">${boost.toFixed(2)}×</em>`:""}${tval(x)}</span><button class="trx" data-trrm="${k}:${i}" aria-label="Remove ${esc(x.name)}">✕</button></div>`};
+function cfBars(list){const mx=Math.max(30,...list.map(([k,i])=>TV[i].c||TV[i].ros)),x=v=>Math.min(100,v/mx*100);
+  return list.map(([k,i])=>{const p=TV[i];if(p.c==null)return`<div class="cfr"><span class="cfn">${esc(p.name)}<small>${k==="give"?"You give":"You get"}</small></span><span class="faint" style="font-size:12px">Needs 4+ games (${p.g} so far)</span></div>`;
+    return`<div class="cfr"><span class="cfn">${esc(p.name)}<small>${k==="give"?"You give":"You get"}</small></span><div class="cftrack"><div class="cfrng" style="left:${x(p.f)}%;width:${x(p.c)-x(p.f)}%"></div><i class="cfd fl" style="left:${x(p.f)}%"></i><i class="cfd av" style="left:${x(p.ppg)}%"></i><i class="cfd ce" style="left:${x(p.c)}%"></i><span class="cfl fl" style="left:${x(p.f)}%">${p.f.toFixed(1)}</span><span class="cfl av" style="left:${x(p.ppg)}%">${p.ppg.toFixed(1)}</span><span class="cfl ce" style="left:${x(p.c)}%">${p.c.toFixed(1)}</span></div></div>`}).join("")}
 function renderTrade(){
   $("#trSub").textContent=`Rest of 2026 · Player stats through Week ${TRADE.week} · light schedule adjustment`;
-  const side=(k,l)=>`<div class="trside"><div class="sh">${l}</div>${TR[k].map(i=>trChip(i,k)).join("")}<button class="tradd" data-tradd="${k}">+ Add player</button><div class="trtot">Value <b>${Math.round(sideScore(TR[k]))}</b></div></div>`;
+  const A=tradeScore(TR.give,TR.get),B=tradeScore(TR.get,TR.give);
+  const side=(k,l,S)=>`<div class="trside"><div class="sh">${l}</div>${TR[k].map(i=>trChip(i,k,S.best&&S.best.i===i?S.boost:1)).join("")}<button class="tradd" data-tradd="${k}">+ Add player</button><div class="trtot">Value <b>${Math.round(S.s)}</b></div></div>`;
+  const styleSeg=`<div class="trstyle"><div class="seg" id="trSty" role="tablist" aria-label="Value style">${[["safe","Safe (floor)"],["bal","Balanced"],["up","Upside (ceiling)"]].map(([k,l])=>`<button role="tab" data-sty="${k}" aria-selected="${TSTY===k}">${l}</button>`).join("")}</div><div class="faint" style="font-size:12px;margin:4px 2px 0">${TSTY==="safe"?"Safe: values lean 25% toward each player’s floor. Best if you’re winning and need steady points.":TSTY==="up"?"Upside: values lean 25% toward each player’s ceiling. Best if you need spike weeks to catch up.":"Balanced: values use average points per game."}</div></div>`;
   let v="";
-  if(TR.give.length&&TR.get.length){const a=sideScore(TR.give),b=sideScore(TR.get),d=b-a,ab=Math.round(100*Math.abs(d)/Math.max(a,b));
+  if(TR.give.length&&TR.get.length){const a=A.s,b=B.s,d=b-a,ab=Math.round(100*Math.abs(d)/Math.max(a,b,1));
     const lab=ab<5?"Fair trade":ab<15?(d>0?"Slight win for you":"Slight loss for you"):ab<30?(d>0?"You win this trade":"You lose this trade"):(d>0?"Lopsided in your favor":"Lopsided against you");
     const cls=ab<5?"fair":d>0?"win":"loss";
-    const ppw=TR.get.reduce((s,i)=>s+TV[i].ros,0)-TR.give.reduce((s,i)=>s+TV[i].ros,0);
-    const ros=TR.get.reduce((s,i)=>s+TV[i].ros*TV[i].left,0)-TR.give.reduce((s,i)=>s+TV[i].ros*TV[i].left,0);
     const n=TR.get.length-TR.give.length,sg=x=>x>=0?"+":"−";
+    const N=Math.min(TR.give.length,TR.get.length),top=ids=>ids.map(i=>TV[i]).sort((x,y)=>y.ros-x.ros).slice(0,N);
+    const ppw=top(TR.get).reduce((s,p)=>s+p.ros,0)-top(TR.give).reduce((s,p)=>s+p.ros,0);
+    const ros=top(TR.get).reduce((s,p)=>s+p.ros*p.left,0)-top(TR.give).reduce((s,p)=>s+p.ros*p.left,0);
+    const tl=n===0?"":` (best ${N} from each side)`;
+    const cfOk=[...TR.give,...TR.get].every(i=>TV[i].c!=null),cs=(ids,k)=>top(ids).reduce((s,p)=>s+p[k],0);
+    const dc=cfOk?cs(TR.get,"c")-cs(TR.give,"c"):null,df=cfOk?cs(TR.get,"f")-cs(TR.give,"f"):null;
+    const bs=A.boost>1.005?A:B.boost>1.005?B:null,bp=bs?TV[bs.best.i]:null;
+    const math=[TW.slice(0,Math.max(TR.give.length,TR.get.length)).length>1?`<div><span>Extra pieces count less</span><span>${TW.slice(0,Math.max(TR.give.length,TR.get.length)).map(w=>Math.round(w*100)+"%").join(" · ")}</span></div>`:"",
+      A.spot||B.spot?`<div><span>Roster spot to clear (${A.spot?"You give":"You get"} side)</span><span>−${A.spot||B.spot}</span></div>`:"",
+      bp?`<div><span>Best player: ${esc(bp.name)} (${bs.gap} pts ahead)</span><span>${bs.boost.toFixed(2)}× → +${(bs.best.v*(bs.boost-1)).toFixed(1)}</span></div>`:""].join("");
     v=`<div class="trver ${cls}"><div class="vh">${lab}${ab>=5?` · ${sg(d)}${ab}%`:""}</div><div class="vbar"><i style="width:${Math.round(100*b/(a+b))}%"></i></div><div class="vbl"><span>You get ${Math.round(b)}</span><span>You give ${Math.round(a)}</span></div>
-      <div class="vnote">Within 5% is fair. When one side gets the best player, extra pieces count for less, so the side getting the star usually comes out ahead.</div></div>
+      ${math?`<div class="trmath">${math}</div>`:""}<div class="vnote">Within 5% is fair.</div></div>
       <div class="trimp"><div class="sh">WHAT CHANGES FOR YOU</div>
-      <div class="row"><span>Points per week (if all start)</span><span class="${ppw>=0?"up":"dn"}">${sg(ppw)}${Math.abs(ppw).toFixed(1)}</span></div>
-      <div class="row"><span>Rest-of-season points</span><span class="${ros>=0?"up":"dn"}">${sg(ros)}${Math.abs(ros).toFixed(0)}</span></div>
+      <div class="row"><span>Points per week${tl}</span><span class="${ppw>=0?"up":"dn"}">${sg(ppw)}${Math.abs(ppw).toFixed(1)}</span></div>
+      ${cfOk?`<div class="row"><span>Weekly ceiling${tl}</span><span class="${dc>=0?"up":"dn"}">${sg(dc)}${Math.abs(dc).toFixed(1)}</span></div>
+      <div class="row"><span>Weekly floor${tl}</span><span class="${df>=0?"up":"dn"}">${sg(df)}${Math.abs(df).toFixed(1)}</span></div>`:""}
+      <div class="row"><span>Rest-of-season points${tl}</span><span class="${ros>=0?"up":"dn"}">${sg(ros)}${Math.abs(ros).toFixed(0)}</span></div>
       <div class="row"><span>Roster spots</span><span>${n===0?"Even":n>0?`Needs ${n} open spot${n>1?"s":""}`:`Frees ${-n} spot${-n>1?"s":""}`}</span></div></div>`}
   else v=`<div class="empty" style="margin-top:10px">Add at least one player to each side to see the verdict.</div>`;
   const all=[...TR.give.map(i=>["give",i]),...TR.get.map(i=>["get",i])];
-  const tbl=all.length?`<div class="sh" style="margin:14px 2px 6px">PLAYER BREAKDOWN</div><div class="swrap"><table class="stab trtab"><thead><tr><th>Player</th><th class="n">Value</th><th class="n">ROS <br>PPG</th><th class="n">Games <br>left</th><th>Schedule</th></tr></thead><tbody>${all.map(([k,i])=>{const x=TV[i];return`<tr><td class="pl"><b>${esc(x.name)}</b><small>${k==="give"?"You give":"You get"} · ${x.pos} · ’26: ${x.ppg.toFixed(1)} PPG, ${x.g} g</small></td><td class="n">${x.val}</td><td class="n">${x.ros.toFixed(1)}</td><td class="n">${x.left}</td><td>${sosTag(x)}</td></tr>`}).join("")}</tbody></table></div>`:"";
-  $("#trBody").innerHTML=`<div class="trsides">${side("give","YOU GIVE")}${side("get","YOU GET")}</div>${v}${tbl}<p class="faint" style="font-size:12px;margin:10px 2px">Values (0–100) come from 2026 points per game on the Player stats page, blended with 2025 for small samples, nudged a little for each player’s remaining opponents (at most ±8%), and compared with a replacement-level player in your 16-team QB/RB/2WR/TE/2FLEX league. Updated every Tuesday.</p>`;
+  const cf=all.length?`<div class="sh" style="margin:14px 2px 4px">CEILING AND FLOOR</div><div class="faint" style="font-size:12px;margin:0 2px 6px">Ceiling = average of his 3 best games this season. Floor = average of his 3 worst.</div><div class="cfkey"><span><i class="fl"></i>Floor</span><span><i class="av"></i>Average</span><span><i class="ce"></i>Ceiling</span></div><div class="cfwrap">${cfBars(all)}</div>`:"";
+  const tbl=all.length?`<div class="sh" style="margin:14px 2px 6px">PLAYER BREAKDOWN</div><div class="swrap"><table class="stab trtab"><thead><tr><th>Player</th><th class="n">Value</th><th class="n">ROS <br>PPG</th><th class="n">Games <br>left</th><th>Schedule</th></tr></thead><tbody>${all.map(([k,i])=>{const x=TV[i];return`<tr><td class="pl"><b>${esc(x.name)}</b><small>${k==="give"?"You give":"You get"} · ${x.pos} · ’26: ${x.ppg.toFixed(1)} PPG, ${x.g} g</small></td><td class="n">${tval(x)}</td><td class="n">${x.ros.toFixed(1)}</td><td class="n">${x.left}</td><td>${sosTag(x)}</td></tr>`}).join("")}</tbody></table></div>`:"";
+  $("#trBody").innerHTML=`${styleSeg}<div class="trsides">${side("give","YOU GIVE",A)}${side("get","YOU GET",B)}</div>${v}${cf}${tbl}<p class="faint" style="font-size:12px;margin:10px 2px">Values (0–100) come from 2026 points per game on the Player stats page, blended with 2025 for small samples, nudged a little for each player’s remaining opponents (at most ±8%), and compared with a replacement-level player in your 16-team QB/RB/2WR/TE/2FLEX league. In multi-player deals, extra pieces count less, the side taking on more players pays for the roster spots, and the best player in the deal gets up to a 1.1× boost. Updated every Tuesday.</p>`;
 }
 function openTradeAdd(side){
   const host=document.createElement("div");host.className="mvscrim";host.innerHTML=`<div class="mover" role="dialog" aria-modal="true" aria-label="Add player"><div class="mvgrab" aria-hidden="true"></div><div class="eyebrow">Add to ${side==="give"?"You give":"You get"}</div><input type="search" id="trQ" placeholder="Search players or NFL teams" autocomplete="off" style="margin:6px 0 8px"><div class="poschips" id="trPos"></div><div class="trlist" id="trL"></div><div class="actions" style="margin-top:10px"><button class="btn" data-trcancel>Cancel</button></div></div>`;
   document.body.appendChild(host);requestAnimationFrame(()=>host.classList.add("open"));
   let pos="ALL";const used=new Set([...TR.give,...TR.get]);const close=()=>{host.classList.remove("open");setTimeout(()=>host.remove(),200)};
   const draw=()=>{const q=$("#trQ").value.trim().toLowerCase();$("#trPos").innerHTML=["ALL",...POS].map(p=>`<button aria-pressed="${p===pos}" data-p="${p}">${p==="ALL"?"All":p}</button>`).join("");
-    const L=TRADE.rows.filter(x=>!used.has(x.id)&&(pos==="ALL"||x.pos===pos)&&(!q||x.name.toLowerCase().includes(q)||x.team.toLowerCase()===q)).slice(0,60);
-    $("#trL").innerHTML=L.length?L.map(x=>`<button class="tritem" data-trpick="${x.id}"><span class="pos ${x.pos}">${x.pos}</span><span class="trn"><b>${esc(x.name)}</b><small>${esc(x.team)} · ${x.ros.toFixed(1)} PPG${injTag(x)}</small></span><span class="trv">${x.val}</span></button>`).join(""):`<div class="empty">No players match.</div>`};
+    const L=TRADE.rows.filter(x=>!used.has(x.id)&&(pos==="ALL"||x.pos===pos)&&(!q||x.name.toLowerCase().includes(q)||x.team.toLowerCase()===q)).sort((a,b)=>tval(b)-tval(a)).slice(0,60);
+    $("#trL").innerHTML=L.length?L.map(x=>`<button class="tritem" data-trpick="${x.id}"><span class="pos ${x.pos}">${x.pos}</span><span class="trn"><b>${esc(x.name)}</b><small>${esc(x.team)} · ${x.ros.toFixed(1)} PPG${injTag(x)}</small></span><span class="trv">${tval(x)}</span></button>`).join(""):`<div class="empty">No players match.</div>`};
   draw();$("#trQ").oninput=draw;
   host.onclick=e=>{if(e.target===host||e.target.closest("[data-trcancel]")){close();return}const b=e.target.closest("[data-p]");if(b){pos=b.dataset.p;draw();return}
     const pk=e.target.closest("[data-trpick]");if(pk){TR[side].push(pk.dataset.trpick);saveTR();close();renderTrade()}}}
 $("#trBody").onclick=e=>{const a=e.target.closest("[data-tradd]");if(a){openTradeAdd(a.dataset.tradd);return}
   const r=e.target.closest("[data-trrm]");if(r){const [k,i]=r.dataset.trrm.split(":");TR[k]=TR[k].filter(x=>x!==i);saveTR();renderTrade()}};
 $("#trClear").onclick=()=>{TR={give:[],get:[]};saveTR();renderTrade()};
+$("#trBody").addEventListener("click",e=>{const b=e.target.closest("[data-sty]");if(!b)return;TSTY=b.dataset.sty;try{localStorage.setItem("dr27-tradestyle",TSTY)}catch(x){}renderTrade()});
 /* ---------- util + events ---------- */
 let toastT;function toast(m){$("#toastHost").innerHTML=`<div class="toast" role="status">${esc(m)}</div>`;clearTimeout(toastT);toastT=setTimeout(()=>$("#toastHost").innerHTML="",2600)}
 $("#tabs").onclick=e=>{const b=e.target.closest("[data-tab]");if(!b)return;document.querySelectorAll("#tabs button").forEach(x=>x.setAttribute("aria-selected",x===b));

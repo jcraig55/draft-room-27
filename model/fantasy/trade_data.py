@@ -9,6 +9,7 @@ REPL={'QB':20,'RB':44,'WR':58,'TE':20}         # replacement level in a 16-team 
 K=3                                            # games of prior blended into 2026 PPG
 SOS_W=0.25                                     # "slight" schedule effect: 25% of the raw matchup difference
 SOS_CAP=0.08                                   # never more than +/-8%
+STYLE_W=0.25                                   # Safe/Upside value styles shift ROS PPG 25% toward floor/ceiling
 def build():
     P=json.load(open(F+'players.json'));B=json.load(open(F+'badges.json'))
     st=pd.read_csv(N+'stats26.csv',usecols=['player_id','position','week','season_type','team','opponent_team','fantasy_points_ppr'],low_memory=False)
@@ -42,18 +43,34 @@ def build():
         raw=[fac.get((o,pos),1.0) for _,o in sched]
         f=sum(raw)/len(raw) if raw else 1.0
         mult=max(1-SOS_CAP,min(1+SOS_CAP,1+SOS_W*(f-1)))
+        wk=sorted(w[2] for w in b.get('wk',[]))
+        c=round(sum(wk[-3:])/3,1) if len(wk)>=4 else None   # ceiling: average of his 3 best games
+        f=round(sum(wk[:3])/3,1) if len(wk)>=4 else None    # floor: average of his 3 worst games
         rows.append({'id':pid,'name':name,'pos':pos,'team':team,'g':gm,'ppg':round(ppg,1),'adj':round(adj,2),'ros':round(adj*mult,2),'left':len(sched),'sos':round(mult,3),
-                     'opp':[o for _,o in sched],'inj':inj.get(pid)})
-    # value over replacement for the rest of the season, scaled 0-100
+                     'opp':[o for _,o in sched],'inj':inj.get(pid),'c':c,'f':f})
+    # value over replacement for the rest of the season, scaled 0-100.
+    # Three styles: Balanced (val), Safe (vs: ROS PPG shifted toward floor), Upside (vu: toward ceiling). All on the Balanced scale.
+    # players with under 4 games use their position's typical ceiling/floor ratio, so styles move everyone consistently
+    RAT={}
     for pos in POS:
-        L=sorted([x for x in rows if x['pos']==pos],key=lambda x:-x['ros'])
-        repl=L[min(REPL[pos],len(L))-1]['ros'] if L else 0
-        for x in L: x['raw']=max(0,x['ros']-repl)*x['left']+0.15*x['ros']*x['left']
-    mx=max(x['raw'] for x in rows) or 1
-    for x in rows: x['val']=max(1,round(100*(x['raw']/mx)**0.85))
+        L=[x for x in rows if x['pos']==pos and x['c'] is not None and x['adj']>0]
+        RAT[pos]=(sum(x['c']/x['adj'] for x in L)/len(L),sum(x['f']/x['adj'] for x in L)/len(L)) if L else (1.5,0.5)
+    def rosOf(x,st):
+        if st=='bal': return x['ros']
+        if x['c'] is None: t=x['ros']*(RAT[x['pos']][1] if st=='safe' else RAT[x['pos']][0])
+        else: t=(x['f'] if st=='safe' else x['c'])*x['sos']
+        return x['ros']+STYLE_W*(t-x['ros'])
+    mx=None
+    for st,key in (('bal','val'),('safe','vs'),('up','vu')):
+        for pos in POS:
+            L=sorted([x for x in rows if x['pos']==pos],key=lambda x:-rosOf(x,st))
+            repl=rosOf(L[min(REPL[pos],len(L))-1],st) if L else 0
+            for x in L: r=rosOf(x,st);x['raw']=max(0,r-repl)*x['left']+0.15*r*x['left']
+        if mx is None: mx=max(x['raw'] for x in rows) or 1
+        for x in rows: x[key]=max(1,min(100,round(100*(x['raw']/mx)**0.85)))
     rows.sort(key=lambda x:-x['val'])
     for x in rows: del x['raw']
     return {'week':played_wk,'rows':rows}
 if __name__=='__main__':
     T=build();print('through week',T['week'],'players',len(T['rows']))
-    for x in T['rows'][:15]: print(x['val'],x['name'],x['pos'],x['ros'],x['left'],x['sos'],x['inj'])
+    for x in T['rows'][:15]: print(x['val'],x['vs'],x['vu'],x['name'],x['pos'],x['ros'],x['c'],x['f'],x['left'],x['sos'],x['inj'])
