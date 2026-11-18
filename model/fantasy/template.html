@@ -382,6 +382,31 @@ table.grid td.r{font-family:var(--f-display);font-weight:800;font-size:15px;colo
 .yrsel{width:auto;min-width:88px;padding:5px 28px 5px 12px;border-radius:999px;font-weight:700;font-size:13px}
 .yrone{font-size:12px;font-weight:700;color:var(--ink-3)}
 .wksum{font-size:12.5px;color:var(--ink-2);margin:0 0 4px}.wksum b{font-size:15px;color:var(--ink)}
+
+.bnav button{min-width:0}
+.trsides{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px}@media (max-width:560px){.trsides{grid-template-columns:minmax(0,1fr)}}
+#trQ{width:100%}
+.trside{border:1.5px solid var(--line);border-radius:16px;padding:8px;display:grid;gap:6px;align-content:start}
+.sh{font:700 11px var(--f-display);letter-spacing:.1em;color:var(--ink-3)}
+.trc{display:grid;grid-template-columns:auto minmax(0,1fr) auto auto;gap:8px;align-items:center;border:1px solid var(--line);border-radius:12px;padding:8px 6px 8px 10px;background:var(--bg)}
+.trn{display:grid;min-width:0;text-align:left}.trn b{font-size:14px;line-height:1.2}.trn small{font-size:11px;color:var(--ink-3);white-space:normal}
+.trv{font:800 17px var(--f-display);font-variant-numeric:tabular-nums;color:var(--ink)}
+.trx{border:0;background:none;color:var(--ink-3);font-size:12px;padding:4px;cursor:pointer;box-shadow:none!important}
+.tradd{border:1.5px dashed var(--accent);background:none;border-radius:12px;padding:8px;font:inherit;font-weight:700;font-size:13px;color:#1F6FA8;cursor:pointer}
+.trtot{text-align:right;font-size:12px;color:var(--ink-2)}.trtot b{font:800 20px var(--f-display);color:var(--ink);margin-left:4px}
+.trver{margin-top:10px;border-radius:16px;padding:12px;border:1.5px solid var(--accent);background:var(--accent-soft);display:grid;gap:6px}
+.trver.win{border-color:#16A34A;background:#EAF8EF}.trver.loss{border-color:#E5484D;background:#FDECEC}
+.trver .vh{font:800 19px var(--f-display);text-transform:uppercase;color:var(--ink)}.trver.win .vh{color:#0F6E3A}.trver.loss .vh{color:#A32D2D}
+.vbar{height:10px;border-radius:999px;background:#F3C8C8;overflow:hidden}.vbar i{display:block;height:100%;background:#16A34A}
+.trver.fair .vbar{background:#C9DDF0}.trver.fair .vbar i{background:var(--accent)}
+.vbl{display:flex;justify-content:space-between;font-size:11.5px;color:var(--ink-2);font-weight:600}.vnote{font-size:12px;color:var(--ink-2)}
+.trimp{margin-top:12px;display:grid;gap:6px}.trimp .row{display:flex;justify-content:space-between;gap:10px;font-size:13.5px;border-bottom:1px solid var(--line);padding-bottom:6px}
+.trimp .up{color:#16A34A;font-weight:800}.trimp .dn{color:#E5484D;font-weight:800}
+.sos{display:inline-block;font-size:11.5px;font-weight:700;border-radius:999px;padding:2px 9px;background:var(--surface-2);color:var(--ink-2)}.sos.easy{background:#EAF8EF;color:#0F6E3A}.sos.tough{background:#FDECEC;color:#A32D2D}
+.injt{color:#B45309;font-weight:700}
+.trlist{display:grid;gap:5px;max-height:50vh;overflow:auto;margin-top:8px}
+.tritem{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:8px;align-items:center;text-align:left;border:1px solid var(--line);border-radius:12px;padding:8px 10px;background:var(--bg);font:inherit;color:var(--ink);cursor:pointer}
+.trtab td.pl b{font-size:13.5px}
 /* ---------- press feel: push down (every button and tab) ---------- */
 :root{--edge:#86B9DE;--edge-p:#2F78AE;--edge-d:#D9A3A0;--edge-k:#000}
 .btn,.gear,.poschips button,.teamchips button,.teampick button,.favbtn,.mvbtn2,.bdinfo,.cmprow,.tswitch,.xbtn,.simme,.clockpill,.seg,.subtabs{box-shadow:0 3px 0 var(--edge)}
@@ -476,6 +501,10 @@ button,.gear,summary,th[data-sort]{transition:transform .07s ease-out,box-shadow
     <div class="poschips" id="tPos" style="margin-top:10px"></div>
     <div id="topList" style="margin-top:10px"></div>
   </section>
+  <section class="panel" id="p-trade" hidden>
+    <div class="tabhead"><div><h2 class="ttl">Trade analyzer</h2><div class="sub" id="trSub"></div></div><button class="gear" id="trClear">Clear</button></div>
+    <div id="trBody"></div>
+  </section>
   <section class="panel" id="p-mocks" hidden>
     <div class="tabhead"><div><h2 class="ttl">My mocks</h2><div class="sub">Saved drafts and results</div></div></div>
     <div id="curMock"></div>
@@ -497,6 +526,7 @@ button,.gear,summary,th[data-sort]{transition:transform .07s ease-out,box-shadow
     <button role="tab" data-tab="mock" aria-selected="true"><i aria-hidden="true">🏈</i>Draft</button>
     <button role="tab" data-tab="board" aria-selected="false"><i aria-hidden="true">📋</i>Board</button>
     <button role="tab" data-tab="top" aria-selected="false"><i aria-hidden="true">🏆</i>Top 125</button>
+    <button role="tab" data-tab="trade" aria-selected="false"><i aria-hidden="true">⚖️</i>Trade</button>
     <button role="tab" data-tab="mocks" aria-selected="false"><i aria-hidden="true">💾</i>My mocks</button>
   </nav>
 </div>
@@ -1462,10 +1492,53 @@ function renderMocks(){
     <div class="actions" style="margin-top:10px"><button class="btn" data-grades>📊 Grades &amp; standings</button><button class="btn" data-boardview>Board view</button></div></div>`;
 }
 
+/* ---------- Trade analyzer (rest of 2026 season; values from the Player stats data + light schedule adjustment) ---------- */
+const TRADE=__TRADE__;const TV={};TRADE.rows.forEach((x,i)=>{x.vr=i+1;TV[x.id]=x});
+let TR={give:[],get:[]};try{const t=JSON.parse(localStorage.getItem("dr27-trade")||"null");if(t)TR={give:(t.give||[]).filter(i=>TV[i]),get:(t.get||[]).filter(i=>TV[i])}}catch(e){}
+const saveTR=()=>{try{localStorage.setItem("dr27-trade",JSON.stringify(TR))}catch(e){}};
+const TW=[1,.8,.65,.52,.42,.34];
+const sideScore=ids=>ids.map(i=>TV[i].val).sort((a,b)=>b-a).reduce((a,v,k)=>a+v*(TW[k]??.3),0);
+const sosTag=x=>x.sos>=1.015?`<span class="sos easy">Easy</span>`:x.sos<=0.985?`<span class="sos tough">Tough</span>`:`<span class="sos">Neutral</span>`;
+const injTag=x=>x.inj?` · <span class="injt">${esc(x.inj[0])}${x.inj[1]?" ("+esc(x.inj[1])+")":""}</span>`:"";
+const trChip=(i,k)=>{const x=TV[i];return`<div class="trc"><span class="pos ${x.pos}">${x.pos}</span><div class="trn"><b>${esc(x.name)}</b><small>${esc(x.team)} · ${x.ros.toFixed(1)} PPG${injTag(x)}</small></div><span class="trv">${x.val}</span><button class="trx" data-trrm="${k}:${i}" aria-label="Remove ${esc(x.name)}">✕</button></div>`};
+function renderTrade(){
+  $("#trSub").textContent=`Rest of 2026 · Player stats through Week ${TRADE.week} · light schedule adjustment`;
+  const side=(k,l)=>`<div class="trside"><div class="sh">${l}</div>${TR[k].map(i=>trChip(i,k)).join("")}<button class="tradd" data-tradd="${k}">+ Add player</button><div class="trtot">Value <b>${Math.round(sideScore(TR[k]))}</b></div></div>`;
+  let v="";
+  if(TR.give.length&&TR.get.length){const a=sideScore(TR.give),b=sideScore(TR.get),d=b-a,ab=Math.round(100*Math.abs(d)/Math.max(a,b));
+    const lab=ab<5?"Fair trade":ab<15?(d>0?"Slight win for you":"Slight loss for you"):ab<30?(d>0?"You win this trade":"You lose this trade"):(d>0?"Lopsided in your favor":"Lopsided against you");
+    const cls=ab<5?"fair":d>0?"win":"loss";
+    const ppw=TR.get.reduce((s,i)=>s+TV[i].ros,0)-TR.give.reduce((s,i)=>s+TV[i].ros,0);
+    const ros=TR.get.reduce((s,i)=>s+TV[i].ros*TV[i].left,0)-TR.give.reduce((s,i)=>s+TV[i].ros*TV[i].left,0);
+    const n=TR.get.length-TR.give.length,sg=x=>x>=0?"+":"−";
+    v=`<div class="trver ${cls}"><div class="vh">${lab}${ab>=5?` · ${sg(d)}${ab}%`:""}</div><div class="vbar"><i style="width:${Math.round(100*b/(a+b))}%"></i></div><div class="vbl"><span>You get ${Math.round(b)}</span><span>You give ${Math.round(a)}</span></div>
+      <div class="vnote">Within 5% is fair. When one side gets the best player, extra pieces count for less, so the side getting the star usually comes out ahead.</div></div>
+      <div class="trimp"><div class="sh">WHAT CHANGES FOR YOU</div>
+      <div class="row"><span>Points per week (if all start)</span><span class="${ppw>=0?"up":"dn"}">${sg(ppw)}${Math.abs(ppw).toFixed(1)}</span></div>
+      <div class="row"><span>Rest-of-season points</span><span class="${ros>=0?"up":"dn"}">${sg(ros)}${Math.abs(ros).toFixed(0)}</span></div>
+      <div class="row"><span>Roster spots</span><span>${n===0?"Even":n>0?`Needs ${n} open spot${n>1?"s":""}`:`Frees ${-n} spot${-n>1?"s":""}`}</span></div></div>`}
+  else v=`<div class="empty" style="margin-top:10px">Add at least one player to each side to see the verdict.</div>`;
+  const all=[...TR.give.map(i=>["give",i]),...TR.get.map(i=>["get",i])];
+  const tbl=all.length?`<div class="sh" style="margin:14px 2px 6px">PLAYER BREAKDOWN</div><div class="swrap"><table class="stab trtab"><thead><tr><th>Player</th><th class="n">Value</th><th class="n">ROS <br>PPG</th><th class="n">Games <br>left</th><th>Schedule</th></tr></thead><tbody>${all.map(([k,i])=>{const x=TV[i];return`<tr><td class="pl"><b>${esc(x.name)}</b><small>${k==="give"?"You give":"You get"} · ${x.pos} · ’26: ${x.ppg.toFixed(1)} PPG, ${x.g} g</small></td><td class="n">${x.val}</td><td class="n">${x.ros.toFixed(1)}</td><td class="n">${x.left}</td><td>${sosTag(x)}</td></tr>`}).join("")}</tbody></table></div>`:"";
+  $("#trBody").innerHTML=`<div class="trsides">${side("give","YOU GIVE")}${side("get","YOU GET")}</div>${v}${tbl}<p class="faint" style="font-size:12px;margin:10px 2px">Values (0–100) come from 2026 points per game on the Player stats page, blended with 2025 for small samples, nudged a little for each player’s remaining opponents (at most ±8%), and compared with a replacement-level player in your 16-team QB/RB/2WR/TE/2FLEX league. Updated every Tuesday.</p>`;
+}
+function openTradeAdd(side){
+  const host=document.createElement("div");host.className="mvscrim";host.innerHTML=`<div class="mover" role="dialog" aria-modal="true" aria-label="Add player"><div class="mvgrab" aria-hidden="true"></div><div class="eyebrow">Add to ${side==="give"?"You give":"You get"}</div><input type="search" id="trQ" placeholder="Search players or NFL teams" autocomplete="off" style="margin:6px 0 8px"><div class="poschips" id="trPos"></div><div class="trlist" id="trL"></div><div class="actions" style="margin-top:10px"><button class="btn" data-trcancel>Cancel</button></div></div>`;
+  document.body.appendChild(host);requestAnimationFrame(()=>host.classList.add("open"));
+  let pos="ALL";const used=new Set([...TR.give,...TR.get]);const close=()=>{host.classList.remove("open");setTimeout(()=>host.remove(),200)};
+  const draw=()=>{const q=$("#trQ").value.trim().toLowerCase();$("#trPos").innerHTML=["ALL",...POS].map(p=>`<button aria-pressed="${p===pos}" data-p="${p}">${p==="ALL"?"All":p}</button>`).join("");
+    const L=TRADE.rows.filter(x=>!used.has(x.id)&&(pos==="ALL"||x.pos===pos)&&(!q||x.name.toLowerCase().includes(q)||x.team.toLowerCase()===q)).slice(0,60);
+    $("#trL").innerHTML=L.length?L.map(x=>`<button class="tritem" data-trpick="${x.id}"><span class="pos ${x.pos}">${x.pos}</span><span class="trn"><b>${esc(x.name)}</b><small>${esc(x.team)} · ${x.ros.toFixed(1)} PPG${injTag(x)}</small></span><span class="trv">${x.val}</span></button>`).join(""):`<div class="empty">No players match.</div>`};
+  draw();$("#trQ").oninput=draw;
+  host.onclick=e=>{if(e.target===host||e.target.closest("[data-trcancel]")){close();return}const b=e.target.closest("[data-p]");if(b){pos=b.dataset.p;draw();return}
+    const pk=e.target.closest("[data-trpick]");if(pk){TR[side].push(pk.dataset.trpick);saveTR();close();renderTrade()}}}
+$("#trBody").onclick=e=>{const a=e.target.closest("[data-tradd]");if(a){openTradeAdd(a.dataset.tradd);return}
+  const r=e.target.closest("[data-trrm]");if(r){const [k,i]=r.dataset.trrm.split(":");TR[k]=TR[k].filter(x=>x!==i);saveTR();renderTrade()}};
+$("#trClear").onclick=()=>{TR={give:[],get:[]};saveTR();renderTrade()};
 /* ---------- util + events ---------- */
 let toastT;function toast(m){$("#toastHost").innerHTML=`<div class="toast" role="status">${esc(m)}</div>`;clearTimeout(toastT);toastT=setTimeout(()=>$("#toastHost").innerHTML="",2600)}
 $("#tabs").onclick=e=>{const b=e.target.closest("[data-tab]");if(!b)return;document.querySelectorAll("#tabs button").forEach(x=>x.setAttribute("aria-selected",x===b));
-  ["mock","board","top","mocks"].forEach(t=>$("#p-"+t).hidden=t!==b.dataset.tab);window.scrollTo(0,0);
+  ["mock","board","top","trade","mocks"].forEach(t=>$("#p-"+t).hidden=t!==b.dataset.tab);window.scrollTo(0,0);if(b.dataset.tab==="trade")renderTrade();
   if(b.dataset.tab==="board")renderBoardTab();if(b.dataset.tab==="top")renderTop();if(b.dataset.tab==="mocks"){renderMocks();renderSaved()}try{localStorage.setItem("dr27-tab",b.dataset.tab)}catch(e){}};
 $("#simUser").onclick=()=>{if(live.on)pauseLive();else startLive()};
 $("#simAll").onclick=()=>{stopLive();simulate("all")};

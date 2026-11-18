@@ -16,6 +16,8 @@ B=https://github.com/nflverse/nflverse-data/releases/download
 curl -sSfL -o stats26.csv $B/stats_player/stats_player_week_2026.csv
 curl -sSfL -o snaps26.csv $B/snap_counts/snap_counts_2026.csv
 curl -sSfL -o players.csv $B/players/players.csv
+mkdir -p sched && curl -sSfL -o sched/games.csv $B/schedules/games.csv
+curl -sSfL -o injuries26.csv $B/injuries/injuries_2026.csv || true
 echo "Stats through week: $(python3 -c "import pandas as p;print(int(p.read_csv('stats26.csv',usecols=['week']).week.max()))")"
 python3 build.py
 cd /home/claude/fantasy
