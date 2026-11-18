@@ -208,6 +208,15 @@ details.more>summary::before{content:"▸ "} details.more[open]>summary::before{
 .favbox{border:1px solid var(--line);border-radius:14px;overflow:hidden}
 .favhd{font-family:var(--f-display);font-weight:700;font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:#1F6FA8;background:var(--accent-soft);padding:6px 12px;border-bottom:1px solid var(--line)}
 .favgone{opacity:.6}
+.ckbox{border:1px solid var(--line);border-radius:14px;overflow:hidden;max-height:56vh;overflow-y:auto}
+.ckhead{padding:10px 12px;border-bottom:1px solid var(--line);background:var(--surface-2)}.ckhead b{font-family:var(--f-display);font-size:20px;font-weight:800}
+.ckrow{display:flex;gap:10px;align-items:flex-start;width:100%;text-align:left;background:var(--bg);border:0;border-bottom:1px solid var(--line);padding:9px 12px;font:inherit;color:var(--ink)}.ckrow:last-child{border-bottom:0}
+.ckbx{flex:0 0 22px;height:22px;border-radius:6px;border:2px solid var(--line);display:grid;place-items:center;font-weight:800;font-size:13px;margin-top:1px}
+.ckrow.on .ckbx{background:var(--up);border-color:var(--up);color:#fff}.ckrow.warn .ckbx{background:var(--down);border-color:var(--down);color:#fff}
+.ckrow.on .cktx>b{color:var(--ink-2)}.ckrow.now{background:var(--accent-soft)}
+.cktx{min-width:0;display:grid;gap:1px}.cktx small{font-size:12px;color:var(--ink-2)}
+.cknow{font-family:var(--f-display);font-weight:700;font-size:11px;letter-spacing:.08em;text-transform:uppercase;background:var(--accent);color:var(--accent-ink);padding:1px 6px;border-radius:999px}
+.ckc{display:inline-flex;font-size:11.5px;font-weight:600;padding:1px 7px;border-radius:999px;border:1px solid transparent}.ckc.ok{background:var(--up-soft);color:var(--up)}.ckc.bad{background:var(--down-soft);color:var(--down)}.ckc.mid{background:#FEF3C7;color:#92400E}
 #pktabs{overflow-x:auto;flex-wrap:nowrap;scrollbar-width:none;max-width:100%}#pktabs::-webkit-scrollbar{display:none}#pktabs button{white-space:nowrap;flex-shrink:0}
 .bpnamerow{display:flex;justify-content:space-between;align-items:center;gap:10px}.bpnamerow .favbtn{width:40px;height:38px;font-size:20px}
 .availhead>div:first-child{flex-wrap:wrap;min-width:0}.side .subtabs{min-width:0;max-width:100%;overflow-x:auto;scrollbar-width:none}.sim3 .btn{min-width:0;font-size:14px;padding-inline:8px;line-height:1.15}@media (max-width:480px){.sim3 .btn{font-size:13px;padding-inline:5px}}
@@ -653,7 +662,7 @@ const STRATS={bal:"Balanced",zero:"Zero RB",hero:"Hero RB",robust:"Robust RB",wr
 const STRAT_DESC={bal:"Follows the rankings and fills open lineup spots.",zero:"Avoids RBs in Rounds 1–5, loads up on WRs.",hero:"One RB early, then no RBs until Round 6.",robust:"Takes RBs heavily in Rounds 1–4.",wr:"Leans WR in the first six rounds.",te:"Grabs a top TE in Rounds 1–3.",eqb:"Takes a QB in Rounds 2–4.",lqb:"Waits on QB until Round 9 or later."};
 
 /* ---------- state ---------- */
-const FRESH=()=>({v:1,scoring:"ppr",sf:false,teams:16,rounds:15,names:[],strat:[],user:[0],needW:55,chaos:30,trades:{},sel:{},log:[]});
+const FRESH=()=>({v:1,scoring:"ppr",sf:false,teams:16,rounds:15,names:[],strat:[],user:[0],needW:55,chaos:30,trades:{},sel:{},log:[],ck:{}});
 let S=FRESH();
 try{const r=localStorage.getItem("dr27-current");if(r)S=Object.assign(FRESH(),JSON.parse(r))}catch(e){}
 applyBoard();
@@ -1242,27 +1251,105 @@ $("#tmSec").onclick=e=>{const b=e.target.closest("[data-s]");if(!b)return;TM.sec
 $("#tmEnd").onchange=e=>{TM.end=e.target.value;saveTM();paintClock()};
 $("#tmBeep").onchange=e=>{TM.beep=e.target.value==="1";saveTM();if(TM.beep)beep()};
 function closeSheet(){$("#sheetHost").innerHTML="";pkRedraw=null;if(typeof paintClock==="function")paintClock();if(typeof paintSimMe==="function")paintSimMe()}
+/* ---------- draft checklist (pick window → Checklist tab) ---------- */
+const ckLateRd=()=>Math.max(1,S.rounds-5);
+const ckIsLate=x=>x.pick.round>=ckLateRd();
+const ckUpside=p=>p.pos==="QB"||p.pos==="TE"||bdOf(p).some(b=>b==="breakout"||b==="ceiling");
+let ckTG=null;
+const ckTeamG=t=>{if(!ckTG){ckTG={};P.forEach(p=>{if(p.team)ckTG[p.team]=Math.max(ckTG[p.team]||0,p.g||0)})}return ckTG[t]||0};
+function ckProne(p){
+  if(/injur|missed|\bIR\b|PUP|clots|hamstring|ACL|concussion/i.test(p.note||""))return"injury history";
+  if(p.exp>=2&&p.g>0){const m=ckTeamG(p.team)-p.g;if(m>=3)return`missed ${m} games in 2026`}
+  const g25=/^(\d+) g/.exec(p.prev||"");if(p.exp>=3&&g25&&+g25[1]<=11)return`played ${g25[1]} games in 2025`;
+  return"";
+}
+function ckHurt(p){
+  const tv=typeof TV!=="undefined"?TV[p.id]:null;
+  if(tv&&tv.inj&&/out|ir|reserve|doubt|pup/i.test(tv.inj[0]||""))return tv.inj[0]+(tv.inj[1]?` (${tv.inj[1]})`:"");
+  if(/\bOn IR\b|\bOn PUP\b/.test(p.note||""))return/PUP/.test(p.note)?"on PUP":"on IR";
+  return"";
+}
+function ckFlash(p){
+  const wk=((BADGES[p.id]||{}).wk||[]);if(wk.length<4)return false;
+  const th={QB:17,RB:12,WR:12,TE:9}[p.pos],l3=wk.slice(-3).reduce((a,w)=>a+w[2],0)/3;
+  return l3>=th&&(p.ppg||0)<th;
+}
+const CK=[
+  {t:"First round RB",s:"Rd 1 RB",rd:1,f:r=>r.filter(x=>x.pick.round===1&&x.p.pos==="RB")},
+  {t:"RB in second round",s:"Rd 2 RB",rd:2,f:r=>r.filter(x=>x.pick.round===2&&x.p.pos==="RB")},
+  {t:"WR1 in round 3",s:"Rd 3 WR1",rd:3,h:()=>`A top-${S.teams} WR`,f:r=>r.filter(x=>x.pick.round===3&&x.p.pos==="WR"&&x.p.prank<=S.teams)},
+  {t:"WR1/High WR2 in round 4",s:"Rd 4 WR1/2",rd:4,h:()=>`A top-${Math.round(S.teams*1.5)} WR`,f:r=>r.filter(x=>x.pick.round===4&&x.p.pos==="WR"&&x.p.prank<=Math.round(S.teams*1.5))},
+  {t:"QB/TE/high upside flex",s:"Rd 5 QB/TE/upside",rd:5,h:()=>"QB, TE, or a 💥 Breakout / 🚀 High ceiling player",f:r=>r.filter(x=>x.pick.round===5&&ckUpside(x.p))},
+  {t:"QB/TE/high upside flex",s:"Rd 6 QB/TE/upside",rd:6,h:()=>"QB, TE, or a 💥 Breakout / 🚀 High ceiling player",f:r=>r.filter(x=>x.pick.round===6&&ckUpside(x.p))},
+  {t:"Rookie",s:"Rookie",h:()=>"A 2027 rookie",f:r=>r.filter(x=>x.p.exp===0)},
+  {t:"Good player, new team",s:"New team",h:()=>"Tap to check off when you get one",f:r=>r.filter(x=>/signing|signed with|traded to/i.test(x.p.note||""))},
+  {t:"Flashes of a starter late in the season",s:"Late-season flashes",h:()=>"Starter-level scoring over his last 3 games",f:r=>r.filter(x=>ckFlash(x.p))},
+  {t:"NO injury-prone players",s:"Injury-prone",no:1,why:p=>ckProne(p),f:r=>r.filter(x=>ckProne(x.p))},
+  {t:"NO one older than 30 (couple exceptions)",s:"Over 30",no:1,allow:2,why:p=>`${p.age}`,f:r=>r.filter(x=>x.p.age>30)},
+  {t:"NO injured players",s:"Injured",no:1,why:p=>ckHurt(p),f:r=>r.filter(x=>ckHurt(x.p))},
+  {t:"Strong backup QB",s:"Backup QB",h:()=>"A second QB inside the top 20",f:r=>{const q=r.filter(x=>x.p.pos==="QB").sort((a,b)=>b.p.proj-a.p.proj);return q.length>1&&q[1].p.prank<=20?[q[1]]:[]}},
+  {t:"Late-round gamble",s:"Late gamble",late:1,h:()=>`Rounds ${ckLateRd()}+: a 💥 Breakout or 🚀 High ceiling player`,f:r=>r.filter(x=>ckIsLate(x)&&bdOf(x.p).some(b=>b==="breakout"||b==="ceiling"))},
+  {t:"Late-round rookie",s:"Late rookie",late:1,h:()=>`Rounds ${ckLateRd()}+: a 2027 rookie`,f:r=>r.filter(x=>ckIsLate(x)&&x.p.exp===0)},
+  {t:"Late-round flier",s:"Late flier",late:1,h:()=>`Rounds ${ckLateRd()}+: a 💤 Sleeper`,f:r=>r.filter(x=>ckIsLate(x)&&bdOf(x.p).includes("sleeper"))},
+  {t:"Handcuff for your RB",s:"RB handcuff",h:()=>"A backup RB from the same NFL team as one of your RBs",f:r=>{const rb=r.filter(x=>x.p.pos==="RB");return rb.filter(x=>rb.some(y=>y!==x&&y.p.team===x.p.team&&y.pick.num<x.pick.num))}}
+];
+const ckRoster=(team,num)=>rosterOf(team).filter(x=>x.pick.num!==num);
+const ckAuto=(c,hits)=>c.no?hits.length<=(c.allow||0):hits.length>0;
+function ckBase(team,r){const ov=(S.ck||{})[team]||{};return CK.map((c,i)=>{const a=ckAuto(c,c.f(r));return ov[i]==null?a:ov[i]})}
+function ckToggle(team,i,num){
+  S.ck=S.ck||{};const ov=S.ck[team]=S.ck[team]||{};const c=CK[i],a=ckAuto(c,c.f(ckRoster(team,num)));
+  const now=ov[i]==null?a:ov[i];if(!now===a)delete ov[i];else ov[i]=!now;persist();
+}
+function ckChips(pick,x,r,base){
+  const r2=r.concat([{p:x,pick}]),out=[];
+  CK.forEach((c,i)=>{if(out.length>=2)return;const h=c.f(r2);
+    if(!c.no){if(!base[i]&&h.length&&!c.f(r).length)out.push(`<span class="ckc ok">☑ ${c.s}</span>`);return}
+    if(!h.some(y=>y.p===x))return;
+    if(c.allow&&h.length<=c.allow)out.push(`<span class="ckc mid">${c.s} · exception ${h.length} of ${c.allow}</span>`);
+    else if(base[i])out.push(`<span class="ckc bad">⚠ ${c.s}</span>`)});
+  return out.length?`<div class="bds">${out.join("")}</div>`:"";
+}
+function checklistHtml(team,num){
+  const r=ckRoster(team,num),cur=picks().find(x=>x.num===num),ov=(S.ck||{})[team]||{};
+  const mine=n=>picks().filter(q=>q.owner===team&&q.round===n).map(q=>q.label);
+  const nm=x=>`${esc(lastName(x.p.name))} <span class="faint">${x.pick.label}</span>`;
+  let done=0;
+  const rows=CK.map((c,i)=>{
+    const hits=c.f(r),a=ckAuto(c,hits),on=ov[i]==null?a:ov[i];if(on)done++;
+    const now=cur&&!on&&(c.rd===cur.round||(c.late&&cur.round>=ckLateRd()))&&!c.no;
+    let d="";
+    if(c.no){
+      if(hits.length)d=hits.map(x=>`${nm(x)} · ${esc(c.why(x.p))}`).join(" · ")+(c.allow?` <b>(${Math.min(hits.length,c.allow)} of ${c.allow} exceptions${hits.length>c.allow?`, ${hits.length-c.allow} over`:""})</b>`:"");
+      else d=c.allow?`None yet · ${c.allow} exceptions allowed`:"None so far";
+    }else if(hits.length)d=hits.map(nm).join(" · ");
+    else{const tk=c.rd?r.filter(x=>x.pick.round===c.rd):[];d=tk.length?`Round ${c.rd} · you took ${tk.map(x=>`${esc(lastName(x.p.name))} (${x.p.pos})`).join(", ")}`:[c.rd?`Round ${c.rd}${mine(c.rd).length?` · your pick ${mine(c.rd).join(", ")}`:""}`:"",c.h?c.h():""].filter(Boolean).join(" · ")}
+    if(ov[i]!=null)d+=` <span class="faint">· set by you</span>`;
+    const ic=c.no?(on?"✓":"!"):(on?"✓":"");
+    return`<button class="ckrow${on?" on":""}${c.no&&!on?" warn":""}${now?" now":""}" data-ck="${i}" aria-pressed="${on}"><span class="ckbx" aria-hidden="true">${ic}</span><span class="cktx"><b>${esc(c.t)}</b>${now?` <span class="cknow">This pick</span>`:""}<small>${d}</small></span></button>`});
+  return`<div class="ckhead"><b class="num">${done} of ${CK.length}</b> <span class="faint">checked · ${esc(tname(team))}</span><div class="faint" style="font-size:12px">Fills in from your picks. Tap any item to check or uncheck it yourself.</div></div>${rows.join("")}`;
+}
 function openPicker(num){
   const p=picks().find(x=>x.num===num);if(!p)return;
   setTimeout(()=>armClock(num),0);
   let pos="ALL",openBio=null;
   const draw=()=>{
     const tk=takenSet(num),q=($("#pkq")?.value||"").toLowerCase(),nd=openNeeds(p.owner);
-    const list=P.filter(x=>!tk.has(x.id)&&(pos==="ALL"||(pos==="NEED"?fitsSlot(x.pos,nd):pos==="FLEX"?x.pos!=="QB":x.pos===pos))&&matchQ(x,q)&&bdPass(x)).slice(0,60);
+    const ckR=ckRoster(p.owner,num),ckB=ckBase(p.owner,ckR);const list=P.filter(x=>!tk.has(x.id)&&(pos==="ALL"||(pos==="NEED"?fitsSlot(x.pos,nd):pos==="FLEX"?x.pos!=="QB":x.pos===pos))&&matchQ(x,q)&&bdPass(x)).slice(0,60);
     $("#pkBoardNote").innerHTML=pickCardHtml(p)+runAlert(num)+(q||bdFilter||bdHide||pos!=="ALL"?"":assistHtml(p))+boardNote();
     const single=["QB","RB","WR","TE"].includes(pos);let lastT=null;
-    $("#pkl").innerHTML=list.map(x=>{const div=single&&x.tier!==lastT?`<div class="tierdiv">${x.pos} Tier ${x.tier}</div>`:"";lastT=x.tier;return div+`<div class="prow pk" data-row="${x.id}"><div style="min-width:0"><div><span class="rkin num">${x.rank}${mvMark(x)}</span>${nameBtn(x,openBio===x.id)}${nd.includes(x.pos)?` <span class="chip" style="font-size:11px">fills ${x.pos}</span>`:""}</div><div class="meta">${esc(x.team)} · ${x.proj} proj ${projLbl()}${x.ts!=null&&x.pos!=="QB"?` · ${x.ts}% tgt share`:""} ${tierChip(x)}</div>${badgeRow(x,2)}${(()=>{const lc=linkChips(x,p.owner),lt=lastInTier(x,tk)&&x.tier<=8?`<span class="lnk lastt">⚠️ Last ${x.pos} in Tier ${x.tier}</span>`:"";return lc||lt?`<div class="bds">${lt}${lc}</div>`:""})()}</div><span class="rowbtns">${favBtn(x.id)}<button class="btn sm ghost mvbtn" data-move="${x.id}" aria-label="Move ${esc(x.name)} in the rankings" title="Move in rankings">⇅</button><button class="btn sm primary" data-take="${x.id}">Draft</button></span></div>`}).join("")||`<div class="empty">No players match.</div>`;
+    $("#pkl").innerHTML=list.map(x=>{const div=single&&x.tier!==lastT?`<div class="tierdiv">${x.pos} Tier ${x.tier}</div>`:"";lastT=x.tier;return div+`<div class="prow pk" data-row="${x.id}"><div style="min-width:0"><div><span class="rkin num">${x.rank}${mvMark(x)}</span>${nameBtn(x,openBio===x.id)}${nd.includes(x.pos)?` <span class="chip" style="font-size:11px">fills ${x.pos}</span>`:""}</div><div class="meta">${esc(x.team)} · ${x.proj} proj ${projLbl()}${x.ts!=null&&x.pos!=="QB"?` · ${x.ts}% tgt share`:""} ${tierChip(x)}</div>${badgeRow(x,2)}${ckChips(p,x,ckR,ckB)}${(()=>{const lc=linkChips(x,p.owner),lt=lastInTier(x,tk)&&x.tier<=8?`<span class="lnk lastt">⚠️ Last ${x.pos} in Tier ${x.tier}</span>`:"";return lc||lt?`<div class="bds">${lt}${lc}</div>`:""})()}</div><span class="rowbtns">${favBtn(x.id)}<button class="btn sm ghost mvbtn" data-move="${x.id}" aria-label="Move ${esc(x.name)} in the rankings" title="Move in rankings">⇅</button><button class="btn sm primary" data-take="${x.id}">Draft</button></span></div>`}).join("")||`<div class="empty">No players match.</div>`;
   };
   $("#sheetHost").innerHTML=`<div class="scrim" id="scrim"><div class="sheet" role="dialog" aria-modal="true" aria-label="Make a pick" data-pnum="${p.num}">
     <div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start"><div><div class="eyebrow">Pick ${p.label} · No. ${p.num} overall</div><h2>${esc(tname(p.owner))}</h2><div class="muted" style="font-size:13px">Open spots: ${openNeeds(p.owner).join(" · ")||"bench"}</div></div><button class="btn sm" id="pkx">Close</button></div>
     <div class="pkclock" id="pkClock" hidden><div class="pkcrow"><span class="pkct">⏱ <b data-clocktxt>0:00</b><span class="faint" data-clocksub></span></span><span class="pkcb"><button class="btn sm" data-clockpause>Pause</button><button class="btn sm" data-clockadd>+30s</button></span></div><div class="pkbarbg"><i data-clockbar></i></div></div>
-    <div class="subtabs" role="tablist" id="pktabs" style="margin-top:12px"><button role="tab" data-pt="players" aria-selected="true">Players</button><button role="tab" data-pt="team" aria-selected="false">My team</button><button role="tab" data-pt="prev" aria-selected="false">Picks</button><button role="tab" data-pt="fav" aria-selected="false" aria-label="Favorites">♥</button></div>
+    <div class="subtabs" role="tablist" id="pktabs" style="margin-top:12px"><button role="tab" data-pt="players" aria-selected="true">Players</button><button role="tab" data-pt="team" aria-selected="false">My team</button><button role="tab" data-pt="prev" aria-selected="false">Picks</button><button role="tab" data-pt="ck" aria-selected="false">Checklist</button><button role="tab" data-pt="fav" aria-selected="false" aria-label="Favorites">♥</button></div>
     <div id="pkPlayers"><div class="pkbar" style="margin-top:10px"><input type="search" id="pkq" placeholder="Search players or NFL teams"><button class="btn sm" id="pkFilterBtn" aria-expanded="${fOpen()}" aria-controls="pkFilter">Filter ${fOpen()?"▴":"▾"}</button></div>
     <div id="pkFilter" class="pkfilter"${fOpen()?"":" hidden"}><div class="pkfhead"><div class="eyebrow" style="margin:0">Position</div><button class="linkbtn pkfx" id="pkFilterX" aria-label="Close filters">Close ✕</button></div><div class="poschips" id="pkpos"></div><div class="eyebrow" style="margin-top:8px">Badges</div><div class="poschips bdchips" id="pkbd"></div></div>
     <div id="pkBoardNote"></div><div id="pkl" style="margin-top:8px;border:1px solid var(--line);border-radius:14px;overflow:hidden"></div><div class="swipehint">Tap a player for his bio · swipe left for ♡ Favorite and ⇅ Move</div></div>
     <div id="pkTeam" hidden style="margin-top:8px;border:1px solid var(--line);border-radius:14px;overflow:hidden"></div>
     <div id="pkPrev" hidden style="margin-top:8px;border:1px solid var(--line);border-radius:14px;overflow:hidden;max-height:56vh;overflow:auto"></div>
     <div id="pkFav" hidden class="favbox" style="margin-top:8px"></div>
+    <div id="pkCk" hidden class="ckbox" style="margin-top:8px"></div>
     <div class="actions" style="margin-top:12px"><button class="btn" id="pkauto">Let the AI pick</button><button class="btn ghost" data-trade="${p.num}">Trade this pick</button></div></div></div>`;
   const chips=$("#pkpos");const dc=()=>{chips.innerHTML=["ALL","NEED","FLEX",...POS].map(x=>`<button aria-pressed="${x===pos}" data-p="${x}">${x==="ALL"?"All":x==="NEED"?"Fills a need":x}</button>`).join("")};
   chips.onclick=e=>{const b=e.target.closest("button[data-p]");if(b){pos=b.dataset.p;dc();bdc();draw()}};dc();
@@ -1275,8 +1362,9 @@ function openPicker(num){
   $("#pkPrev").dataset.upto=num;$("#pkPrev").innerHTML=prevPicksHtml(num);
   $("#pkFav").dataset.upto=num;$("#pkFav").innerHTML=favListHtml(num);
   $("#pkFav").onclick=e=>{if(e.target.closest("[data-fav]"))return;$("#pkl").onclick(e)};
+  $("#pkCk").innerHTML=checklistHtml(p.owner,num);$("#pkCk").onclick=e=>{const b=e.target.closest("[data-ck]");if(!b)return;ckToggle(p.owner,+b.dataset.ck,num);$("#pkCk").innerHTML=checklistHtml(p.owner,num);draw()};
   $("#pktabs").onclick=e=>{const b=e.target.closest("[data-pt]");if(!b)return;const t=b.dataset.pt;
-    document.querySelectorAll("#pktabs button").forEach(x=>x.setAttribute("aria-selected",x===b));$("#pkPlayers").hidden=t!=="players";$("#pkTeam").hidden=t!=="team";$("#pkPrev").hidden=t!=="prev";$("#pkFav").hidden=t!=="fav";if(t==="fav")$("#pkFav").innerHTML=favListHtml(num)};
+    document.querySelectorAll("#pktabs button").forEach(x=>x.setAttribute("aria-selected",x===b));$("#pkPlayers").hidden=t!=="players";$("#pkTeam").hidden=t!=="team";$("#pkPrev").hidden=t!=="prev";$("#pkFav").hidden=t!=="fav";$("#pkCk").hidden=t!=="ck";if(t==="ck")$("#pkCk").innerHTML=checklistHtml(p.owner,num);if(t==="fav")$("#pkFav").innerHTML=favListHtml(num)};
   pkRedraw=draw;
   $("#pkq").oninput=draw;$("#pkx").onclick=closeSheet;$("#scrim").onclick=e=>{if(e.target.id==="scrim")closeSheet()};
   $("#pkauto").onclick=()=>{delete S.sel[num];const pl=aiChoose(p.owner,p.num,p.round);S.sel[num]=pl.id;justPicked.add(num);persist();closeSheet();render();afterUserPick()};
@@ -1584,18 +1672,18 @@ $("#simAll").onclick=()=>{stopLive();simulate("all")};
 $("#simOne").onclick=()=>{if(live.on)pauseLive(true);const p=nextOpen();if(p&&S.user.includes(p.owner)){openPicker(p.num);return}simulate("one")};
 let clrT=null;$("#clearPicks").onclick=()=>{const b=$("#clearPicks");if(!Object.keys(S.sel).length){toast("No picks to clear.");return}
   if(!b.classList.contains("confirm")){b.classList.add("confirm");b.textContent="Tap to clear";clearTimeout(clrT);clrT=setTimeout(()=>{b.classList.remove("confirm");b.textContent="Clear picks"},3000);return}
-  clearTimeout(clrT);b.classList.remove("confirm");b.textContent="Clear picks";stopLive();live.started=false;stopClock();S.sel={};persist();render();toast("Picks cleared. Trades kept.")};
+  clearTimeout(clrT);b.classList.remove("confirm");b.textContent="Clear picks";stopLive();live.started=false;stopClock();S.sel={};S.ck={};persist();render();toast("Picks cleared. Trades kept.")};
 
 $("#needW").oninput=e=>{S.needW=+e.target.value;persist();renderControls()};
 $("#rnd").oninput=e=>{S.chaos=+e.target.value;persist();renderControls()};
-$("#nTeams").onchange=e=>{S.teams=+e.target.value;S.sel={};S.trades={};S.log=[];S.user=S.user.filter(i=>i<S.teams);if(!S.user.length)S.user=[0];persist();render();toast("League size changed. Picks and trades cleared.")};
+$("#nTeams").onchange=e=>{S.teams=+e.target.value;S.sel={};S.ck={};S.trades={};S.log=[];S.user=S.user.filter(i=>i<S.teams);if(!S.user.length)S.user=[0];persist();render();toast("League size changed. Picks and trades cleared.")};
 
 $("#scoring").onchange=e=>{S.scoring=e.target.value;applyBoard();persist();render();toast(`Scoring set to ${scoringName()}. Projections and rankings updated.`)};
 $("#sfSel").onchange=e=>{S.sf=e.target.value==="1";applyBoard();persist();render();toast(S.sf?"Superflex on: QBs move up and every team gets a Superflex spot.":"Superflex off.")};
 $("#nRounds").onchange=e=>{S.rounds=+e.target.value;const max=S.teams*S.rounds;for(const k in S.sel)if(+k>max)delete S.sel[k];for(const k in S.trades)if(+k>max)delete S.trades[k];persist();render()};
 $("#userTeams").onclick=e=>{const b=e.target.closest("[data-ut]");if(!b)return;const t=+b.dataset.ut;S.user=S.user.includes(t)?S.user.filter(x=>x!==t):[...S.user,t];persist();render()};
 $("#openTrade").onclick=()=>openTrade(null);
-$("#resetTrades").onclick=()=>{S.trades={};S.log=[];S.sel={};persist();render();toast("Trades undone, picks cleared.")};
+$("#resetTrades").onclick=()=>{S.trades={};S.log=[];S.sel={};S.ck={};persist();render();toast("Trades undone, picks cleared.")};
 $("#teamsGrid").onchange=e=>{const s=e.target.closest("[data-st]");if(s){S.strat[+s.dataset.st]=s.value;persist();renderTeams()}};
 $("#teamsGrid").addEventListener("input",e=>{const n=e.target.closest("[data-tn]");if(n){S.names[+n.dataset.tn]=n.value.trim();persist();renderUserTeams();renderBoard()}});
 $("#randStrat").onclick=()=>{const k=Object.keys(STRATS);S.strat=Array.from({length:S.teams},()=>k[Math.floor(Math.random()*k.length)]);persist();renderTeams();toast("AI strategies randomized.")};
