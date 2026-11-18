@@ -1291,7 +1291,8 @@ const CK=[
   {t:"Late-round gamble",s:"Late gamble",late:1,h:()=>`Rounds ${ckLateRd()}+: a 💥 Breakout or 🚀 High ceiling player`,f:r=>r.filter(x=>ckIsLate(x)&&bdOf(x.p).some(b=>b==="breakout"||b==="ceiling"))},
   {t:"Late-round rookie",s:"Late rookie",late:1,h:()=>`Rounds ${ckLateRd()}+: a 2027 rookie`,f:r=>r.filter(x=>ckIsLate(x)&&x.p.exp===0)},
   {t:"Late-round flier",s:"Late flier",late:1,h:()=>`Rounds ${ckLateRd()}+: a 💤 Sleeper`,f:r=>r.filter(x=>ckIsLate(x)&&bdOf(x.p).includes("sleeper"))},
-  {t:"Handcuff for your RB",s:"RB handcuff",h:()=>"A backup RB from the same NFL team as one of your RBs",f:r=>{const rb=r.filter(x=>x.p.pos==="RB");return rb.filter(x=>rb.some(y=>y!==x&&y.p.team===x.p.team&&y.pick.num<x.pick.num))}}
+  {t:"Handcuff for your RB",s:"RB handcuff",h:()=>"A backup RB from the same NFL team as one of your RBs",f:r=>{const rb=r.filter(x=>x.p.pos==="RB");return rb.filter(x=>rb.some(y=>y!==x&&y.p.team===x.p.team&&y.pick.num<x.pick.num))}},
+  {t:"Breakout candidate",s:"Breakout",h:()=>"A 💥 Breakout player",f:r=>r.filter(x=>bdOf(x.p).includes("breakout"))}
 ];
 const ckRoster=(team,num)=>rosterOf(team).filter(x=>x.pick.num!==num);
 const ckAuto=(c,hits)=>c.no?hits.length<=(c.allow||0):hits.length>0;
