@@ -431,6 +431,7 @@ table.grid td.r{font-family:var(--f-display);font-weight:800;font-size:15px;colo
 .cfl{position:absolute;top:0;font-size:10.5px;font-weight:700;transform:translateX(-50%);white-space:nowrap}
 .cfl.fl{color:#A32D2D}.cfl.ce{color:#0F6E3A}.cfl.av{color:#1F6FA8;top:auto;bottom:-14px}
 .cftrack{margin-bottom:10px}
+.savedtag{display:inline-block;font-size:12px;font-weight:700;color:#1F6FA8;background:var(--accent-soft);border-radius:999px;padding:4px 10px;margin:0 0 6px}
 /* ---------- press feel: push down (every button and tab) ---------- */
 :root{--edge:#86B9DE;--edge-p:#2F78AE;--edge-d:#D9A3A0;--edge-k:#000}
 .btn,.gear,.poschips button,.teamchips button,.teampick button,.favbtn,.mvbtn2,.bdinfo,.cmprow,.tswitch,.xbtn,.simme,.clockpill,.seg,.subtabs{box-shadow:0 3px 0 var(--edge)}
@@ -1090,8 +1091,8 @@ function gradesHtml(){
   ${S.user.map(u=>{const x=str[u];return`<section class="bsec"><div class="eyebrow">${esc(tname(u))} · starting lineup</div><dl class="bdl">${x.L.slots.map(s=>`<dt>${s.s==="SF"?"SFLEX":s.s}</dt><dd>${s.p?`${esc(s.p.name)} <span class="faint">${s.p.proj}</span>`:'<span class="faint">Empty</span>'}</dd>`).join("")}</dl></section>`}).join("")}
   </div>`;
 }
-function openGrades(){bioCtx=null;let host=$("#bioHost");if(!host){host=document.createElement("div");host.id="bioHost";document.body.appendChild(host)}
-  host.innerHTML=`<div class="biopg" role="dialog" aria-modal="true" aria-label="Grades and standings">${gradesHtml()}</div>`;requestAnimationFrame(()=>host.firstElementChild.classList.add("open"))}
+function openGrades(html){bioCtx=null;let host=$("#bioHost");if(!host){host=document.createElement("div");host.id="bioHost";document.body.appendChild(host)}
+  host.innerHTML=`<div class="biopg" role="dialog" aria-modal="true" aria-label="Grades and standings">${html||gradesHtml()}</div>`;requestAnimationFrame(()=>host.firstElementChild.classList.add("open"))}
 
 /* ---------- favorites (shared with the Top 125 board through localStorage) ---------- */
 let FAVS=new Set();
@@ -1476,6 +1477,10 @@ async function saveMock(){
 }
 async function deleteMock(id){if(store.kind==="db"){try{await store.db.collection("data/users/"+store.uid+"/fmocks").doc(id).delete();return}catch(e){}}saved=saved.filter(s=>s.id!==id);saveLocal();renderSaved()}
 const gradeCache={};
+/* Grades & standings for a saved mock, without loading it over the current draft */
+function openSavedGrades(sv){const keep=S;let html=null;
+  try{S=Object.assign(FRESH(),JSON.parse(sv.state));applyBoard();html=gradesHtml().replace('<h2 class="bpname"',`<div class="savedtag">💾 Saved mock · ${esc(sv.name)}${sv.folder?` · ${esc(sv.folder)}`:""} · ${new Date(sv.savedAt).toLocaleDateString()}</div><h2 class="bpname"`)}catch(e){html=null}
+  S=keep;applyBoard();if(!html){toast("That save couldn’t be read.");return}openGrades(html)}
 function savedGrade(sv){if(sv.id in gradeCache)return gradeCache[sv.id];const keep=S;let g=null;
   try{S=Object.assign(FRESH(),JSON.parse(sv.state));applyBoard();if(S.user.length&&Object.keys(S.sel).length){const T=S.teams,str=Array.from({length:T},(_,i)=>teamStrength(i)),m=str.reduce((a,x)=>a+x.score,0)/T,sd=Math.sqrt(str.reduce((a,x)=>a+(x.score-m)**2,0)/T)||1;g=gradeOf((str[S.user[0]].score-m)/sd)}}catch(e){}
   S=keep;applyBoard();return gradeCache[sv.id]=g}
@@ -1485,7 +1490,7 @@ function renderSaved(){
   if(!saved.length){$("#savedList").innerHTML=`<div class="card empty">No saved mocks yet. Run a draft, name it, pick a folder, and save. Folders appear here.</div>`;return}
   $("#savedList").innerHTML=folders.map(f=>{const it=saved.filter(s=>s.folder===f).sort((a,b)=>b.savedAt.localeCompare(a.savedAt));
     return`<section class="folder"><h3>${esc(f)} <span class="faint num" style="font-size:13px;font-weight:500">${it.length}</span></h3>${it.map(s=>`<div class="mockrow"><div style="min-width:0"><div class="t"><button data-view="${s.id}">${esc(s.name)}</button>${(g=>g?` <span class="grade g${g[0]}">${g}</span>`:"")(savedGrade(s))}</div><div class="s">${esc(s.headline||"")} · ${new Date(s.savedAt).toLocaleDateString()}</div></div>
-      <div class="actions">${pendingDelete===s.id?`<button class="btn sm danger" data-delyes="${s.id}">Delete</button><button class="btn sm" data-delno="1">Keep</button>`:`<button class="btn sm primary" data-view="${s.id}">View board</button><button class="btn sm" data-load="${s.id}">Load</button><button class="btn sm ghost" data-del="${s.id}">Delete</button>`}</div></div>`).join("")}</section>`}).join("");
+      <div class="actions">${pendingDelete===s.id?`<button class="btn sm danger" data-delyes="${s.id}">Delete</button><button class="btn sm" data-delno="1">Keep</button>`:`<button class="btn sm primary" data-view="${s.id}">View board</button><button class="btn sm" data-sgrades="${s.id}">📊 Grades</button><button class="btn sm" data-load="${s.id}">Load</button><button class="btn sm ghost" data-del="${s.id}">Delete</button>`}</div></div>`).join("")}</section>`}).join("");
 }
 
 
@@ -1718,6 +1723,7 @@ document.addEventListener("click",e=>{
   const cl=e.target.closest("[data-clear]");if(cl){delete S.sel[+cl.dataset.clear];persist();render();return}
   const tr=e.target.closest("[data-trade]");if(tr){openTrade(+tr.dataset.trade);return}
   const dr=e.target.closest("[data-draft]");if(dr){const p=nextOpen();if(!p)return;S.sel[p.num]=dr.dataset.draft;justPicked.add(p.num);availBio=null;persist();render();return}
+  const sg=e.target.closest("[data-sgrades]");if(sg){const s=saved.find(x=>x.id===sg.dataset.sgrades);if(s)openSavedGrades(s);return}
   const vw=e.target.closest("[data-view]");if(vw){const s=saved.find(x=>x.id===vw.dataset.view);if(s){let st;try{st=JSON.parse(s.state)}catch(er){toast("That save couldn’t be read.");return}openBoardView(st,{eyebrow:`${s.folder} · saved ${new Date(s.savedAt).toLocaleDateString()}`,title:s.name,loadId:s.id})}return}
   const ld=e.target.closest("[data-load]");if(ld){const s=saved.find(x=>x.id===ld.dataset.load);if(s){try{S=Object.assign(FRESH(),JSON.parse(s.state));closeSheet();persist();render();document.querySelector('[data-tab="mock"]').click();toast(`Loaded “${s.name}”.`)}catch(er){toast("That save couldn’t be read.")}}return}
   const dl=e.target.closest("[data-del]");if(dl){pendingDelete=dl.dataset.del;renderSaved();return}
