@@ -79,7 +79,7 @@ for x in P:
         m,n=ADJ[x['name']]; x['proj']*=m; x['note']=n
     else: x['note']=''
 # ---- Jared's manual 2027 projections (PPR/G); these win over the model. Set Nov 18, 2026.
-PROJ_SET={'Kenneth Walker III':20.0,'Justin Jefferson':16.5,'Matthew Golden':16.5}
+PROJ_SET={'Kenneth Walker III':20.0,'Justin Jefferson':16.5,'Matthew Golden':16.5,'Bhayshul Tuten':16.0,'Jonah Coleman':15.5}
 for x in P:
     if x['name'] in PROJ_SET: x['proj']=PROJ_SET[x['name']]
 # ---- 2027 rookies (projected landing spot from War Room base mock)
