@@ -446,6 +446,7 @@ table.grid td.r{font-family:var(--f-display);font-weight:800;font-size:15px;colo
 .cfl.fl{color:#A32D2D}.cfl.ce{color:#0F6E3A}.cfl.av{color:#1F6FA8;top:auto;bottom:-14px}
 .cftrack{margin-bottom:10px}
 .savedtag{display:inline-block;font-size:12px;font-weight:700;color:#1F6FA8;background:var(--accent-soft);border-radius:999px;padding:4px 10px;margin:0 0 6px}
+.mockacts{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;flex:none;min-width:200px}@media (max-width:480px){.mockacts{min-width:176px}.mockacts .btn{padding-inline:6px;font-size:12.5px}}.mockacts .btn{justify-content:center;text-align:center;white-space:nowrap}
 /* ---------- press feel: push down (every button and tab) ---------- */
 :root{--edge:#86B9DE;--edge-p:#2F78AE;--edge-d:#D9A3A0;--edge-k:#000}
 .btn,.gear,.poschips button,.teamchips button,.teampick button,.favbtn,.mvbtn2,.bdinfo,.cmprow,.tswitch,.xbtn,.simme,.clockpill,.seg,.subtabs{box-shadow:0 3px 0 var(--edge)}
@@ -1507,7 +1508,7 @@ function renderSaved(){
   if(!saved.length){$("#savedList").innerHTML=`<div class="card empty">No saved mocks yet. Run a draft, name it, pick a folder, and save. Folders appear here.</div>`;return}
   $("#savedList").innerHTML=folders.map(f=>{const it=saved.filter(s=>s.folder===f).sort((a,b)=>b.savedAt.localeCompare(a.savedAt));
     return`<section class="folder"><h3>${esc(f)} <span class="faint num" style="font-size:13px;font-weight:500">${it.length}</span></h3>${it.map(s=>`<div class="mockrow"><div style="min-width:0"><div class="t"><button data-view="${s.id}">${esc(s.name)}</button>${(g=>g?` <span class="grade g${g[0]}">${g}</span>`:"")(savedGrade(s))}</div><div class="s">${esc(s.headline||"")} · ${new Date(s.savedAt).toLocaleDateString()}</div></div>
-      <div class="actions">${pendingDelete===s.id?`<button class="btn sm danger" data-delyes="${s.id}">Delete</button><button class="btn sm" data-delno="1">Keep</button>`:`<button class="btn sm primary" data-view="${s.id}">View board</button><button class="btn sm" data-sgrades="${s.id}">📊 Grades</button><button class="btn sm" data-load="${s.id}">Load</button><button class="btn sm ghost" data-del="${s.id}">Delete</button>`}</div></div>`).join("")}</section>`}).join("");
+      <div class="actions mockacts">${pendingDelete===s.id?`<button class="btn sm danger" data-delyes="${s.id}">Delete</button><button class="btn sm" data-delno="1">Keep</button>`:`<button class="btn sm primary" data-view="${s.id}">View board</button><button class="btn sm" data-load="${s.id}">Load</button><button class="btn sm" data-sgrades="${s.id}">📊 Grades</button><button class="btn sm ghost" data-del="${s.id}">Delete</button>`}</div></div>`).join("")}</section>`}).join("");
 }
 
 
