@@ -9,6 +9,7 @@ REPL={'QB':20,'RB':44,'WR':58,'TE':20}         # replacement level in a 16-team 
 K=3                                            # games of prior blended into 2026 PPG
 SOS_W=0.25                                     # "slight" schedule effect: 25% of the raw matchup difference
 SOS_CAP=0.08                                   # never more than +/-8%
+def qb_disc(r): return 0.05+0.15*min(1,(r-1)/14)   # QB discount ladder by QB rank
 STYLE_W=0.25                                   # Safe/Upside value styles shift ROS PPG 25% toward floor/ceiling
 def build():
     P=json.load(open(F+'players.json'));B=json.load(open(F+'badges.json'))
@@ -65,7 +66,11 @@ def build():
         for pos in POS:
             L=sorted([x for x in rows if x['pos']==pos],key=lambda x:-rosOf(x,st))
             repl=rosOf(L[min(REPL[pos],len(L))-1],st) if L else 0
-            for x in L: r=rosOf(x,st);x['raw']=max(0,r-repl)*x['left']+0.15*r*x['left']
+            for k,x in enumerate(L):
+                r=rosOf(x,st);x['raw']=max(0,r-repl)*x['left']+0.15*r*x['left']
+                if pos=='QB':                      # QB ladder: 5% off for QB1 rising smoothly to 20% off by QB15 (one-QB league)
+                    d=qb_disc(k+1);x['raw']*=1-d
+                    if st=='bal': x['qbr']=k+1;x['qbd']=round(d*100,1)
         if mx is None: mx=max(x['raw'] for x in rows) or 1
         for x in rows: x[key]=max(1,min(100,round(100*(x['raw']/mx)**0.85)))
     rows.sort(key=lambda x:-x['val'])
