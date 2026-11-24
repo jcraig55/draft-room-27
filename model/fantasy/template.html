@@ -444,6 +444,8 @@ table.grid td.r{font-family:var(--f-display);font-weight:800;font-size:15px;colo
 .cunum{display:flex;justify-content:center;align-items:center;gap:16px}.cunum b{font:800 44px var(--f-display);min-width:72px;text-align:center;font-variant-numeric:tabular-nums}
 #cuRng{width:100%;accent-color:#4B9CD3;height:28px}
 .curl{display:flex;justify-content:space-between;font-size:11px;color:var(--ink-3)}
+.pkord{width:auto;flex:none;max-width:118px;padding:7px 26px 7px 10px;border-radius:999px;font-weight:700;font-size:13px}
+.brdrk{font-size:10.5px;font-weight:700;color:var(--ink-3);border:1px solid var(--line);border-radius:6px;padding:0 4px;white-space:nowrap}
 /* ---------- press feel: push down (every button and tab) ---------- */
 :root{--edge:#86B9DE;--edge-p:#2F78AE;--edge-d:#D9A3A0;--edge-k:#000}
 .btn,.gear,.poschips button,.teamchips button,.teampick button,.favbtn,.mvbtn2,.bdinfo,.cmprow,.tswitch,.xbtn,.simme,.clockpill,.seg,.subtabs{box-shadow:0 3px 0 var(--edge)}
@@ -1342,22 +1344,24 @@ function checklistHtml(team,num){
     return`<button class="ckrow${on?" on":""}${c.no&&!on?" warn":""}${now?" now":""}" data-ck="${i}" aria-pressed="${on}"><span class="ckbx" aria-hidden="true">${ic}</span><span class="cktx"><b>${esc(c.t)}</b>${now?` <span class="cknow">This pick</span>`:""}<small>${d}</small></span></button>`});
   return`<div class="ckhead"><b class="num">${done} of ${CK.length}</b> <span class="faint">checked · ${esc(tname(team))}</span><div class="faint" style="font-size:12px">Fills in from your picks. Tap any item to check or uncheck it yourself.</div></div>${rows.join("")}`;
 }
+const pkOrd=()=>{try{return localStorage.getItem("dr27-pkord")||"board"}catch(e){return"board"}};
 function openPicker(num){
   const p=picks().find(x=>x.num===num);if(!p)return;
   setTimeout(()=>armClock(num),0);
   let pos="ALL",openBio=null;
   const draw=()=>{
     const tk=takenSet(num),q=($("#pkq")?.value||"").toLowerCase(),nd=openNeeds(p.owner);
-    const ckR=ckRoster(p.owner,num),ckB=ckBase(p.owner,ckR);const list=P.filter(x=>!tk.has(x.id)&&(pos==="ALL"||(pos==="NEED"?fitsSlot(x.pos,nd):pos==="FLEX"?x.pos!=="QB":x.pos===pos))&&matchQ(x,q)&&bdPass(x)).slice(0,60);
+    const top=pkOrd()==="top",SRC=top?TOPL:P;
+    const ckR=ckRoster(p.owner,num),ckB=ckBase(p.owner,ckR);const list=SRC.filter(x=>!tk.has(x.id)&&(pos==="ALL"||(pos==="NEED"?fitsSlot(x.pos,nd):pos==="FLEX"?x.pos!=="QB":x.pos===pos))&&matchQ(x,q)&&bdPass(x)).slice(0,60);
     $("#pkBoardNote").innerHTML=pickCardHtml(p)+runAlert(num)+(q||bdFilter||bdHide||pos!=="ALL"?"":assistHtml(p))+boardNote();
-    const single=["QB","RB","WR","TE"].includes(pos);let lastT=null;
-    $("#pkl").innerHTML=list.map(x=>{const div=single&&x.tier!==lastT?`<div class="tierdiv">${x.pos} Tier ${x.tier}</div>`:"";lastT=x.tier;return div+`<div class="prow pk" data-row="${x.id}"><div style="min-width:0"><div><span class="rkin num">${x.rank}${mvMark(x)}</span>${nameBtn(x,openBio===x.id)}${nd.includes(x.pos)?` <span class="chip" style="font-size:11px">fills ${x.pos}</span>`:""}</div><div class="meta">${esc(x.team)} · ${x.proj} proj ${projLbl()}${x.ts!=null&&x.pos!=="QB"?` · ${x.ts}% tgt share`:""} ${tierChip(x)}</div>${badgeRow(x,2)}${ckChips(p,x,ckR,ckB)}${(()=>{const lc=linkChips(x,p.owner),lt=lastInTier(x,tk)&&x.tier<=8?`<span class="lnk lastt">⚠️ Last ${x.pos} in Tier ${x.tier}</span>`:"";return lc||lt?`<div class="bds">${lt}${lc}</div>`:""})()}</div><span class="rowbtns">${favBtn(x.id)}<button class="btn sm ghost mvbtn" data-move="${x.id}" aria-label="Move ${esc(x.name)} in the rankings" title="Move in rankings">⇅</button><button class="btn sm primary" data-take="${x.id}">Draft</button></span></div>`}).join("")||`<div class="empty">No players match.</div>`;
+    const single=!top&&["QB","RB","WR","TE"].includes(pos);let lastT=null;
+    $("#pkl").innerHTML=list.map(x=>{const div=single&&x.tier!==lastT?`<div class="tierdiv">${x.pos} Tier ${x.tier}</div>`:"";lastT=x.tier;return div+`<div class="prow pk" data-row="${x.id}"><div style="min-width:0"><div><span class="rkin num"${top?' title="Top 125 rank"':""}>${top?x.tr:x.rank}${top?"":mvMark(x)}</span>${nameBtn(x,openBio===x.id)}${top?` <span class="brdrk">Board #${x.rank}</span>`:""}${nd.includes(x.pos)?` <span class="chip" style="font-size:11px">fills ${x.pos}</span>`:""}</div><div class="meta">${esc(x.team)} · ${x.proj} proj ${projLbl()}${x.ts!=null&&x.pos!=="QB"?` · ${x.ts}% tgt share`:""} ${tierChip(x)}</div>${badgeRow(x,2)}${ckChips(p,x,ckR,ckB)}${(()=>{const lc=linkChips(x,p.owner),lt=lastInTier(x,tk)&&x.tier<=8?`<span class="lnk lastt">⚠️ Last ${x.pos} in Tier ${x.tier}</span>`:"";return lc||lt?`<div class="bds">${lt}${lc}</div>`:""})()}</div><span class="rowbtns">${favBtn(x.id)}<button class="btn sm ghost mvbtn" data-move="${x.id}" aria-label="Move ${esc(x.name)} in the rankings" title="Move in rankings">⇅</button><button class="btn sm primary" data-take="${x.id}">Draft</button></span></div>`}).join("")||`<div class="empty">No players match.</div>`;
   };
   $("#sheetHost").innerHTML=`<div class="scrim" id="scrim"><div class="sheet" role="dialog" aria-modal="true" aria-label="Make a pick" data-pnum="${p.num}">
     <div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start"><div><div class="eyebrow">Pick ${p.label} · No. ${p.num} overall</div><h2>${esc(tname(p.owner))}</h2><div class="muted" style="font-size:13px">Open spots: ${openNeeds(p.owner).join(" · ")||"bench"}</div></div><button class="btn sm" id="pkx">Close</button></div>
     <div class="pkclock" id="pkClock" hidden><div class="pkcrow"><span class="pkct">⏱ <b data-clocktxt>0:00</b><span class="faint" data-clocksub></span></span><span class="pkcb"><button class="btn sm" data-clockpause>Pause</button><button class="btn sm" data-clockadd>+30s</button></span></div><div class="pkbarbg"><i data-clockbar></i></div></div>
     <div class="subtabs" role="tablist" id="pktabs" style="margin-top:12px"><button role="tab" data-pt="players" aria-selected="true">Players</button><button role="tab" data-pt="team" aria-selected="false">My team</button><button role="tab" data-pt="prev" aria-selected="false">Picks</button><button role="tab" data-pt="ck" aria-selected="false">Checklist</button><button role="tab" data-pt="fav" aria-selected="false" aria-label="Favorites">♥</button></div>
-    <div id="pkPlayers"><div class="pkbar" style="margin-top:10px"><input type="search" id="pkq" placeholder="Search players or NFL teams"><button class="btn sm" id="pkFilterBtn" aria-expanded="${fOpen()}" aria-controls="pkFilter">Filter ${fOpen()?"▴":"▾"}</button></div>
+    <div id="pkPlayers"><div class="pkbar" style="margin-top:10px"><input type="search" id="pkq" placeholder="Search players or NFL teams"><select id="pkOrd" class="pkord" aria-label="List order"><option value="board">Draft board</option><option value="top">Top 125</option></select><button class="btn sm" id="pkFilterBtn" aria-expanded="${fOpen()}" aria-controls="pkFilter">Filter ${fOpen()?"▴":"▾"}</button></div>
     <div id="pkFilter" class="pkfilter"${fOpen()?"":" hidden"}><div class="pkfhead"><div class="eyebrow" style="margin:0">Position</div><button class="linkbtn pkfx" id="pkFilterX" aria-label="Close filters">Close ✕</button></div><div class="poschips" id="pkpos"></div><div class="eyebrow" style="margin-top:8px">Badges</div><div class="poschips bdchips" id="pkbd"></div></div>
     <div id="pkBoardNote"></div><div id="pkl" style="margin-top:8px;border:1px solid var(--line);border-radius:14px;overflow:hidden"></div><div class="swipehint">Tap a player for his bio · swipe left for ♡ Favorite and ⇅ Move</div></div>
     <div id="pkTeam" hidden style="margin-top:8px;border:1px solid var(--line);border-radius:14px;overflow:hidden"></div>
@@ -1368,7 +1372,8 @@ function openPicker(num){
   const chips=$("#pkpos");const dc=()=>{chips.innerHTML=["ALL","NEED","FLEX",...POS].map(x=>`<button aria-pressed="${x===pos}" data-p="${x}">${x==="ALL"?"All":x==="NEED"?"Fills a need":x}</button>`).join("")};
   chips.onclick=e=>{const b=e.target.closest("button[data-p]");if(b){pos=b.dataset.p;dc();bdc();draw()}};dc();
   const setF=o=>{$("#pkFilter").hidden=!o;$("#pkFilterBtn").setAttribute("aria-expanded",o);try{localStorage.setItem("dr27-filteropen",o?"1":"0")}catch(e){}bdc()};
-  $("#pkFilterBtn").onclick=()=>setF($("#pkFilter").hidden);$("#pkFilterX").onclick=()=>setF(false);
+  $("#pkFilterBtn").onclick=()=>setF($("#pkFilter").hidden);
+  $("#pkOrd").value=pkOrd();$("#pkOrd").onchange=e=>{try{localStorage.setItem("dr27-pkord",e.target.value)}catch(x){}draw();$("#pkl").scrollTop=0};$("#pkFilterX").onclick=()=>setF(false);
   const bdc=()=>{$("#pkbd").innerHTML=[["safety","🛡️ Safety picks"],["breakout","💥 Breakouts"],["sleeper","💤 Sleepers"],["volume","⚙️ Volume"],["ceiling","🚀 High ceiling"]].map(([k,l])=>`<button aria-pressed="${bdFilter===k}" data-bf="${k}">${l}</button>`).join("")+`<button aria-pressed="${bdHide}" data-bh="1">Hide 🚨 🎢</button><button class="bdinfo" data-bguide aria-label="What do badges mean?">ⓘ Guide</button>`;
     const n=(pos!=="ALL"?1:0)+(bdFilter?1:0)+(bdHide?1:0),op=!$("#pkFilter").hidden;$("#pkFilterBtn").textContent=(n?`Filter · ${n}`:"Filter")+(op?" ▴":" ▾");$("#pkFilterBtn").classList.toggle("primary",!!n)};
   $("#pkbd").onclick=e=>{const b=e.target.closest("[data-bf]");if(b){bdFilter=bdFilter===b.dataset.bf?null:b.dataset.bf;bdc();draw();return}if(e.target.closest("[data-bh]")){bdHide=!bdHide;bdc();draw()}};bdc();draw();
