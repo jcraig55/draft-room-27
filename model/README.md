@@ -36,4 +36,4 @@ WEEKLY UPDATE RULE (set Nov 16, 2026): weekly stat updates change ONLY the Top 1
 - Saved mocks (Nov 18): each saved mock in My mocks has a 📊 Grades button that opens Grades & standings for that save without loading it (openSavedGrades in template.html).
 - Custom trade values (Nov 19): ✎ next to a player's name in the Trade tab opens a 1-100 slider with an on/off switch (saved as dr27-tradeovr); while on it replaces the model value in every style.
 - Pick window order dropdown (Nov 24): Draft board / Top 125 (saved as dr27-pkord); Top 125 mode shows Top 125 rank with a Board # tag.
-- My guys (Nov 25): permanent watch list (dr27-myguys). ☆/★ buttons on Board list, Top 125, Draft tab side list, pick window rows (swipe on phones) and bios; Board tab '★ My guys' view (sort by added/draft board/Top 125, live status in current mock); pick window '★ My guys' filter chip.
+

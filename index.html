@@ -319,13 +319,13 @@ body{padding-bottom:calc(76px + env(safe-area-inset-bottom,0px))}
 .assist .asl{padding:0 10px 10px;margin-top:0}
 .swipehint{font-size:11.5px;color:var(--ink-3);text-align:center;margin-top:8px}
 .prow[data-row]{cursor:pointer}
-@media (hover:none){#pkl .prow .favbtn,#pkl .prow .mvbtn,#pkl .prow .minebtn{display:none}#pkl .prow.open .favbtn,#pkl .prow.open .mvbtn,#pkl .prow.open .minebtn{display:inline-grid;place-items:center}#pkl .prow.open{background:var(--accent-soft)}}
+@media (hover:none){#pkl .prow .favbtn,#pkl .prow .mvbtn{display:none}#pkl .prow.open .favbtn,#pkl .prow.open .mvbtn{display:inline-grid;place-items:center}#pkl .prow.open{background:var(--accent-soft)}}
 @media (hover:hover){.swipehint{display:none}}
 .tiers{display:grid;gap:10px}.tierbox{border:1.5px solid var(--accent);border-radius:14px;overflow:hidden}.tierbox .tierdiv{display:flex;justify-content:space-between}.tierbox .tierdiv span{font-weight:600;letter-spacing:.04em;color:var(--ink-3)}
 .tierbox .t125{padding:4px}
 .t125 .nm{white-space:normal!important;line-height:1.2}.t125 .nmc{display:grid;min-width:0}.t125 .nmc .tm{font-size:11px;color:var(--ink-3);line-height:1.1}.t125 .n{display:grid;justify-items:end;line-height:1.05}.t125 .n .mvmark{font-size:9.5px;margin:0}.t125 .tmv{min-width:32px;padding-inline:6px}.t125 .posrk{justify-self:start;min-width:40px;text-align:center}.t125 .prk{font-size:11px;font-weight:700;color:var(--ink-2);border:1px solid var(--line);border-radius:6px;padding:1px 5px;text-align:center;min-width:38px}
 .t125{list-style:none;margin:0;padding:0;display:grid;gap:2px}
-.t125 li{display:grid;grid-template-columns:28px 46px minmax(0,1fr) 34px 32px 32px;column-gap:8px;gap:6px;align-items:center;padding:5px 6px;border-radius:12px}.t125 li:nth-child(odd){background:var(--surface-2)}
+.t125 li{display:grid;grid-template-columns:28px 46px minmax(0,1fr) 34px 32px;column-gap:8px;gap:6px;align-items:center;padding:5px 6px;border-radius:12px}.t125 li:nth-child(odd){background:var(--surface-2)}
 .t125 .n{text-align:right;font-weight:700;font-size:13px}.t125 .pos{text-align:center}.t125 .nm{border:0;background:none;text-align:left;font:inherit;font-weight:500;color:var(--ink);padding:0;cursor:pointer;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.t125 .tm{font-size:11.5px;color:var(--ink-3)}
 .swrap{overflow-x:auto;border:1px solid var(--line);border-radius:16px}
 .stab{border-collapse:collapse;width:100%;min-width:600px;font-size:13px}.stab th{font:600 11px var(--f-display);letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);text-align:left;padding:9px 8px;border-bottom:1px solid var(--line);cursor:pointer;white-space:nowrap;background:var(--bg);position:sticky;top:0}
@@ -460,17 +460,6 @@ table.grid td.r{font-family:var(--f-display);font-weight:800;font-size:15px;colo
 .curl{display:flex;justify-content:space-between;font-size:11px;color:var(--ink-3)}
 .pkord{width:auto;flex:none;max-width:118px;padding:7px 26px 7px 10px;border-radius:999px;font-weight:700;font-size:13px}
 .brdrk{font-size:10.5px;font-weight:700;color:var(--ink-3);border:1px solid var(--line);border-radius:6px;padding:0 4px;white-space:nowrap}
-
-.minebtn{border:1px solid var(--line);background:var(--bg);color:#B8860B;border-radius:999px;width:32px;height:30px;font-size:16px;line-height:1;cursor:pointer;flex-shrink:0;padding:0}
-.minebtn[aria-pressed="true"]{background:#FFF6D6;border-color:#E9C46A}
-.bpmine{width:auto!important;height:auto!important;padding:6px 12px!important;font-size:13px!important;font-weight:700;margin:4px 0 2px}
-.mghead{display:flex;justify-content:space-between;align-items:center;gap:10px;margin:10px 2px 8px}.mghead b{font:800 20px var(--f-display)}
-#mgSort{width:auto;min-width:132px;flex:none;padding:6px 26px 6px 10px;border-radius:999px;font-weight:700;font-size:13px}
-.mgrow{grid-template-columns:64px minmax(0,1fr) auto!important}
-.mgrk{display:grid;gap:2px;font-size:10.5px;font-weight:700;color:var(--ink-3);line-height:1.2}
-.mgst{display:inline-block;font-size:11px;font-weight:700;border-radius:999px;padding:1px 7px;margin-left:2px}.mgst.av{background:#EAF8EF;color:#0F6E3A}.mgst.gone{background:var(--surface-2);color:var(--ink-3)}.mgst.you{background:#FFF6D6;color:#7A5B00}
-.mgx{color:var(--ink-3)}
-.mgempty{text-align:center;border:1.5px dashed var(--line);border-radius:16px;padding:22px 18px;margin-top:10px}
 /* ---------- press feel: push down (every button and tab) ---------- */
 :root{--edge:#86B9DE;--edge-p:#2F78AE;--edge-d:#D9A3A0;--edge-k:#000}
 .btn,.gear,.poschips button,.teamchips button,.teampick button,.favbtn,.mvbtn2,.bdinfo,.cmprow,.tswitch,.xbtn,.simme,.clockpill,.seg,.subtabs{box-shadow:0 3px 0 var(--edge)}
@@ -556,7 +545,7 @@ button,.gear,summary,th[data-sort]{transition:transform .07s ease-out,box-shadow
   </section>
   <section class="panel" id="p-board" hidden>
     <div class="tabhead"><div><h2 class="ttl">Board</h2><div class="sub">Your draft board · order set Nov 13, 2026, changes only when you move players · stats through Week 10</div></div></div>
-    <div class="seg" role="tablist" id="bSeg"><button role="tab" data-v="list" aria-selected="true">List</button><button role="tab" data-v="stats" aria-selected="false">Stats</button><button role="tab" data-v="teams" aria-selected="false">Teams</button><button role="tab" data-v="grid" aria-selected="false">Draft board</button><button role="tab" data-v="mine" aria-selected="false">★ My guys</button></div>
+    <div class="seg" role="tablist" id="bSeg"><button role="tab" data-v="list" aria-selected="true">List</button><button role="tab" data-v="stats" aria-selected="false">Stats</button><button role="tab" data-v="teams" aria-selected="false">Teams</button><button role="tab" data-v="grid" aria-selected="false">Draft board</button></div>
     <div id="bFilters"><div class="pkbar" style="margin-top:10px"><input type="search" id="bQ" placeholder="Search players or NFL teams"></div>
     <div class="poschips" id="bPos" style="margin-top:8px"></div></div>
     <div class="teamchips" id="bTeams" hidden></div>
@@ -877,7 +866,7 @@ function renderAvail(){
   $("#availHint").innerHTML=(clock?runAlert(clock.num):"")+boardNote()+(clock?`<div class="hint"><b>${esc(tname(clock.owner))}</b> at ${clock.label}. Tap a name for his bio, or “Draft”.</div>`:`<div class="hint">Every pick is in. Tap “Change” on any slot to swap a player.</div>`);
   $("#availList").innerHTML=list.length?list.map(p=>`<div class="prow"><div class="rk">${p.rank}${mvMark(p)}</div>
     <div style="min-width:0"><div>${nameBtn(p,availBio===p.id)}</div><div class="meta">${esc(p.team)} · ${p.proj} proj ${projLbl()}${p.ts!=null&&p.pos!=="QB"?` · ${p.ts}% tgt share`:""} ${tierChip(p)}</div>${badgeRow(p)}</div>
-    <span class="rowbtns">${mineBtn(p.id)}${favBtn(p.id)}<button class="btn sm ghost mvbtn" data-move="${p.id}" aria-label="Move ${esc(p.name)} in the rankings" title="Move in rankings">⇅</button><button class="btn sm" data-draft="${p.id}" ${clock?"":"disabled"}>Draft</button></span></div>`).join(""):`<div class="empty">No players match.</div>`;
+    <span class="rowbtns">${favBtn(p.id)}<button class="btn sm ghost mvbtn" data-move="${p.id}" aria-label="Move ${esc(p.name)} in the rankings" title="Move in rankings">⇅</button><button class="btn sm" data-draft="${p.id}" ${clock?"":"disabled"}>Draft</button></span></div>`).join(""):`<div class="empty">No players match.</div>`;
 }
 function renderUserTeams(){$("#userTeams").innerHTML=Array.from({length:S.teams},(_,i)=>`<button aria-pressed="${S.user.includes(i)}" data-ut="${i}">${i+1}${S.names[i]?" · "+esc(S.names[i].slice(0,8)):""}</button>`).join("")}
 function renderControls(){
@@ -974,7 +963,7 @@ function bioPageHtml(p,ctx){
   return`<div class="bpbar"><button class="linkbtn bpback" data-bioclose>‹ Back</button>${clock?`<span class="bpclk num">${S.user.includes(clock.owner)?"You":esc(tshort(clock.owner))} · Pick ${clock.label}</span>`:""}</div>
   <div class="bpwrap">
     <div class="bptop">${posTag(p.pos)}<span class="chip num">Overall #${p.rank}</span><span class="chip num">${p.pos}${p.prank}</span>${tierChip(p)}${tr}</div>
-    <div class="bpnamerow"><h2 class="bpname">${esc(p.name)}</h2>${favBtn(p.id)}</div><button class="btn sm bpmine minebtn" data-mine="${p.id}" aria-pressed="${isMine(p.id)}" aria-label="${isMine(p.id)?"Remove from":"Add to"} My guys">${isMine(p.id)?"★ My guy":"☆ My guys"}</button>
+    <div class="bpnamerow"><h2 class="bpname">${esc(p.name)}</h2>${favBtn(p.id)}</div>
     <div class="muted" style="font-size:13px">${esc(p.team)} · Age ${p.age??"—"} in Sept. 2027 · ${esc(p.ht)}, ${p.wt||"—"} lb</div>
     ${B.b.length?`<div class="bds bpbds">${B.b.map(bdPill).join("")}</div>`:""}
     ${taken?`<div class="bfit bench">Already drafted.</div>`:fit}${team!=null&&!taken?(()=>{const lc=linkChips(p,team);return lc?`<div class="bds" style="margin-top:8px">${lc}</div>`:""})():""}
@@ -1140,15 +1129,6 @@ function openGrades(html){bioCtx=null;let host=$("#bioHost");if(!host){host=docu
 let FAVS=new Set();
 const loadFavs=()=>{try{FAVS=new Set(JSON.parse(localStorage.getItem("dr27-favs")||"[]").filter(id=>BYID[id]))}catch(e){FAVS=new Set()}};loadFavs();
 const saveFavs=()=>{try{localStorage.setItem("dr27-favs",JSON.stringify([...FAVS]))}catch(e){}};
-/* My guys: a permanent watch list (sleepers you love for next year). Only ever changes when you add or remove someone. */
-let MYG=[];try{MYG=(JSON.parse(localStorage.getItem("dr27-myguys")||"[]")||[]).filter(m=>m&&BYID[m.id])}catch(e){MYG=[]}
-const saveMYG=()=>{try{localStorage.setItem("dr27-myguys",JSON.stringify(MYG))}catch(e){}};
-const isMine=id=>MYG.some(m=>m.id===id);
-const mineBtn=id=>`<button class="minebtn" data-mine="${id}" aria-pressed="${isMine(id)}" aria-label="${isMine(id)?"Remove from":"Add to"} My guys" title="My guys">${isMine(id)?"★":"☆"}</button>`;
-function toggleMine(id){const p=BYID[id];if(!p)return;if(isMine(id))MYG=MYG.filter(m=>m.id!==id);else MYG.push({id,at:Date.now()});saveMYG();
-  document.querySelectorAll(`[data-mine="${id}"]`).forEach(b=>{const on=isMine(id);b.setAttribute("aria-pressed",on);b.textContent=b.classList.contains("bpmine")?(on?"★ My guy":"☆ My guys"):(on?"★":"☆");b.setAttribute("aria-label",(on?"Remove from":"Add to")+" My guys")});
-  toast(isMine(id)?`★ ${p.name} added to My guys.`:`${p.name} removed from My guys.`);
-  if(!$("#p-board").hidden&&bView==="mine")renderBoardTab()}
 const favBtn=id=>`<button class="favbtn" data-fav="${id}" aria-pressed="${FAVS.has(id)}" aria-label="${FAVS.has(id)?"Remove from":"Add to"} favorites" title="Favorite">${FAVS.has(id)?"♥":"♡"}</button>`;
 function favListHtml(num){
   const tk=new Map();for(const k in S.sel)if(num==null||+k<num)tk.set(S.sel[k],+k);
@@ -1389,10 +1369,10 @@ function openPicker(num){
   const draw=()=>{
     const tk=takenSet(num),q=($("#pkq")?.value||"").toLowerCase(),nd=openNeeds(p.owner);
     const top=pkOrd()==="top",SRC=top?TOPL:P;
-    const ckR=ckRoster(p.owner,num),ckB=ckBase(p.owner,ckR);const list=SRC.filter(x=>!tk.has(x.id)&&(pos==="ALL"||(pos==="NEED"?fitsSlot(x.pos,nd):pos==="MINE"?isMine(x.id):pos==="FLEX"?x.pos!=="QB":x.pos===pos))&&matchQ(x,q)&&bdPass(x)).slice(0,60);
+    const ckR=ckRoster(p.owner,num),ckB=ckBase(p.owner,ckR);const list=SRC.filter(x=>!tk.has(x.id)&&(pos==="ALL"||(pos==="NEED"?fitsSlot(x.pos,nd):pos==="FLEX"?x.pos!=="QB":x.pos===pos))&&matchQ(x,q)&&bdPass(x)).slice(0,60);
     $("#pkBoardNote").innerHTML=pickCardHtml(p)+runAlert(num)+(q||bdFilter||bdHide||pos!=="ALL"?"":assistHtml(p))+boardNote();
     const single=!top&&["QB","RB","WR","TE"].includes(pos);let lastT=null;
-    $("#pkl").innerHTML=list.map(x=>{const div=single&&x.tier!==lastT?`<div class="tierdiv">${x.pos} Tier ${x.tier}</div>`:"";lastT=x.tier;return div+`<div class="prow pk" data-row="${x.id}"><div style="min-width:0"><div><span class="rkin num"${top?' title="Top 125 rank"':""}>${top?x.tr:x.rank}${top?"":mvMark(x)}</span>${nameBtn(x,openBio===x.id)}${top?` <span class="brdrk">Board #${x.rank}</span>`:""}${nd.includes(x.pos)?` <span class="chip" style="font-size:11px">fills ${x.pos}</span>`:""}</div><div class="meta">${esc(x.team)} · ${x.proj} proj ${projLbl()}${x.ts!=null&&x.pos!=="QB"?` · ${x.ts}% tgt share`:""} ${tierChip(x)}</div>${badgeRow(x,2)}${ckChips(p,x,ckR,ckB)}${(()=>{const lc=linkChips(x,p.owner),lt=lastInTier(x,tk)&&x.tier<=8?`<span class="lnk lastt">⚠️ Last ${x.pos} in Tier ${x.tier}</span>`:"";return lc||lt?`<div class="bds">${lt}${lc}</div>`:""})()}</div><span class="rowbtns">${mineBtn(x.id)}${favBtn(x.id)}<button class="btn sm ghost mvbtn" data-move="${x.id}" aria-label="Move ${esc(x.name)} in the rankings" title="Move in rankings">⇅</button><button class="btn sm primary" data-take="${x.id}">Draft</button></span></div>`}).join("")||`<div class="empty">No players match.</div>`;
+    $("#pkl").innerHTML=list.map(x=>{const div=single&&x.tier!==lastT?`<div class="tierdiv">${x.pos} Tier ${x.tier}</div>`:"";lastT=x.tier;return div+`<div class="prow pk" data-row="${x.id}"><div style="min-width:0"><div><span class="rkin num"${top?' title="Top 125 rank"':""}>${top?x.tr:x.rank}${top?"":mvMark(x)}</span>${nameBtn(x,openBio===x.id)}${top?` <span class="brdrk">Board #${x.rank}</span>`:""}${nd.includes(x.pos)?` <span class="chip" style="font-size:11px">fills ${x.pos}</span>`:""}</div><div class="meta">${esc(x.team)} · ${x.proj} proj ${projLbl()}${x.ts!=null&&x.pos!=="QB"?` · ${x.ts}% tgt share`:""} ${tierChip(x)}</div>${badgeRow(x,2)}${ckChips(p,x,ckR,ckB)}${(()=>{const lc=linkChips(x,p.owner),lt=lastInTier(x,tk)&&x.tier<=8?`<span class="lnk lastt">⚠️ Last ${x.pos} in Tier ${x.tier}</span>`:"";return lc||lt?`<div class="bds">${lt}${lc}</div>`:""})()}</div><span class="rowbtns">${favBtn(x.id)}<button class="btn sm ghost mvbtn" data-move="${x.id}" aria-label="Move ${esc(x.name)} in the rankings" title="Move in rankings">⇅</button><button class="btn sm primary" data-take="${x.id}">Draft</button></span></div>`}).join("")||`<div class="empty">No players match.</div>`;
   };
   $("#sheetHost").innerHTML=`<div class="scrim" id="scrim"><div class="sheet" role="dialog" aria-modal="true" aria-label="Make a pick" data-pnum="${p.num}">
     <div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start"><div><div class="eyebrow">Pick ${p.label} · No. ${p.num} overall</div><h2>${esc(tname(p.owner))}</h2><div class="muted" style="font-size:13px">Open spots: ${openNeeds(p.owner).join(" · ")||"bench"}</div></div><button class="btn sm" id="pkx">Close</button></div>
@@ -1400,13 +1380,13 @@ function openPicker(num){
     <div class="subtabs" role="tablist" id="pktabs" style="margin-top:12px"><button role="tab" data-pt="players" aria-selected="true">Players</button><button role="tab" data-pt="team" aria-selected="false">My team</button><button role="tab" data-pt="prev" aria-selected="false">Picks</button><button role="tab" data-pt="ck" aria-selected="false">Checklist</button><button role="tab" data-pt="fav" aria-selected="false" aria-label="Favorites">♥</button></div>
     <div id="pkPlayers"><div class="pkbar" style="margin-top:10px"><input type="search" id="pkq" placeholder="Search players or NFL teams"><select id="pkOrd" class="pkord" aria-label="List order"><option value="board">Draft board</option><option value="top">Top 125</option></select><button class="btn sm" id="pkFilterBtn" aria-expanded="${fOpen()}" aria-controls="pkFilter">Filter ${fOpen()?"▴":"▾"}</button></div>
     <div id="pkFilter" class="pkfilter"${fOpen()?"":" hidden"}><div class="pkfhead"><div class="eyebrow" style="margin:0">Position</div><button class="linkbtn pkfx" id="pkFilterX" aria-label="Close filters">Close ✕</button></div><div class="poschips" id="pkpos"></div><div class="eyebrow" style="margin-top:8px">Badges</div><div class="poschips bdchips" id="pkbd"></div></div>
-    <div id="pkBoardNote"></div><div id="pkl" style="margin-top:8px;border:1px solid var(--line);border-radius:14px;overflow:hidden"></div><div class="swipehint">Tap a player for his bio · swipe left for ☆ My guys, ♡ Favorite and ⇅ Move</div></div>
+    <div id="pkBoardNote"></div><div id="pkl" style="margin-top:8px;border:1px solid var(--line);border-radius:14px;overflow:hidden"></div><div class="swipehint">Tap a player for his bio · swipe left for ♡ Favorite and ⇅ Move</div></div>
     <div id="pkTeam" hidden style="margin-top:8px;border:1px solid var(--line);border-radius:14px;overflow:hidden"></div>
     <div id="pkPrev" hidden style="margin-top:8px;border:1px solid var(--line);border-radius:14px;overflow:hidden;max-height:56vh;overflow:auto"></div>
     <div id="pkFav" hidden class="favbox" style="margin-top:8px"></div>
     <div id="pkCk" hidden class="ckbox" style="margin-top:8px"></div>
     <div class="actions" style="margin-top:12px"><button class="btn" id="pkauto">Let the AI pick</button><button class="btn ghost" data-trade="${p.num}">Trade this pick</button></div></div></div>`;
-  const chips=$("#pkpos");const dc=()=>{chips.innerHTML=["ALL","NEED","MINE","FLEX",...POS].map(x=>`<button aria-pressed="${x===pos}" data-p="${x}">${x==="ALL"?"All":x==="NEED"?"Fills a need":x==="MINE"?"★ My guys":x}</button>`).join("")};
+  const chips=$("#pkpos");const dc=()=>{chips.innerHTML=["ALL","NEED","FLEX",...POS].map(x=>`<button aria-pressed="${x===pos}" data-p="${x}">${x==="ALL"?"All":x==="NEED"?"Fills a need":x}</button>`).join("")};
   chips.onclick=e=>{const b=e.target.closest("button[data-p]");if(b){pos=b.dataset.p;dc();bdc();draw()}};dc();
   const setF=o=>{$("#pkFilter").hidden=!o;$("#pkFilterBtn").setAttribute("aria-expanded",o);try{localStorage.setItem("dr27-filteropen",o?"1":"0")}catch(e){}bdc()};
   $("#pkFilterBtn").onclick=()=>setF($("#pkFilter").hidden);
@@ -1417,7 +1397,7 @@ function openPicker(num){
   $("#pkTeam").innerHTML=myTeamHtml(p.owner);
   $("#pkPrev").dataset.upto=num;$("#pkPrev").innerHTML=prevPicksHtml(num);
   $("#pkFav").dataset.upto=num;$("#pkFav").innerHTML=favListHtml(num);
-  $("#pkFav").onclick=e=>{if(e.target.closest("[data-fav],[data-mine]"))return;$("#pkl").onclick(e)};
+  $("#pkFav").onclick=e=>{if(e.target.closest("[data-fav]"))return;$("#pkl").onclick(e)};
   $("#pkCk").innerHTML=checklistHtml(p.owner,num);$("#pkCk").onclick=e=>{const b=e.target.closest("[data-ck]");if(!b)return;ckToggle(p.owner,+b.dataset.ck,num);$("#pkCk").innerHTML=checklistHtml(p.owner,num);draw()};
   $("#pktabs").onclick=e=>{const b=e.target.closest("[data-pt]");if(!b)return;const t=b.dataset.pt;
     document.querySelectorAll("#pktabs button").forEach(x=>x.setAttribute("aria-selected",x===b));$("#pkPlayers").hidden=t!=="players";$("#pkTeam").hidden=t!=="team";$("#pkPrev").hidden=t!=="prev";$("#pkFav").hidden=t!=="fav";$("#pkCk").hidden=t!=="ck";if(t==="ck")$("#pkCk").innerHTML=checklistHtml(p.owner,num);if(t==="fav")$("#pkFav").innerHTML=favListHtml(num)};
@@ -1598,22 +1578,10 @@ function teamsViewHtml(t){
   const nav=`<div class="teamnav"><button class="btn sm" data-tstep="-1" aria-label="Previous team">‹ Prev</button><button class="btn sm" data-tstep="1" aria-label="Next team">Next ›</button></div>`;
   return`<div class="card teamcard">${head}${made?"":`<div class="empty" style="margin:8px 0">No picks yet. Start a mock on the Draft tab and every team’s roster fills in here.</div>`}${myTeamHtml(t)}${nav}</div>`;
 }
-let mgSort="added";try{mgSort=localStorage.getItem("dr27-mgsort")||"added"}catch(e){}
-function myGuysHtml(){
-  if(!MYG.length)return`<div class="mgempty"><div style="font-size:30px">☆</div><b>No guys yet</b><div class="faint" style="font-size:13px;margin-top:4px">Tap ☆ next to any player on the Board, the Top 125, the Draft tab’s player list, the pick window (swipe left on a phone) or in his bio. They stay here until you remove them.</div></div>`;
-  const tk=new Map();picks().forEach(pk=>{const id=S.sel[pk.num];if(id)tk.set(id,pk)});
-  const L=MYG.map(m=>({m,p:BYID[m.id]})).filter(x=>x.p);
-  if(mgSort==="board")L.sort((a,b)=>a.p.rank-b.p.rank);else if(mgSort==="top")L.sort((a,b)=>a.p.tr-b.p.tr);else L.sort((a,b)=>a.m.at-b.m.at);
-  const st=p=>{const pk=tk.get(p.id);if(!pk)return Object.keys(S.sel).length?`<span class="mgst av">Available</span>`:"";return S.user.includes(pk.owner)?`<span class="mgst you">★ Yours · ${pk.label}</span>`:`<span class="mgst gone">Taken ${pk.label} · ${esc(tshort(pk.owner))}</span>`};
-  return`<div class="mghead"><div><b>${L.length}</b> <span class="faint">player${L.length===1?"":"s"} · your sleepers for 2027</span></div><select id="mgSort" aria-label="Sort My guys"><option value="added"${mgSort==="added"?" selected":""}>Order added</option><option value="board"${mgSort==="board"?" selected":""}>Draft board</option><option value="top"${mgSort==="top"?" selected":""}>Top 125</option></select></div>
-  <div class="favbox">${L.map(({m,p})=>`<div class="prow mgrow" data-row="${p.id}"><div class="mgrk"><span title="Draft board rank">Board #${p.rank}</span><span title="Top 125 rank">T125 #${p.tr}</span></div><div style="min-width:0"><div>${nameBtn(p,false)}</div><div class="meta">${esc(p.team)} · ${p.proj} proj ${projLbl()} · ${p.pos}${p.prank} ${st(p)}</div>${badgeRow(p,2)}<div class="faint" style="font-size:11px;margin-top:2px">Added ${new Date(m.at).toLocaleDateString()}</div></div><span class="rowbtns"><button class="btn sm ghost mgx" data-mine="${p.id}" aria-label="Remove ${esc(p.name)} from My guys">Remove</button></span></div>`).join("")}</div>`;
-}
-document.addEventListener("change",e=>{if(e.target.id==="mgSort"){mgSort=e.target.value;try{localStorage.setItem("dr27-mgsort",mgSort)}catch(x){}renderBoardTab()}});
 function renderBoardTab(){
   $("#bPos").innerHTML=chipsHtml(bPos,"data-bp");
   document.querySelectorAll("#bSeg button").forEach(b=>b.setAttribute("aria-selected",b.dataset.v===bView));
-  $("#bFilters").hidden=bView==="teams"||bView==="grid"||bView==="mine";$("#bTeams").hidden=bView!=="teams";
-  if(bView==="mine"){$("#boardList").innerHTML=myGuysHtml();return}
+  $("#bFilters").hidden=bView==="teams"||bView==="grid";$("#bTeams").hidden=bView!=="teams";
   if(bView==="grid"){$("#boardList").innerHTML=gridViewHtml();const oc=$("#boardList .gc.clock");if(oc)oc.scrollIntoView({block:"nearest",inline:"center"});return}
   if(bView==="teams"){
     if(bTeam==null||bTeam>=S.teams)bTeam=S.user.length?S.user[0]:0;
@@ -1625,7 +1593,7 @@ function renderBoardTab(){
   const q=($("#bQ").value||"").toLowerCase(),L=P.filter(p=>posFilter(p,bPos)&&matchQ(p,q));
   if(!L.length){$("#boardList").innerHTML=`<div class="empty">${bPos==="FAV"?"No favorites yet. Tap ♡ next to any player to save him.":"No players match."}</div>`;return}
   if(bView==="stats"){$("#boardList").innerHTML=statsTable("board",L);return}
-  $("#boardList").innerHTML=`<div class="favbox">${L.map(p=>`<div class="prow" data-row="${p.id}"><div class="rk">${p.rank}</div><div style="min-width:0"><div>${nameBtn(p,false)}</div><div class="meta">${esc(p.team)} · ${p.proj} proj ${projLbl()} · ${p.pos}${p.prank} ${tierChip(p)}</div>${badgeRow(p,2)}</div><span class="rowbtns">${mineBtn(p.id)}${favBtn(p.id)}</span></div>`).join("")}</div>`;
+  $("#boardList").innerHTML=`<div class="favbox">${L.map(p=>`<div class="prow" data-row="${p.id}"><div class="rk">${p.rank}</div><div style="min-width:0"><div>${nameBtn(p,false)}</div><div class="meta">${esc(p.team)} · ${p.proj} proj ${projLbl()} · ${p.pos}${p.prank} ${tierChip(p)}</div>${badgeRow(p,2)}</div><span class="rowbtns">${favBtn(p.id)}</span></div>`).join("")}</div>`;
 }
 $("#bSeg").onclick=e=>{const b=e.target.closest("[data-v]");if(b){bView=b.dataset.v;renderBoardTab()}};
 $("#bPos").onclick=e=>{const b=e.target.closest("[data-bp]");if(b){bPos=b.dataset.bp;renderBoardTab()}};
@@ -1646,7 +1614,7 @@ function renderTop(){
     $("#topList").innerHTML=SL.length?statsTable("top",SL):`<div class="empty">${tPos==="FAV"?"None of your favorites have 4+ games yet.":"No players match."}</div>`;return}
   if(!L.length){$("#topList").innerHTML=`<div class="empty">${tPos==="FAV"?"No favorites in the Top 125 yet. Tap ♡ to save a player.":"No players match."}</div>`;return}
   const tm=p=>(!TMOVES.some(m=>m[0]===p.id)||p.tr===p.trank)?"":`<span class="mvmark ${p.tr<p.trank?"up":"dn"}" title="Weekly rank #${p.trank}">${p.tr<p.trank?"▲":"▼"}${Math.abs(p.trank-p.tr)}</span>`;
-  const row=p=>`<li data-row="${p.id}"><span class="n num">${p.tr}${tm(p)}</span><span class="pos ${p.pos} posrk">${p.pos}${p.tprank}</span><span class="nmc"><button class="nm" data-bio="${p.id}">${esc(p.name)}</button><small class="tm">${esc(p.team)}</small></span><button class="btn sm ghost mvbtn tmv" data-movetop="${p.id}" aria-label="Move ${esc(p.name)} in your Top 125" title="Move in your Top 125">⇅</button>${mineBtn(p.id)}${favBtn(p.id)}</li>`;
+  const row=p=>`<li data-row="${p.id}"><span class="n num">${p.tr}${tm(p)}</span><span class="pos ${p.pos} posrk">${p.pos}${p.tprank}</span><span class="nmc"><button class="nm" data-bio="${p.id}">${esc(p.name)}</button><small class="tm">${esc(p.team)}</small></span><button class="btn sm ghost mvbtn tmv" data-movetop="${p.id}" aria-label="Move ${esc(p.name)} in your Top 125" title="Move in your Top 125">⇅</button>${favBtn(p.id)}</li>`;
   if(POS.includes(tPos)){const G=[];let top=null,cm=null,t=0;L.forEach(p=>{const pj=p.proj0;if(top==null){top=cm=pj;t=1}else{cm=Math.min(cm,pj);if(top-cm>=TGAP[p.pos]){t++;top=cm}}const g=G[G.length-1];if(g&&g.t===t)g.L.push(p);else G.push({t,L:[p]})});
     $("#topList").innerHTML=`<div class="tiers">${G.map(g=>`<section class="tierbox t${Math.min(g.t,4)}"><div class="tierdiv">${tPos} Tier ${g.t}<span>${g.L.length} player${g.L.length===1?"":"s"}</span></div><ol class="t125">${g.L.map(row).join("")}</ol></section>`).join("")}</div>`;return}
   $("#topList").innerHTML=`<ol class="t125">${L.map(row).join("")}</ol>`;
@@ -1803,7 +1771,6 @@ document.addEventListener("click",e=>{
   const cmp=e.target.closest("[data-compare]");if(cmp){openCompareChooser(cmp.dataset.compare);return}
   if(e.target.closest("[data-cmpback]")){if(bioCtx){delete bioCtx.cmp;redrawBio()}return}
   const fv=e.target.closest("[data-fav]");if(fv){toggleFav(fv.dataset.fav);return}
-  const mg=e.target.closest("[data-mine]");if(mg){toggleMine(mg.dataset.mine);return}
   if(e.target.closest("[data-boardview]")){openBoardView(JSON.parse(JSON.stringify(S)),{eyebrow:"Current mock",title:"Draft board"});return}
   if(e.target.closest("[data-grades]")){openGrades();return}
   const brow=e.target.closest("#boardList [data-row], #topList [data-row]");if(brow&&!e.target.closest("button")){openBioPage(brow.dataset.row,{});return}
